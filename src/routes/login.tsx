@@ -1,0 +1,105 @@
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { Flame, Mail, Lock, ArrowRight } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useAuth } from "@/lib/auth";
+
+export const Route = createFileRoute("/login")({
+  validateSearch: (s: Record<string, unknown>) => ({ redirect: (s.redirect as string) || "" }),
+  component: LoginPage,
+});
+
+function LoginPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const nav = useNavigate();
+  const { user, role } = useAuth();
+  const search = Route.useSearch();
+
+  useEffect(() => {
+    if (user && role) {
+      nav({ to: search.redirect || (role === "admin" ? "/admin" : "/app") });
+    }
+  }, [user, role, nav, search.redirect]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+    if (error) {
+      toast.error("Credenciais inválidas", { description: error.message });
+      return;
+    }
+    toast.success("Bem-vindo de volta!");
+  };
+
+  return (
+    <div className="min-h-screen relative flex items-center justify-center px-4 overflow-hidden">
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-primary/25 rounded-full blur-[160px]" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-info/10 rounded-full blur-[120px]" />
+      </div>
+
+      <div className="w-full max-w-md">
+        <Link to="/" className="flex items-center justify-center gap-2.5 mb-8">
+          <div className="h-12 w-12 rounded-xl bg-gradient-fire flex items-center justify-center shadow-fire">
+            <Flame className="h-6 w-6 text-white" strokeWidth={2.5} />
+          </div>
+          <div>
+            <div className="font-display font-bold text-2xl leading-none">FIRE</div>
+            <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Afiliados</div>
+          </div>
+        </Link>
+
+        <div className="rounded-2xl border border-border bg-card/80 backdrop-blur-xl p-8 shadow-card-premium">
+          <h1 className="font-display text-2xl font-bold mb-1">Acessar painel</h1>
+          <p className="text-sm text-muted-foreground mb-6">Entre com seu email e senha.</p>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email" type="email" required value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="seu@email.com" className="pl-10 h-11 bg-background/50"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Senha</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="password" type="password" required value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••" className="pl-10 h-11 bg-background/50"
+                />
+              </div>
+            </div>
+
+            <Button type="submit" disabled={loading} className="w-full h-11 bg-gradient-fire shadow-fire hover:opacity-90 text-white font-semibold">
+              {loading ? "Entrando..." : <>Entrar <ArrowRight className="ml-2 h-4 w-4" /></>}
+            </Button>
+          </form>
+
+          <div className="mt-6 pt-6 border-t border-border text-center text-xs text-muted-foreground">
+            Ainda não tem conta?{" "}
+            <Link to="/signup" className="text-primary hover:underline font-medium">Criar conta admin</Link>
+          </div>
+        </div>
+
+        <p className="text-center text-xs text-muted-foreground mt-6">
+          🔒 Conexão segura · Plataforma FIRE
+        </p>
+      </div>
+    </div>
+  );
+}

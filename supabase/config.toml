@@ -1,0 +1,4 @@
+project_id = "jaajatugxxhwfgthmtia"
+
+[functions.integration-leads]
+verify_jwt = false

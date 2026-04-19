@@ -9,38 +9,297 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as DocsRouteImport } from './routes/docs'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AppRulesRouteImport } from './routes/app/rules'
+import { Route as AppProfileRouteImport } from './routes/app/profile'
+import { Route as AppPayoutsRouteImport } from './routes/app/payouts'
+import { Route as AppLinkRouteImport } from './routes/app/link'
+import { Route as AppLeadsRouteImport } from './routes/app/leads'
+import { Route as AppCommissionsRouteImport } from './routes/app/commissions'
+import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
+import { Route as AdminPayoutsRouteImport } from './routes/admin/payouts'
+import { Route as AdminLeadsRouteImport } from './routes/admin/leads'
+import { Route as AdminCommissionsRouteImport } from './routes/admin/commissions'
+import { Route as AdminBuyersRouteImport } from './routes/admin/buyers'
+import { Route as AdminApiRouteImport } from './routes/admin/api'
+import { Route as AdminAffiliatesRouteImport } from './routes/admin/affiliates'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsRoute = DocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/app/',
+  path: '/app/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRulesRoute = AppRulesRouteImport.update({
+  id: '/app/rules',
+  path: '/app/rules',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/app/profile',
+  path: '/app/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppPayoutsRoute = AppPayoutsRouteImport.update({
+  id: '/app/payouts',
+  path: '/app/payouts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppLinkRoute = AppLinkRouteImport.update({
+  id: '/app/link',
+  path: '/app/link',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppLeadsRoute = AppLeadsRouteImport.update({
+  id: '/app/leads',
+  path: '/app/leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppCommissionsRoute = AppCommissionsRouteImport.update({
+  id: '/app/commissions',
+  path: '/app/commissions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/admin/settings',
+  path: '/admin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPayoutsRoute = AdminPayoutsRouteImport.update({
+  id: '/admin/payouts',
+  path: '/admin/payouts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLeadsRoute = AdminLeadsRouteImport.update({
+  id: '/admin/leads',
+  path: '/admin/leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCommissionsRoute = AdminCommissionsRouteImport.update({
+  id: '/admin/commissions',
+  path: '/admin/commissions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminBuyersRoute = AdminBuyersRouteImport.update({
+  id: '/admin/buyers',
+  path: '/admin/buyers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminApiRoute = AdminApiRouteImport.update({
+  id: '/admin/api',
+  path: '/admin/api',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAffiliatesRoute = AdminAffiliatesRouteImport.update({
+  id: '/admin/affiliates',
+  path: '/admin/affiliates',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/docs': typeof DocsRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/admin/affiliates': typeof AdminAffiliatesRoute
+  '/admin/api': typeof AdminApiRoute
+  '/admin/buyers': typeof AdminBuyersRoute
+  '/admin/commissions': typeof AdminCommissionsRoute
+  '/admin/leads': typeof AdminLeadsRoute
+  '/admin/payouts': typeof AdminPayoutsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/app/commissions': typeof AppCommissionsRoute
+  '/app/leads': typeof AppLeadsRoute
+  '/app/link': typeof AppLinkRoute
+  '/app/payouts': typeof AppPayoutsRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/rules': typeof AppRulesRoute
+  '/admin/': typeof AdminIndexRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/docs': typeof DocsRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/admin/affiliates': typeof AdminAffiliatesRoute
+  '/admin/api': typeof AdminApiRoute
+  '/admin/buyers': typeof AdminBuyersRoute
+  '/admin/commissions': typeof AdminCommissionsRoute
+  '/admin/leads': typeof AdminLeadsRoute
+  '/admin/payouts': typeof AdminPayoutsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/app/commissions': typeof AppCommissionsRoute
+  '/app/leads': typeof AppLeadsRoute
+  '/app/link': typeof AppLinkRoute
+  '/app/payouts': typeof AppPayoutsRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/rules': typeof AppRulesRoute
+  '/admin': typeof AdminIndexRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/docs': typeof DocsRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/admin/affiliates': typeof AdminAffiliatesRoute
+  '/admin/api': typeof AdminApiRoute
+  '/admin/buyers': typeof AdminBuyersRoute
+  '/admin/commissions': typeof AdminCommissionsRoute
+  '/admin/leads': typeof AdminLeadsRoute
+  '/admin/payouts': typeof AdminPayoutsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/app/commissions': typeof AppCommissionsRoute
+  '/app/leads': typeof AppLeadsRoute
+  '/app/link': typeof AppLinkRoute
+  '/app/payouts': typeof AppPayoutsRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/rules': typeof AppRulesRoute
+  '/admin/': typeof AdminIndexRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/docs'
+    | '/login'
+    | '/signup'
+    | '/admin/affiliates'
+    | '/admin/api'
+    | '/admin/buyers'
+    | '/admin/commissions'
+    | '/admin/leads'
+    | '/admin/payouts'
+    | '/admin/settings'
+    | '/app/commissions'
+    | '/app/leads'
+    | '/app/link'
+    | '/app/payouts'
+    | '/app/profile'
+    | '/app/rules'
+    | '/admin/'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/docs'
+    | '/login'
+    | '/signup'
+    | '/admin/affiliates'
+    | '/admin/api'
+    | '/admin/buyers'
+    | '/admin/commissions'
+    | '/admin/leads'
+    | '/admin/payouts'
+    | '/admin/settings'
+    | '/app/commissions'
+    | '/app/leads'
+    | '/app/link'
+    | '/app/payouts'
+    | '/app/profile'
+    | '/app/rules'
+    | '/admin'
+    | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/docs'
+    | '/login'
+    | '/signup'
+    | '/admin/affiliates'
+    | '/admin/api'
+    | '/admin/buyers'
+    | '/admin/commissions'
+    | '/admin/leads'
+    | '/admin/payouts'
+    | '/admin/settings'
+    | '/app/commissions'
+    | '/app/leads'
+    | '/app/link'
+    | '/app/payouts'
+    | '/app/profile'
+    | '/app/rules'
+    | '/admin/'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DocsRoute: typeof DocsRoute
+  LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
+  AdminAffiliatesRoute: typeof AdminAffiliatesRoute
+  AdminApiRoute: typeof AdminApiRoute
+  AdminBuyersRoute: typeof AdminBuyersRoute
+  AdminCommissionsRoute: typeof AdminCommissionsRoute
+  AdminLeadsRoute: typeof AdminLeadsRoute
+  AdminPayoutsRoute: typeof AdminPayoutsRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AppCommissionsRoute: typeof AppCommissionsRoute
+  AppLeadsRoute: typeof AppLeadsRoute
+  AppLinkRoute: typeof AppLinkRoute
+  AppPayoutsRoute: typeof AppPayoutsRoute
+  AppProfileRoute: typeof AppProfileRoute
+  AppRulesRoute: typeof AppRulesRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  AppIndexRoute: typeof AppIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +307,134 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/app'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/rules': {
+      id: '/app/rules'
+      path: '/app/rules'
+      fullPath: '/app/rules'
+      preLoaderRoute: typeof AppRulesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/profile': {
+      id: '/app/profile'
+      path: '/app/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/payouts': {
+      id: '/app/payouts'
+      path: '/app/payouts'
+      fullPath: '/app/payouts'
+      preLoaderRoute: typeof AppPayoutsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/link': {
+      id: '/app/link'
+      path: '/app/link'
+      fullPath: '/app/link'
+      preLoaderRoute: typeof AppLinkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/leads': {
+      id: '/app/leads'
+      path: '/app/leads'
+      fullPath: '/app/leads'
+      preLoaderRoute: typeof AppLeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/commissions': {
+      id: '/app/commissions'
+      path: '/app/commissions'
+      fullPath: '/app/commissions'
+      preLoaderRoute: typeof AppCommissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/payouts': {
+      id: '/admin/payouts'
+      path: '/admin/payouts'
+      fullPath: '/admin/payouts'
+      preLoaderRoute: typeof AdminPayoutsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/leads': {
+      id: '/admin/leads'
+      path: '/admin/leads'
+      fullPath: '/admin/leads'
+      preLoaderRoute: typeof AdminLeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/commissions': {
+      id: '/admin/commissions'
+      path: '/admin/commissions'
+      fullPath: '/admin/commissions'
+      preLoaderRoute: typeof AdminCommissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/buyers': {
+      id: '/admin/buyers'
+      path: '/admin/buyers'
+      fullPath: '/admin/buyers'
+      preLoaderRoute: typeof AdminBuyersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/api': {
+      id: '/admin/api'
+      path: '/admin/api'
+      fullPath: '/admin/api'
+      preLoaderRoute: typeof AdminApiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/affiliates': {
+      id: '/admin/affiliates'
+      path: '/admin/affiliates'
+      fullPath: '/admin/affiliates'
+      preLoaderRoute: typeof AdminAffiliatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DocsRoute: DocsRoute,
+  LoginRoute: LoginRoute,
+  SignupRoute: SignupRoute,
+  AdminAffiliatesRoute: AdminAffiliatesRoute,
+  AdminApiRoute: AdminApiRoute,
+  AdminBuyersRoute: AdminBuyersRoute,
+  AdminCommissionsRoute: AdminCommissionsRoute,
+  AdminLeadsRoute: AdminLeadsRoute,
+  AdminPayoutsRoute: AdminPayoutsRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AppCommissionsRoute: AppCommissionsRoute,
+  AppLeadsRoute: AppLeadsRoute,
+  AppLinkRoute: AppLinkRoute,
+  AppPayoutsRoute: AppPayoutsRoute,
+  AppProfileRoute: AppProfileRoute,
+  AppRulesRoute: AppRulesRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  AppIndexRoute: AppIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
