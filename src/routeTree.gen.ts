@@ -12,6 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
+import { Route as AdminPayoutsRouteImport } from './routes/admin/payouts'
+import { Route as AdminLeadsRouteImport } from './routes/admin/leads'
+import { Route as AdminCommissionsRouteImport } from './routes/admin/commissions'
+import { Route as AdminBuyersRouteImport } from './routes/admin/buyers'
+import { Route as AdminAffiliatesRouteImport } from './routes/admin/affiliates'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -28,35 +35,129 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/admin/settings',
+  path: '/admin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPayoutsRoute = AdminPayoutsRouteImport.update({
+  id: '/admin/payouts',
+  path: '/admin/payouts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLeadsRoute = AdminLeadsRouteImport.update({
+  id: '/admin/leads',
+  path: '/admin/leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCommissionsRoute = AdminCommissionsRouteImport.update({
+  id: '/admin/commissions',
+  path: '/admin/commissions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminBuyersRoute = AdminBuyersRouteImport.update({
+  id: '/admin/buyers',
+  path: '/admin/buyers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAffiliatesRoute = AdminAffiliatesRouteImport.update({
+  id: '/admin/affiliates',
+  path: '/admin/affiliates',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/admin/affiliates': typeof AdminAffiliatesRoute
+  '/admin/buyers': typeof AdminBuyersRoute
+  '/admin/commissions': typeof AdminCommissionsRoute
+  '/admin/leads': typeof AdminLeadsRoute
+  '/admin/payouts': typeof AdminPayoutsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/admin/affiliates': typeof AdminAffiliatesRoute
+  '/admin/buyers': typeof AdminBuyersRoute
+  '/admin/commissions': typeof AdminCommissionsRoute
+  '/admin/leads': typeof AdminLeadsRoute
+  '/admin/payouts': typeof AdminPayoutsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin': typeof AdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/admin/affiliates': typeof AdminAffiliatesRoute
+  '/admin/buyers': typeof AdminBuyersRoute
+  '/admin/commissions': typeof AdminCommissionsRoute
+  '/admin/leads': typeof AdminLeadsRoute
+  '/admin/payouts': typeof AdminPayoutsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/': typeof AdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/signup'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/signup'
+    | '/admin/affiliates'
+    | '/admin/buyers'
+    | '/admin/commissions'
+    | '/admin/leads'
+    | '/admin/payouts'
+    | '/admin/settings'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/signup'
-  id: '__root__' | '/' | '/login' | '/signup'
+  to:
+    | '/'
+    | '/login'
+    | '/signup'
+    | '/admin/affiliates'
+    | '/admin/buyers'
+    | '/admin/commissions'
+    | '/admin/leads'
+    | '/admin/payouts'
+    | '/admin/settings'
+    | '/admin'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/signup'
+    | '/admin/affiliates'
+    | '/admin/buyers'
+    | '/admin/commissions'
+    | '/admin/leads'
+    | '/admin/payouts'
+    | '/admin/settings'
+    | '/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
+  AdminAffiliatesRoute: typeof AdminAffiliatesRoute
+  AdminBuyersRoute: typeof AdminBuyersRoute
+  AdminCommissionsRoute: typeof AdminCommissionsRoute
+  AdminLeadsRoute: typeof AdminLeadsRoute
+  AdminPayoutsRoute: typeof AdminPayoutsRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminIndexRoute: typeof AdminIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +183,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/payouts': {
+      id: '/admin/payouts'
+      path: '/admin/payouts'
+      fullPath: '/admin/payouts'
+      preLoaderRoute: typeof AdminPayoutsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/leads': {
+      id: '/admin/leads'
+      path: '/admin/leads'
+      fullPath: '/admin/leads'
+      preLoaderRoute: typeof AdminLeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/commissions': {
+      id: '/admin/commissions'
+      path: '/admin/commissions'
+      fullPath: '/admin/commissions'
+      preLoaderRoute: typeof AdminCommissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/buyers': {
+      id: '/admin/buyers'
+      path: '/admin/buyers'
+      fullPath: '/admin/buyers'
+      preLoaderRoute: typeof AdminBuyersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/affiliates': {
+      id: '/admin/affiliates'
+      path: '/admin/affiliates'
+      fullPath: '/admin/affiliates'
+      preLoaderRoute: typeof AdminAffiliatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +239,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
+  AdminAffiliatesRoute: AdminAffiliatesRoute,
+  AdminBuyersRoute: AdminBuyersRoute,
+  AdminCommissionsRoute: AdminCommissionsRoute,
+  AdminLeadsRoute: AdminLeadsRoute,
+  AdminPayoutsRoute: AdminPayoutsRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminIndexRoute: AdminIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
