@@ -52,7 +52,7 @@ function AffiliatesPage() {
 
   const toggleStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { error } = await supabase.from("affiliates").update({ status }).eq("id", id);
+      const { error } = await supabase.from("affiliates").update({ status: status as "active" | "paused" | "blocked" }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Status atualizado"); qc.invalidateQueries({ queryKey: ["affiliates"] }); },
@@ -172,7 +172,7 @@ function AffiliateForm({ initial, onClose }: { initial: Affiliate | null; onClos
         <Field label="Instagram"><Input value={form.instagram ?? ""} onChange={(e) => setForm({ ...form, instagram: e.target.value })} /></Field>
         <Field label="Slug (link)"><Input value={form.slug} onChange={(e) => setForm({ ...form, slug: slugify(e.target.value) })} /></Field>
         <Field label="Tipo Pix">
-          <Select value={form.pix_type} onValueChange={(v) => setForm({ ...form, pix_type: v })}>
+          <Select value={form.pix_type} onValueChange={(v: "cpf" | "cnpj" | "email" | "phone" | "random") => setForm({ ...form, pix_type: v })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="cpf">CPF</SelectItem><SelectItem value="cnpj">CNPJ</SelectItem>
