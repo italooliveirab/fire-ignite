@@ -29,7 +29,8 @@ function ProfilePage() {
   const save = async () => {
     setSaving(true);
     const { error } = await supabase.from("affiliates").update({
-      phone: aff.phone, instagram: aff.instagram, pix_key: aff.pix_key,
+      phone: aff.phone as string | null, instagram: aff.instagram as string | null,
+      pix_key: aff.pix_key as string | null,
       pix_type: aff.pix_type as "cpf" | "cnpj" | "email" | "phone" | "random",
     }).eq("id", aff.id as string);
     if (pwd) await supabase.auth.updateUser({ password: pwd });
