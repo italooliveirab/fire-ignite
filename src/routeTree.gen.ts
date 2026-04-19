@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as DocsRouteImport } from './routes/docs'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
@@ -25,6 +26,7 @@ import { Route as AdminPayoutsRouteImport } from './routes/admin/payouts'
 import { Route as AdminLeadsRouteImport } from './routes/admin/leads'
 import { Route as AdminCommissionsRouteImport } from './routes/admin/commissions'
 import { Route as AdminBuyersRouteImport } from './routes/admin/buyers'
+import { Route as AdminApiRouteImport } from './routes/admin/api'
 import { Route as AdminAffiliatesRouteImport } from './routes/admin/affiliates'
 
 const SignupRoute = SignupRouteImport.update({
@@ -35,6 +37,11 @@ const SignupRoute = SignupRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocsRoute = DocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -107,6 +114,11 @@ const AdminBuyersRoute = AdminBuyersRouteImport.update({
   path: '/admin/buyers',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminApiRoute = AdminApiRouteImport.update({
+  id: '/admin/api',
+  path: '/admin/api',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAffiliatesRoute = AdminAffiliatesRouteImport.update({
   id: '/admin/affiliates',
   path: '/admin/affiliates',
@@ -115,9 +127,11 @@ const AdminAffiliatesRoute = AdminAffiliatesRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/docs': typeof DocsRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/admin/affiliates': typeof AdminAffiliatesRoute
+  '/admin/api': typeof AdminApiRoute
   '/admin/buyers': typeof AdminBuyersRoute
   '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/leads': typeof AdminLeadsRoute
@@ -134,9 +148,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/docs': typeof DocsRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/admin/affiliates': typeof AdminAffiliatesRoute
+  '/admin/api': typeof AdminApiRoute
   '/admin/buyers': typeof AdminBuyersRoute
   '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/leads': typeof AdminLeadsRoute
@@ -154,9 +170,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/docs': typeof DocsRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/admin/affiliates': typeof AdminAffiliatesRoute
+  '/admin/api': typeof AdminApiRoute
   '/admin/buyers': typeof AdminBuyersRoute
   '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/leads': typeof AdminLeadsRoute
@@ -175,9 +193,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/docs'
     | '/login'
     | '/signup'
     | '/admin/affiliates'
+    | '/admin/api'
     | '/admin/buyers'
     | '/admin/commissions'
     | '/admin/leads'
@@ -194,9 +214,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/docs'
     | '/login'
     | '/signup'
     | '/admin/affiliates'
+    | '/admin/api'
     | '/admin/buyers'
     | '/admin/commissions'
     | '/admin/leads'
@@ -213,9 +235,11 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/docs'
     | '/login'
     | '/signup'
     | '/admin/affiliates'
+    | '/admin/api'
     | '/admin/buyers'
     | '/admin/commissions'
     | '/admin/leads'
@@ -233,9 +257,11 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DocsRoute: typeof DocsRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
   AdminAffiliatesRoute: typeof AdminAffiliatesRoute
+  AdminApiRoute: typeof AdminApiRoute
   AdminBuyersRoute: typeof AdminBuyersRoute
   AdminCommissionsRoute: typeof AdminCommissionsRoute
   AdminLeadsRoute: typeof AdminLeadsRoute
@@ -265,6 +291,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/docs': {
+      id: '/docs'
+      path: '/docs'
+      fullPath: '/docs'
+      preLoaderRoute: typeof DocsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -365,6 +398,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBuyersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/api': {
+      id: '/admin/api'
+      path: '/admin/api'
+      fullPath: '/admin/api'
+      preLoaderRoute: typeof AdminApiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/affiliates': {
       id: '/admin/affiliates'
       path: '/admin/affiliates'
@@ -377,9 +417,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DocsRoute: DocsRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
   AdminAffiliatesRoute: AdminAffiliatesRoute,
+  AdminApiRoute: AdminApiRoute,
   AdminBuyersRoute: AdminBuyersRoute,
   AdminCommissionsRoute: AdminCommissionsRoute,
   AdminLeadsRoute: AdminLeadsRoute,
@@ -397,3 +439,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
