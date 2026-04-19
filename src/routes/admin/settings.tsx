@@ -27,7 +27,7 @@ function SettingsPage() {
     setSaving(true);
     const { id, created_at, updated_at, ...payload } = data as Record<string, unknown>;
     void created_at; void updated_at;
-    const { error } = await supabase.from("settings").update(payload).eq("id", id as string);
+    const { error } = await supabase.from("settings").update(payload as never).eq("id", id as string);
     setSaving(false);
     if (error) toast.error(error.message); else toast.success("Configurações salvas");
   };

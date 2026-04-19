@@ -141,11 +141,11 @@ function AffiliateForm({ initial, onClose }: { initial: Affiliate | null; onClos
     phone: initial?.phone ?? "",
     instagram: initial?.instagram ?? "",
     pix_key: initial?.pix_key ?? "",
-    pix_type: initial?.pix_type ?? "email",
-    commission_type: initial?.commission_type ?? "percentage",
+    pix_type: (initial?.pix_type ?? "email") as "cpf" | "cnpj" | "email" | "phone" | "random",
+    commission_type: (initial?.commission_type ?? "percentage") as "percentage" | "fixed",
     commission_value: initial?.commission_value ?? 30,
     slug: initial?.slug ?? "",
-    status: initial?.status ?? "active",
+    status: (initial?.status ?? "active") as "active" | "paused" | "blocked",
   });
   const [saving, setSaving] = useState(false);
 
@@ -154,8 +154,8 @@ function AffiliateForm({ initial, onClose }: { initial: Affiliate | null; onClos
     setSaving(true);
     const payload = { ...form, slug: form.slug || slugify(form.username || form.full_name), commission_value: Number(form.commission_value) };
     const { error } = initial
-      ? await supabase.from("affiliates").update(payload).eq("id", initial.id)
-      : await supabase.from("affiliates").insert(payload);
+      ? await supabase.from("affiliates").update(payload as never).eq("id", initial.id)
+      : await supabase.from("affiliates").insert(payload as never);
     setSaving(false);
     if (error) { toast.error(error.message); return; }
     toast.success(initial ? "Afiliado atualizado" : "Afiliado criado");

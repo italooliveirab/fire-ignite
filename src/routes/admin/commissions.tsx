@@ -22,7 +22,7 @@ function CommissionsPage() {
 
   const update = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { error } = await supabase.from("commissions").update({ status }).eq("id", id);
+      const { error } = await supabase.from("commissions").update({ status: status as "pending" | "released" | "paid" }).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Status atualizado"); qc.invalidateQueries({ queryKey: ["commissions"] }); },
