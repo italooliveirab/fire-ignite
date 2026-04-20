@@ -8,16 +8,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { slugify, formatBRL } from "@/lib/format";
+import { slugify } from "@/lib/format";
 
 export const Route = createFileRoute("/admin/products")({ component: ProductsPage });
 
 interface Product {
   id: string; name: string; slug: string; description: string | null; media_kit_url: string | null;
-  commission_type: "percentage" | "fixed"; commission_value: number; is_active: boolean; created_at: string;
+  is_active: boolean; created_at: string;
 }
 
 function ProductsPage() {
@@ -56,7 +55,7 @@ function ProductsPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="font-display text-3xl font-bold">Produtos & Serviços</h1>
-          <p className="text-muted-foreground text-sm mt-1">{products.length} cadastrados — afiliados podem solicitar revenda.</p>
+          <p className="text-muted-foreground text-sm mt-1">{products.length} cadastrados — a comissão é definida por afiliado em "Solicitações".</p>
         </div>
         <Button onClick={() => { setEditing(null); setOpen(true); }} className="bg-gradient-fire shadow-fire text-white font-semibold">
           <Plus className="h-4 w-4 mr-1" /> Novo produto
@@ -90,11 +89,8 @@ function ProductsPage() {
                 </span>
               </div>
               {p.description && <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{p.description}</p>}
-              <div className="flex items-center gap-2 text-sm mb-4">
-                <span className="text-muted-foreground">Comissão:</span>
-                <span className="font-semibold text-primary">
-                  {p.commission_type === "percentage" ? `${p.commission_value}%` : formatBRL(p.commission_value)}
-                </span>
+              <div className="text-xs text-muted-foreground mb-4">
+                Comissão definida por afiliado na aprovação da solicitação.
               </div>
               {p.media_kit_url && (
                 <a href={p.media_kit_url} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1 mb-3">
@@ -135,8 +131,6 @@ function ProductForm({ initial, onClose }: { initial: Product | null; onClose: (
     slug: initial?.slug ?? "",
     description: initial?.description ?? "",
     media_kit_url: initial?.media_kit_url ?? "",
-    commission_type: (initial?.commission_type ?? "percentage") as "percentage" | "fixed",
-    commission_value: initial?.commission_value ?? 30,
     is_active: initial?.is_active ?? true,
   });
   const [saving, setSaving] = useState(false);
@@ -145,11 +139,11 @@ function ProductForm({ initial, onClose }: { initial: Product | null; onClose: (
     e.preventDefault();
     setSaving(true);
     const payload = {
-      ...form,
+      name: form.name,
       slug: form.slug || slugify(form.name),
       description: form.description || null,
       media_kit_url: form.media_kit_url || null,
-      commission_value: Number(form.commission_value),
+      is_active: form.is_active,
     };
     const { error } = initial
       ? await supabase.from("products").update(payload).eq("id", initial.id)
@@ -180,21 +174,8 @@ function ProductForm({ initial, onClose }: { initial: Product | null; onClose: (
         <Input type="url" value={form.media_kit_url} onChange={(e) => setForm({ ...form, media_kit_url: e.target.value })} placeholder="https://drive.google.com/..." />
         <p className="text-xs text-muted-foreground">Materiais de divulgação para o afiliado (banners, textos, vídeos).</p>
       </div>
-      <div className="grid sm:grid-cols-2 gap-3">
-        <div className="space-y-1.5">
-          <Label className="text-xs">Tipo de comissão</Label>
-          <Select value={form.commission_type} onValueChange={(v: "percentage" | "fixed") => setForm({ ...form, commission_type: v })}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="percentage">Porcentagem (%)</SelectItem>
-              <SelectItem value="fixed">Valor fixo (R$)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-xs">{form.commission_type === "percentage" ? "Valor (%)" : "Valor (R$)"}</Label>
-          <Input type="number" step="0.01" required value={form.commission_value} onChange={(e) => setForm({ ...form, commission_value: Number(e.target.value) })} />
-        </div>
+      <div className="rounded-lg bg-muted/40 border border-border p-3 text-xs text-muted-foreground">
+        💡 A <strong className="text-foreground">comissão é definida por afiliado</strong> ao aprovar cada solicitação em <code>Solicitações</code>. Cada afiliado pode ter % ou R$ fixo diferente neste mesmo produto.
       </div>
       <div className="flex items-center gap-2 pt-2">
         <input type="checkbox" id="active" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} className="h-4 w-4 accent-primary" />
