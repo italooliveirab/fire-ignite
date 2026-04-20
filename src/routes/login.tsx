@@ -95,7 +95,10 @@ function LoginPage() {
           </div>
 
           <div className="mt-6 pt-6 border-t border-border text-center text-xs text-muted-foreground">
-            Ainda não é afiliado? Fale com nosso time para receber seu acesso.
+            Ainda não é afiliado?{" "}
+            <Link to="/signup" className="text-primary font-semibold hover:underline">
+              Cadastre-se
+            </Link>
           </div>
         </div>
 

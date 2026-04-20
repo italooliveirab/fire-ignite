@@ -10,7 +10,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDateTime } from "@/lib/format";
 import { exportCSV } from "@/lib/csv";
-import { EmailLogsTable } from "@/components/EmailLogsTable";
+import { EmailLogsTable as EmailLogsTableView } from "@/components/EmailLogsTable";
 
 export const Route = createFileRoute("/admin/audit")({ component: AuditPage });
 
@@ -251,7 +251,7 @@ function AuditPage() {
         </TabsContent>
 
         <TabsContent value="emails">
-          <EmailLogsTable />
+          <EmailLogsTableView />
         </TabsContent>
       </Tabs>
     </DashboardLayout>
