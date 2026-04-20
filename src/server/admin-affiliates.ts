@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 interface CreateAffiliateInput {
   email: string;
@@ -15,23 +14,29 @@ interface CreateAffiliateInput {
   status: "active" | "paused" | "blocked";
 }
 
-async function assertAdmin(context: { supabase: ReturnType<typeof supabaseAdmin.from> extends never ? never : any; userId: string }) {
-  const { data: roles } = await context.supabase.from("user_roles").select("role").eq("user_id", context.userId);
+async function resolveAdminContext(accessToken: string) {
+  const { data: authUser, error: authError } = await supabaseAdmin.auth.getUser(accessToken);
+  if (authError || !authUser.user) throw new Error("Sessão expirada. Refaça o login.");
+  return { userId: authUser.user.id };
+}
+
+async function assertAdmin(userId: string) {
+  const { data: roles } = await supabaseAdmin.from("user_roles").select("role").eq("user_id", userId);
   const isAdmin = roles?.some((r: { role: string }) => r.role === "admin");
   if (!isAdmin) throw new Error("Apenas admins podem executar esta ação");
 }
 
 export const adminCreateAffiliate = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: CreateAffiliateInput) => {
-    if (!input.email || !input.password || !input.full_name || !input.username || !input.slug) {
+  .inputValidator((input: CreateAffiliateInput & { accessToken: string }) => {
+    if (!input.accessToken || !input.email || !input.password || !input.full_name || !input.username || !input.slug) {
       throw new Error("Campos obrigatórios faltando");
     }
     if (input.password.length < 6) throw new Error("Senha precisa ter pelo menos 6 caracteres");
     return input;
   })
-  .handler(async ({ data, context }) => {
-    await assertAdmin(context);
+  .handler(async ({ data }) => {
+    const { userId } = await resolveAdminContext(data.accessToken);
+    await assertAdmin(userId);
 
     const { data: created, error: authErr } = await supabaseAdmin.auth.admin.createUser({
       email: data.email,
@@ -56,13 +61,13 @@ export const adminCreateAffiliate = createServerFn({ method: "POST" })
     }).select().single();
 
     if (affErr) {
-      await supabaseAdmin.auth.admin.deleteUser(uid).catch(() => {});
+      await supabaseAdmin.auth.admin.deleteUser(uid);
       throw new Error(affErr.message);
     }
 
     const { error: roleErr } = await supabaseAdmin.from("user_roles").insert({ user_id: uid, role: "affiliate" });
     if (roleErr) {
-      await supabaseAdmin.auth.admin.deleteUser(uid).catch(() => {});
+      await supabaseAdmin.auth.admin.deleteUser(uid);
       throw new Error(roleErr.message);
     }
 
@@ -76,16 +81,16 @@ interface UpdateAffiliateAuthInput {
 }
 
 export const adminUpdateAffiliateAuth = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: UpdateAffiliateAuthInput) => {
-    if (!input.affiliate_id) throw new Error("affiliate_id obrigatório");
+  .inputValidator((input: UpdateAffiliateAuthInput & { accessToken: string }) => {
+    if (!input.accessToken || !input.affiliate_id) throw new Error("affiliate_id obrigatório");
     if (!input.email && !input.password) throw new Error("Informe email ou senha para alterar");
     if (input.password && input.password.length < 6) throw new Error("Senha precisa ter pelo menos 6 caracteres");
     if (input.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email)) throw new Error("Email inválido");
     return input;
   })
-  .handler(async ({ data, context }) => {
-    await assertAdmin(context);
+  .handler(async ({ data }) => {
+    const { userId } = await resolveAdminContext(data.accessToken);
+    await assertAdmin(userId);
 
     const { data: aff, error: affErr } = await supabaseAdmin
       .from("affiliates")
@@ -113,11 +118,11 @@ export const adminUpdateAffiliateAuth = createServerFn({ method: "POST" })
     }
 
     // Lookup admin email for audit
-    const { data: adminUser } = await supabaseAdmin.auth.admin.getUserById(context.userId);
+    const { data: adminUser } = await supabaseAdmin.auth.admin.getUserById(userId);
 
     const { error: auditErr } = await supabaseAdmin.from("affiliate_credential_audit").insert({
       affiliate_id: aff.id,
-      changed_by: context.userId,
+      changed_by: userId,
       changed_by_email: adminUser?.user?.email ?? null,
       email_changed: !!data.email,
       password_changed: !!data.password,
@@ -136,13 +141,13 @@ interface GetAffiliateAuthInfoInput {
 }
 
 export const adminGetAffiliateAuthInfo = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((input: GetAffiliateAuthInfoInput) => {
-    if (!input.affiliate_id) throw new Error("affiliate_id obrigatório");
+  .inputValidator((input: GetAffiliateAuthInfoInput & { accessToken: string }) => {
+    if (!input.accessToken || !input.affiliate_id) throw new Error("affiliate_id obrigatório");
     return input;
   })
-  .handler(async ({ data, context }) => {
-    await assertAdmin(context);
+  .handler(async ({ data }) => {
+    const { userId } = await resolveAdminContext(data.accessToken);
+    await assertAdmin(userId);
     const { data: aff, error: affErr } = await supabaseAdmin
       .from("affiliates")
       .select("user_id")
@@ -158,9 +163,13 @@ export const adminGetAffiliateAuthInfo = createServerFn({ method: "POST" })
   });
 
 export const adminListAffiliatesLastSignIn = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    await assertAdmin(context);
+  .inputValidator((input: { accessToken: string }) => {
+    if (!input.accessToken) throw new Error("Sessão expirada. Refaça o login.");
+    return input;
+  })
+  .handler(async ({ data }) => {
+    const { userId } = await resolveAdminContext(data.accessToken);
+    await assertAdmin(userId);
     // Fetch all affiliates with user_id
     const { data: affs } = await supabaseAdmin
       .from("affiliates")

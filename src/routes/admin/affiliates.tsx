@@ -26,6 +26,13 @@ interface Affiliate {
   status: "active" | "paused" | "blocked"; created_at: string;
 }
 
+async function getAccessToken() {
+  const { data, error } = await supabase.auth.getSession();
+  const accessToken = data.session?.access_token;
+  if (error || !accessToken) throw new Error("Sessão expirada. Recarregue a página e faça login novamente.");
+  return accessToken;
+}
+
 function AffiliatesPage() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
@@ -44,7 +51,7 @@ function AffiliatesPage() {
 
   const { data: lastSignInMap = {} } = useQuery({
     queryKey: ["affiliates-last-sign-in"],
-    queryFn: () => adminListAffiliatesLastSignIn(),
+    queryFn: async () => adminListAffiliatesLastSignIn({ data: { accessToken: await getAccessToken() } }),
     staleTime: 60_000,
   });
 
@@ -219,6 +226,7 @@ function AffiliateForm({ initial, onClose }: { initial: Affiliate | null; onClos
         }
         await adminCreateAffiliate({
           data: {
+            accessToken: await getAccessToken(),
             email: form.email,
             password: form.password,
             full_name: form.full_name,
@@ -298,7 +306,8 @@ function AuthForm({ affiliate, onSaved }: { affiliate: Affiliate; onSaved: () =>
 
   useEffect(() => {
     let cancelled = false;
-    adminGetAffiliateAuthInfo({ data: { affiliate_id: affiliate.id } })
+    getAccessToken()
+      .then((accessToken) => adminGetAffiliateAuthInfo({ data: { affiliate_id: affiliate.id, accessToken } }))
       .then((info) => { if (!cancelled) setAuthInfo(info); })
       .catch(() => {});
     return () => { cancelled = true; };
@@ -322,6 +331,7 @@ function AuthForm({ affiliate, onSaved }: { affiliate: Affiliate; onSaved: () =>
     try {
       await adminUpdateAffiliateAuth({
         data: {
+          accessToken: await getAccessToken(),
           affiliate_id: affiliate.id,
           ...(emailChanged ? { email } : {}),
           ...(wantsPassword ? { password } : {}),
