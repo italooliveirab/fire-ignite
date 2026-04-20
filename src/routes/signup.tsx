@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { slugify } from "@/lib/format";
+import { useServerFn } from "@tanstack/react-start";
+import { sendWelcomeEmailFn } from "@/server/notifications";
 
 export const Route = createFileRoute("/signup")({ component: SignupPage });
 
@@ -16,6 +18,7 @@ function SignupPage() {
   const [form, setForm] = useState({ full_name: "", email: "", phone: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [referrerInfo, setReferrerInfo] = useState<{ id: string; full_name: string } | null>(null);
+  const sendWelcome = useServerFn(sendWelcomeEmailFn);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -91,6 +94,8 @@ function SignupPage() {
       }
 
       toast.success("Conta criada!", { description: "Você já pode escolher os produtos para revender." });
+      // dispara email de boas-vindas (não bloqueia o fluxo)
+      sendWelcome({ data: { email: form.email, full_name: form.full_name } }).catch(() => {});
       nav({ to: "/app" });
     } catch (e) {
       toast.error("Erro ao criar conta", { description: (e as Error).message });

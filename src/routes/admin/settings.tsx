@@ -8,8 +8,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Upload, Image as ImageIcon, Save, Loader2 } from "lucide-react";
+import { Upload, Image as ImageIcon, Save, Loader2, Mail } from "lucide-react";
 import { refreshBrand } from "@/hooks/useBrand";
+import { useServerFn } from "@tanstack/react-start";
+import { sendTestEmailFn } from "@/server/notifications";
 
 export const Route = createFileRoute("/admin/settings")({ component: SettingsPage });
 
@@ -17,6 +19,22 @@ function SettingsPage() {
   const [data, setData] = useState<Record<string, unknown> | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [testEmail, setTestEmail] = useState("");
+  const [testing, setTesting] = useState(false);
+  const sendTest = useServerFn(sendTestEmailFn);
+
+  const handleTestEmail = async () => {
+    if (!testEmail || !testEmail.includes("@")) { toast.error("Informe um email válido"); return; }
+    setTesting(true);
+    try {
+      await sendTest({ data: { to: testEmail } });
+      toast.success("Email de teste enviado!", { description: `Verifique a caixa de entrada de ${testEmail}` });
+    } catch (e) {
+      toast.error("Falha no envio", { description: (e as Error).message });
+    } finally {
+      setTesting(false);
+    }
+  };
 
   useEffect(() => {
     supabase.from("settings").select("*").limit(1).single().then(({ data }) => setData(data));
@@ -137,6 +155,17 @@ function SettingsPage() {
             <SummaryItem label="Retenção" value={`${String(data.retention_days ?? 0)} dias`} />
             <SummaryItem label="Suporte" value={String(data.support_email ?? "—")} />
           </div>
+        </Section>
+
+        <Section title="Teste de Email (SMTP)">
+          <p className="text-xs text-muted-foreground">Envie um email de teste para verificar se o SMTP está funcionando.</p>
+          <Field label="Destinatário do teste">
+            <Input type="email" placeholder="seu@email.com" value={testEmail} onChange={(e) => setTestEmail(e.target.value)} />
+          </Field>
+          <Button onClick={handleTestEmail} disabled={testing} variant="outline" className="w-full">
+            {testing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Mail className="h-4 w-4 mr-2" />}
+            {testing ? "Enviando..." : "Enviar email de teste"}
+          </Button>
         </Section>
       </div>
     </DashboardLayout>

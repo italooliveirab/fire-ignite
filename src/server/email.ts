@@ -1,5 +1,7 @@
 // Server-only SMTP helper. Configure via env: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM
 import nodemailer from "nodemailer";
+import { createClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 
 let _transporter: nodemailer.Transporter | null = null;
 
@@ -27,25 +29,49 @@ export interface SendEmailInput {
   html: string;
   text?: string;
   replyTo?: string;
+  template?: string;
+  context?: Record<string, unknown>;
 }
 
 export async function sendEmail(input: SendEmailInput): Promise<{ ok: boolean; error?: string }> {
+  const recipient = Array.isArray(input.to) ? input.to.join(",") : input.to;
+  let okFlag = false;
+  let errorMsg: string | undefined;
   try {
     const from = process.env.SMTP_FROM ?? process.env.SMTP_USER!;
     const transporter = getTransporter();
     await transporter.sendMail({
       from,
-      to: Array.isArray(input.to) ? input.to.join(",") : input.to,
+      to: recipient,
       subject: input.subject,
       html: input.html,
       text: input.text ?? input.html.replace(/<[^>]+>/g, ""),
       replyTo: input.replyTo,
     });
-    return { ok: true };
+    okFlag = true;
   } catch (e) {
     console.error("[email] send failed:", e);
-    return { ok: false, error: (e as Error).message };
+    errorMsg = (e as Error).message;
   }
+  // log no banco (best-effort, usa service role)
+  try {
+    const url = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (url && key) {
+      const sb = createClient<Database>(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+      await sb.from("email_log").insert({
+        recipient,
+        subject: input.subject,
+        template: input.template ?? null,
+        status: okFlag ? "sent" : "failed",
+        error: errorMsg ?? null,
+        context: (input.context ?? null) as never,
+      });
+    }
+  } catch (logErr) {
+    console.error("[email] log failed:", logErr);
+  }
+  return okFlag ? { ok: true } : { ok: false, error: errorMsg };
 }
 
 // Brand wrapper for consistent styling
