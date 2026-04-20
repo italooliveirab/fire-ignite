@@ -156,3 +156,35 @@ export const adminGetAffiliateAuthInfo = createServerFn({ method: "POST" })
       email_confirmed_at: u?.user?.email_confirmed_at ?? null,
     };
   });
+
+export const adminListAffiliatesLastSignIn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    // Fetch all affiliates with user_id
+    const { data: affs } = await supabaseAdmin
+      .from("affiliates")
+      .select("id, user_id")
+      .not("user_id", "is", null);
+    if (!affs) return {} as Record<string, string | null>;
+
+    // Page through auth users (admin API)
+    const map: Record<string, string | null> = {};
+    const userIdToAffId = new Map<string, string>();
+    for (const a of affs) if (a.user_id) userIdToAffId.set(a.user_id, a.id);
+
+    let page = 1;
+    const perPage = 200;
+    // limit to ~10 pages (2000 users) for safety
+    for (let i = 0; i < 10; i++) {
+      const { data, error } = await supabaseAdmin.auth.admin.listUsers({ page, perPage });
+      if (error || !data?.users?.length) break;
+      for (const u of data.users) {
+        const affId = userIdToAffId.get(u.id);
+        if (affId) map[affId] = u.last_sign_in_at ?? null;
+      }
+      if (data.users.length < perPage) break;
+      page++;
+    }
+    return map;
+  });
