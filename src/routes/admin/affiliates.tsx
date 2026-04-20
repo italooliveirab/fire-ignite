@@ -126,10 +126,11 @@ function AffiliatesPage() {
           </DialogHeader>
           {editing ? (
             <Tabs defaultValue="data" className="w-full">
-              <TabsList className="grid grid-cols-3 w-full">
+              <TabsList className="grid grid-cols-4 w-full">
                 <TabsTrigger value="data">Dados</TabsTrigger>
                 <TabsTrigger value="auth">Acesso</TabsTrigger>
                 <TabsTrigger value="products">Produtos</TabsTrigger>
+                <TabsTrigger value="history">Histórico</TabsTrigger>
               </TabsList>
               <TabsContent value="data" className="mt-4">
                 <AffiliateForm initial={editing} onClose={() => { setOpen(false); qc.invalidateQueries({ queryKey: ["affiliates"] }); }} />
@@ -139,6 +140,9 @@ function AffiliatesPage() {
               </TabsContent>
               <TabsContent value="products" className="mt-4">
                 <ProductsTab affiliateId={editing.id} />
+              </TabsContent>
+              <TabsContent value="history" className="mt-4">
+                <HistoryTab affiliateId={editing.id} />
               </TabsContent>
             </Tabs>
           ) : (
@@ -405,6 +409,60 @@ function ProductRowEditor({ row, onSaved }: { row: AffiliateProductRow; onSaved:
           {saving ? "Salvando..." : "Salvar produto"}
         </Button>
       </div>
+    </div>
+  );
+}
+
+interface AuditRow {
+  id: string;
+  created_at: string;
+  changed_by_email: string | null;
+  email_changed: boolean;
+  password_changed: boolean;
+  old_email: string | null;
+  new_email: string | null;
+}
+
+function HistoryTab({ affiliateId }: { affiliateId: string }) {
+  const { data: rows = [], isLoading } = useQuery({
+    queryKey: ["credential-audit", affiliateId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("affiliate_credential_audit")
+        .select("id, created_at, changed_by_email, email_changed, password_changed, old_email, new_email")
+        .eq("affiliate_id", affiliateId)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return (data ?? []) as AuditRow[];
+    },
+  });
+
+  if (isLoading) return <div className="py-8 text-center text-muted-foreground text-sm">Carregando histórico...</div>;
+  if (rows.length === 0) return <div className="py-8 text-center text-muted-foreground text-sm">Nenhuma alteração de credenciais registrada.</div>;
+
+  return (
+    <div className="space-y-2">
+      <p className="text-xs text-muted-foreground mb-2">Últimas 50 alterações de email/senha realizadas por administradores.</p>
+      {rows.map((r) => (
+        <div key={r.id} className="rounded-lg border border-border bg-background/40 p-3 text-sm">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex gap-1.5 flex-wrap">
+              {r.email_changed && <span className="text-xs px-2 py-0.5 rounded bg-primary/15 text-primary font-medium">Email</span>}
+              {r.password_changed && <span className="text-xs px-2 py-0.5 rounded bg-primary/15 text-primary font-medium">Senha</span>}
+            </div>
+            <span className="text-xs text-muted-foreground">
+              {new Date(r.created_at).toLocaleString("pt-BR")}
+            </span>
+          </div>
+          <div className="mt-2 text-xs text-muted-foreground">
+            por <span className="text-foreground font-medium">{r.changed_by_email ?? "admin"}</span>
+            {r.email_changed && r.old_email && r.new_email && (
+              <div className="mt-1 font-mono">{r.old_email} → {r.new_email}</div>
+            )}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

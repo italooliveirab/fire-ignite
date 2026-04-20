@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      affiliate_credential_audit: {
+        Row: {
+          affiliate_id: string
+          changed_by: string
+          changed_by_email: string | null
+          created_at: string
+          email_changed: boolean
+          id: string
+          new_email: string | null
+          old_email: string | null
+          password_changed: boolean
+        }
+        Insert: {
+          affiliate_id: string
+          changed_by: string
+          changed_by_email?: string | null
+          created_at?: string
+          email_changed?: boolean
+          id?: string
+          new_email?: string | null
+          old_email?: string | null
+          password_changed?: boolean
+        }
+        Update: {
+          affiliate_id?: string
+          changed_by?: string
+          changed_by_email?: string | null
+          created_at?: string
+          email_changed?: boolean
+          id?: string
+          new_email?: string | null
+          old_email?: string | null
+          password_changed?: boolean
+        }
+        Relationships: []
+      }
       affiliate_products: {
         Row: {
           affiliate_id: string

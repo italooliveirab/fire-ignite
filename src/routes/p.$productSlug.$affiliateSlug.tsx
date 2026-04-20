@@ -20,29 +20,46 @@ export const Route = createFileRoute("/p/$productSlug/$affiliateSlug")({
             return new Response(JSON.stringify({ ok: false }), { status: 400 });
           }
 
-          const [{ data: product }, { data: affiliate }] = await Promise.all([
-            supabaseAdmin.from("products").select("id, is_active").eq("slug", productSlug).maybeSingle(),
-            supabaseAdmin.from("affiliates").select("id, status").eq("slug", affiliateSlug).maybeSingle(),
-          ]);
+          const { data: product } = await supabaseAdmin
+            .from("products").select("id, is_active").eq("slug", productSlug).maybeSingle();
 
-          if (!product || !product.is_active || !affiliate || affiliate.status !== "active") {
+          if (!product || !product.is_active) {
             return new Response(JSON.stringify({ ok: false }), { status: 404 });
           }
 
-          // Verify the affiliation is approved before tracking
-          const { data: ap } = await supabaseAdmin
+          // 1) Try to resolve via custom_slug for this product
+          let affiliateId: string | null = null;
+          const { data: customMatch } = await supabaseAdmin
             .from("affiliate_products")
-            .select("status")
-            .eq("affiliate_id", affiliate.id)
+            .select("affiliate_id, status")
             .eq("product_id", product.id)
+            .eq("custom_slug", affiliateSlug)
+            .eq("status", "approved")
             .maybeSingle();
 
-          if (!ap || ap.status !== "approved") {
-            return new Response(JSON.stringify({ ok: false }), { status: 403 });
+          if (customMatch) {
+            affiliateId = customMatch.affiliate_id;
+          } else {
+            // 2) Fallback: default affiliate slug + must have approved affiliation
+            const { data: affiliate } = await supabaseAdmin
+              .from("affiliates").select("id, status").eq("slug", affiliateSlug).maybeSingle();
+            if (!affiliate || affiliate.status !== "active") {
+              return new Response(JSON.stringify({ ok: false }), { status: 404 });
+            }
+            const { data: ap } = await supabaseAdmin
+              .from("affiliate_products")
+              .select("status")
+              .eq("affiliate_id", affiliate.id)
+              .eq("product_id", product.id)
+              .maybeSingle();
+            if (!ap || ap.status !== "approved") {
+              return new Response(JSON.stringify({ ok: false }), { status: 403 });
+            }
+            affiliateId = affiliate.id;
           }
 
           await supabaseAdmin.from("leads").insert({
-            affiliate_id: affiliate.id,
+            affiliate_id: affiliateId,
             product_id: product.id,
             status: "initiated_conversation",
             conversation_started_at: new Date().toISOString(),
@@ -80,28 +97,46 @@ function PublicLandingRedirect() {
         // affiliates (public ranking policy), settings, and approved affiliations.
         const { supabase } = await import("@/integrations/supabase/client");
 
-        const [productRes, affiliateRes, settingsRes] = await Promise.all([
+        const [productRes, settingsRes] = await Promise.all([
           supabase.from("products").select("id, name, slug, is_active").eq("slug", productSlug).maybeSingle(),
-          supabase.from("affiliates").select("id, full_name, slug, status").eq("slug", affiliateSlug).maybeSingle(),
           supabase.from("settings").select("support_whatsapp, company_name").limit(1).maybeSingle(),
         ]);
 
         const product = productRes.data;
-        const affiliate = affiliateRes.data;
         const settings = settingsRes.data;
 
         if (!product || !product.is_active) { setError("Produto indisponível."); return; }
-        if (!affiliate || affiliate.status !== "active") { setError("Afiliado não encontrado."); return; }
 
-        const { data: ap } = await supabase
+        // Resolve affiliate: try custom_slug first, then default slug
+        let affiliateRow: { id: string; full_name: string; slug: string; status: string } | null = null;
+
+        const { data: customMatch } = await supabase
           .from("affiliate_products")
-          .select("status")
-          .eq("affiliate_id", affiliate.id)
+          .select("affiliate_id, status, affiliate:affiliates(id, full_name, slug, status)")
           .eq("product_id", product.id)
+          .eq("custom_slug", affiliateSlug)
+          .eq("status", "approved")
           .maybeSingle();
 
-        const approved = ap?.status === "approved";
-        if (!approved) { setError("Este link não está mais ativo."); return; }
+        if (customMatch?.affiliate) {
+          affiliateRow = customMatch.affiliate as unknown as typeof affiliateRow;
+        } else {
+          const { data: affiliate } = await supabase
+            .from("affiliates").select("id, full_name, slug, status").eq("slug", affiliateSlug).maybeSingle();
+          if (!affiliate || affiliate.status !== "active") { setError("Afiliado não encontrado."); return; }
+          const { data: ap } = await supabase
+            .from("affiliate_products")
+            .select("status")
+            .eq("affiliate_id", affiliate.id)
+            .eq("product_id", product.id)
+            .maybeSingle();
+          if (ap?.status !== "approved") { setError("Este link não está mais ativo."); return; }
+          affiliateRow = affiliate;
+        }
+
+        if (!affiliateRow || affiliateRow.status !== "active") { setError("Afiliado não encontrado."); return; }
+        const affiliate = affiliateRow;
+        const approved = true;
 
         if (cancelled) return;
         setData({
