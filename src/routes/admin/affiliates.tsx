@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Edit, Trash2, Pause, Play } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Pause, Play, ArrowUpDown, Download } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { slugify } from "@/lib/format";
+import { formatDateTime } from "@/lib/format";
+import { exportCSV } from "@/lib/csv";
 import { adminCreateAffiliate, adminUpdateAffiliateAuth, adminGetAffiliateAuthInfo, adminListAffiliatesLastSignIn } from "@/server/admin-affiliates";
 
 export const Route = createFileRoute("/admin/affiliates")({ component: AffiliatesPage });
