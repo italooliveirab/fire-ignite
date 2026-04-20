@@ -85,6 +85,12 @@ function LoginPage() {
             </Button>
           </form>
 
+          <div className="mt-4 text-right">
+            <Link to="/forgot-password" className="text-xs text-muted-foreground hover:text-primary transition">
+              Esqueceu a senha?
+            </Link>
+          </div>
+
           <div className="mt-6 pt-6 border-t border-border text-center text-xs text-muted-foreground">
             Ainda não tem conta?{" "}
             <Link to="/signup" className="text-primary hover:underline font-medium">Criar conta admin</Link>
