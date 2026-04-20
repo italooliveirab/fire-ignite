@@ -5,6 +5,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import crypto from "crypto";
+import { notifyAdminLeadPaid } from "@/server/notifications";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -95,6 +96,27 @@ export const Route = createFileRoute("/api/track-event")({
 
           const { data: updated, error: updErr } = await supabaseAdmin.from("leads").update(update as never).eq("id", lead.id).select().single();
           if (updErr) throw updErr;
+
+          // Dispara email para admin quando lead vira "paid" (apenas na transição)
+          if (newStatus === "paid" && lead.status !== "paid") {
+            try {
+              const [{ data: aff }, { data: prod }] = await Promise.all([
+                supabaseAdmin.from("affiliates").select("full_name").eq("id", updated.affiliate_id).maybeSingle(),
+                updated.product_id
+                  ? supabaseAdmin.from("products").select("name").eq("id", updated.product_id).maybeSingle()
+                  : Promise.resolve({ data: null }),
+              ]);
+              await notifyAdminLeadPaid({
+                customer_name: updated.customer_name,
+                whatsapp_number: updated.whatsapp_number,
+                affiliate_name: aff?.full_name ?? null,
+                product_name: (prod as { name?: string } | null)?.name ?? null,
+                amount: updated.payment_amount,
+              });
+            } catch (notifyErr) {
+              console.error("notify admin paid failed:", notifyErr);
+            }
+          }
 
           return new Response(JSON.stringify({ success: true, lead: updated }), { status: 200, headers: cors });
         } catch (e) {
