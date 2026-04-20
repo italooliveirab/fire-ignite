@@ -53,7 +53,7 @@ function LoginPage() {
         </Link>
 
         <div className="rounded-2xl border border-border bg-card/80 backdrop-blur-xl p-8 shadow-card-premium">
-          <h1 className="font-display text-2xl font-bold mb-1">Acessar painel</h1>
+          <h1 className="font-display text-2xl font-bold mb-1">Painel do Afiliado</h1>
           <p className="text-sm text-muted-foreground mb-6">Entre com seu email e senha.</p>
 
           <form onSubmit={handleLogin} className="space-y-4">
@@ -92,8 +92,7 @@ function LoginPage() {
           </div>
 
           <div className="mt-6 pt-6 border-t border-border text-center text-xs text-muted-foreground">
-            Ainda não tem conta?{" "}
-            <Link to="/signup" className="text-primary hover:underline font-medium">Criar conta admin</Link>
+            Ainda não é afiliado? Fale com nosso time para receber seu acesso.
           </div>
         </div>
 
