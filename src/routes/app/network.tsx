@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { formatBRL, formatNumber, formatDate } from "@/lib/format";
-import { Network, Users, Banknote, Copy, Share2 } from "lucide-react";
+import { Network, Users, Banknote, Copy, Share2, UserCheck } from "lucide-react";
 
 export const Route = createFileRoute("/app/network")({ component: MyNetwork });
 
@@ -94,6 +94,23 @@ function MyNetwork() {
         <h1 className="font-display text-3xl font-bold flex items-center gap-2"><Network className="h-7 w-7 text-primary" /> Minha Rede</h1>
         <p className="text-sm text-muted-foreground mt-1">Indique afiliados e ganhe comissão sobre as vendas deles.</p>
       </div>
+
+      {/* Meu afiliador (se eu sou indicado) */}
+      {myReferrer && (
+        <div className="rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/10 to-transparent p-5 mb-6 shadow-card-premium">
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
+              <UserCheck className="h-6 w-6 text-primary" />
+            </div>
+            <div className="flex-1">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">Você foi indicado por</div>
+              <div className="font-display font-semibold text-lg">{myReferrer.full_name}</div>
+              <div className="text-xs text-muted-foreground">{myReferrer.email} · vinculado em {formatDate(myReferrer.linked_at)}</div>
+            </div>
+            <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-400/15 text-emerald-400 font-medium">{myReferrer.status}</span>
+          </div>
+        </div>
+      )}
 
       {/* Link de indicação */}
       <div className="rounded-2xl border border-border bg-card p-6 mb-6 shadow-card-premium">
