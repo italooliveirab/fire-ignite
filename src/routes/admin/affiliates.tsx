@@ -31,6 +31,7 @@ function AffiliatesPage() {
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<Affiliate | null>(null);
   const [open, setOpen] = useState(false);
+  const [sortLastAccess, setSortLastAccess] = useState<"none" | "asc" | "desc">("none");
 
   const { data: affiliates = [], isLoading } = useQuery({
     queryKey: ["affiliates"],
@@ -50,6 +51,14 @@ function AffiliatesPage() {
   const filtered = affiliates.filter((a) =>
     [a.full_name, a.username, a.email].some((f) => f?.toLowerCase().includes(search.toLowerCase())),
   );
+
+  const sorted = sortLastAccess === "none" ? filtered : [...filtered].sort((a, b) => {
+    const av = lastSignInMap[a.id] ? new Date(lastSignInMap[a.id] as string).getTime() : 0;
+    const bv = lastSignInMap[b.id] ? new Date(lastSignInMap[b.id] as string).getTime() : 0;
+    return sortLastAccess === "asc" ? av - bv : bv - av;
+  });
+
+  const cycleSort = () => setSortLastAccess((s) => s === "none" ? "desc" : s === "desc" ? "asc" : "none");
 
   const deleteAff = useMutation({
     mutationFn: async (id: string) => {
