@@ -6,7 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { formatBRL, formatDate } from "@/lib/format";
+import { exportCSV } from "@/lib/csv";
 import { toast } from "sonner";
+import { Download } from "lucide-react";
+
+const STATUS_LABEL: Record<string, string> = { pending: "Pendente", released: "Liberada", paid: "Paga" };
 
 export const Route = createFileRoute("/admin/commissions")({ component: CommissionsPage });
 
@@ -30,9 +34,36 @@ function CommissionsPage() {
 
   return (
     <DashboardLayout variant="admin" title="Comissões">
-      <div className="mb-6">
-        <h1 className="font-display text-3xl font-bold">Comissões</h1>
-        <p className="text-muted-foreground text-sm mt-1">{data.length} comissões geradas</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6">
+        <div>
+          <h1 className="font-display text-3xl font-bold">Comissões</h1>
+          <p className="text-muted-foreground text-sm mt-1">{data.length} comissões geradas</p>
+        </div>
+        <Button variant="outline" onClick={() => {
+          if (!data.length) { toast.error("Nada para exportar"); return; }
+          exportCSV(`comissoes-${new Date().toISOString().slice(0, 10)}`, data.map((c) => {
+            const a = (c as { affiliates?: { full_name: string } }).affiliates;
+            const l = (c as { leads?: { customer_name: string; payment_amount: number } }).leads;
+            return {
+              data: formatDate(c.created_at),
+              afiliado: a?.full_name ?? "",
+              cliente: l?.customer_name ?? "",
+              venda: l?.payment_amount ? Number(l.payment_amount).toFixed(2).replace(".", ",") : "",
+              comissao: Number(c.commission_value).toFixed(2).replace(".", ","),
+              status: STATUS_LABEL[c.status] ?? c.status,
+            };
+          }), [
+            { key: "data", label: "Data" },
+            { key: "afiliado", label: "Afiliado" },
+            { key: "cliente", label: "Cliente" },
+            { key: "venda", label: "Venda (R$)" },
+            { key: "comissao", label: "Comissão (R$)" },
+            { key: "status", label: "Status" },
+          ]);
+          toast.success(`${data.length} comissões exportadas`);
+        }} className="border-border">
+          <Download className="h-4 w-4 mr-1" /> Exportar CSV
+        </Button>
       </div>
 
       <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-card-premium">
