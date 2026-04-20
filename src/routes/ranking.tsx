@@ -121,12 +121,17 @@ function RankingPage() {
 
         <div className="text-center mt-10">
           <p className="text-sm text-muted-foreground mb-4">Quer aparecer aqui no próximo mês?</p>
-          <Link
-            to="/signup"
+          <a
+            href="https://wa.me/?text=Quero%20me%20tornar%20afiliado%20FIRE"
+            target="_blank"
+            rel="noreferrer"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-fire text-white font-semibold shadow-fire hover:opacity-90 transition"
           >
             <Flame className="h-4 w-4" /> Quero ser afiliado
-          </Link>
+          </a>
+          <p className="text-xs text-muted-foreground mt-3">
+            Já é afiliado? <Link to="/login" className="text-primary hover:underline">Entrar no painel</Link>
+          </p>
         </div>
       </main>
     </div>
