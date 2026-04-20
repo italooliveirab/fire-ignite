@@ -126,10 +126,11 @@ function AffiliatesPage() {
           </DialogHeader>
           {editing ? (
             <Tabs defaultValue="data" className="w-full">
-              <TabsList className="grid grid-cols-3 w-full">
+              <TabsList className="grid grid-cols-4 w-full">
                 <TabsTrigger value="data">Dados</TabsTrigger>
                 <TabsTrigger value="auth">Acesso</TabsTrigger>
                 <TabsTrigger value="products">Produtos</TabsTrigger>
+                <TabsTrigger value="history">Histórico</TabsTrigger>
               </TabsList>
               <TabsContent value="data" className="mt-4">
                 <AffiliateForm initial={editing} onClose={() => { setOpen(false); qc.invalidateQueries({ queryKey: ["affiliates"] }); }} />
@@ -139,6 +140,9 @@ function AffiliatesPage() {
               </TabsContent>
               <TabsContent value="products" className="mt-4">
                 <ProductsTab affiliateId={editing.id} />
+              </TabsContent>
+              <TabsContent value="history" className="mt-4">
+                <HistoryTab affiliateId={editing.id} />
               </TabsContent>
             </Tabs>
           ) : (
