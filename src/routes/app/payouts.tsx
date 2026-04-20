@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatBRL, formatDate } from "@/lib/format";
 import { toast } from "sonner";
 import { Banknote, Wallet, Clock, CheckCircle2, XCircle, FileText, ArrowUpCircle } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { requestPayoutFn } from "@/server/payouts";
 
 export const Route = createFileRoute("/app/payouts")({ component: MyPayouts });
 
@@ -55,12 +57,12 @@ function MyPayouts() {
 
   const request = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.rpc("request_payout", { _affiliate_id: affiliate!.id });
-      if (error) throw error;
+      await requestPayoutFnCall({ data: { affiliate_id: affiliate!.id } });
     },
     onSuccess: () => { toast.success("Solicitação de saque enviada!"); qc.invalidateQueries({ queryKey: ["my-balance", affiliate?.id] }); qc.invalidateQueries({ queryKey: ["my-payouts", affiliate?.id] }); },
     onError: (e) => toast.error("Não foi possível solicitar", { description: (e as Error).message }),
   });
+  const requestPayoutFnCall = useServerFn(requestPayoutFn);
 
   const minPayout = Number(settings?.minimum_payout ?? 50);
   const available = Number(balance?.available ?? 0);
