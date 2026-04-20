@@ -22,6 +22,7 @@ import { Route as AppRulesRouteImport } from './routes/app/rules'
 import { Route as AppProfileRouteImport } from './routes/app/profile'
 import { Route as AppProductsRouteImport } from './routes/app/products'
 import { Route as AppPayoutsRouteImport } from './routes/app/payouts'
+import { Route as AppNetworkRouteImport } from './routes/app/network'
 import { Route as AppLinkRouteImport } from './routes/app/link'
 import { Route as AppLeadsRouteImport } from './routes/app/leads'
 import { Route as AppCommissionsRouteImport } from './routes/app/commissions'
@@ -103,6 +104,11 @@ const AppProductsRoute = AppProductsRouteImport.update({
 const AppPayoutsRoute = AppPayoutsRouteImport.update({
   id: '/app/payouts',
   path: '/app/payouts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppNetworkRoute = AppNetworkRouteImport.update({
+  id: '/app/network',
+  path: '/app/network',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppLinkRoute = AppLinkRouteImport.update({
@@ -216,6 +222,7 @@ export interface FileRoutesByFullPath {
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
   '/app/link': typeof AppLinkRoute
+  '/app/network': typeof AppNetworkRoute
   '/app/payouts': typeof AppPayoutsRoute
   '/app/products': typeof AppProductsRoute
   '/app/profile': typeof AppProfileRoute
@@ -248,6 +255,7 @@ export interface FileRoutesByTo {
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
   '/app/link': typeof AppLinkRoute
+  '/app/network': typeof AppNetworkRoute
   '/app/payouts': typeof AppPayoutsRoute
   '/app/products': typeof AppProductsRoute
   '/app/profile': typeof AppProfileRoute
@@ -281,6 +289,7 @@ export interface FileRoutesById {
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
   '/app/link': typeof AppLinkRoute
+  '/app/network': typeof AppNetworkRoute
   '/app/payouts': typeof AppPayoutsRoute
   '/app/products': typeof AppProductsRoute
   '/app/profile': typeof AppProfileRoute
@@ -315,6 +324,7 @@ export interface FileRouteTypes {
     | '/app/commissions'
     | '/app/leads'
     | '/app/link'
+    | '/app/network'
     | '/app/payouts'
     | '/app/products'
     | '/app/profile'
@@ -347,6 +357,7 @@ export interface FileRouteTypes {
     | '/app/commissions'
     | '/app/leads'
     | '/app/link'
+    | '/app/network'
     | '/app/payouts'
     | '/app/products'
     | '/app/profile'
@@ -379,6 +390,7 @@ export interface FileRouteTypes {
     | '/app/commissions'
     | '/app/leads'
     | '/app/link'
+    | '/app/network'
     | '/app/payouts'
     | '/app/products'
     | '/app/profile'
@@ -412,6 +424,7 @@ export interface RootRouteChildren {
   AppCommissionsRoute: typeof AppCommissionsRoute
   AppLeadsRoute: typeof AppLeadsRoute
   AppLinkRoute: typeof AppLinkRoute
+  AppNetworkRoute: typeof AppNetworkRoute
   AppPayoutsRoute: typeof AppPayoutsRoute
   AppProductsRoute: typeof AppProductsRoute
   AppProfileRoute: typeof AppProfileRoute
@@ -512,6 +525,13 @@ declare module '@tanstack/react-router' {
       path: '/app/payouts'
       fullPath: '/app/payouts'
       preLoaderRoute: typeof AppPayoutsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/network': {
+      id: '/app/network'
+      path: '/app/network'
+      fullPath: '/app/network'
+      preLoaderRoute: typeof AppNetworkRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/link': {
@@ -660,6 +680,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppCommissionsRoute: AppCommissionsRoute,
   AppLeadsRoute: AppLeadsRoute,
   AppLinkRoute: AppLinkRoute,
+  AppNetworkRoute: AppNetworkRoute,
   AppPayoutsRoute: AppPayoutsRoute,
   AppProductsRoute: AppProductsRoute,
   AppProfileRoute: AppProfileRoute,
