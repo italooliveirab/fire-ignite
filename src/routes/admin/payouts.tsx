@@ -225,12 +225,15 @@ function PayForm({ payout, onClose }: { payout: Payout; onClose: () => void }) {
 function RejectForm({ payout, onClose }: { payout: Payout; onClose: () => void }) {
   const [reason, setReason] = useState("");
   const [saving, setSaving] = useState(false);
+  const rejectFn = useServerFn(rejectPayoutFn);
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    const { error } = await supabase.rpc("reject_payout", { _payout_id: payout.id, _reason: reason });
-    setSaving(false);
-    if (error) toast.error(error.message); else { toast.success("Rejeitado"); onClose(); }
+    try {
+      await rejectFn({ data: { payout_id: payout.id, reason } });
+      toast.success("Rejeitado"); onClose();
+    } catch (err) { toast.error((err as Error).message); }
+    finally { setSaving(false); }
   };
   return (
     <form onSubmit={submit} className="space-y-3">
