@@ -31,6 +31,7 @@ import { Route as AdminRequestsRouteImport } from './routes/admin/requests'
 import { Route as AdminProductsRouteImport } from './routes/admin/products'
 import { Route as AdminPayoutsRouteImport } from './routes/admin/payouts'
 import { Route as AdminNetworkRulesRouteImport } from './routes/admin/network-rules'
+import { Route as AdminNetworkCommissionsRouteImport } from './routes/admin/network-commissions'
 import { Route as AdminNetworkRouteImport } from './routes/admin/network'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminLeadsRouteImport } from './routes/admin/leads'
@@ -151,6 +152,11 @@ const AdminNetworkRulesRoute = AdminNetworkRulesRouteImport.update({
   path: '/admin/network-rules',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminNetworkCommissionsRoute = AdminNetworkCommissionsRouteImport.update({
+  id: '/admin/network-commissions',
+  path: '/admin/network-commissions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminNetworkRoute = AdminNetworkRouteImport.update({
   id: '/admin/network',
   path: '/admin/network',
@@ -214,6 +220,7 @@ export interface FileRoutesByFullPath {
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/network': typeof AdminNetworkRoute
+  '/admin/network-commissions': typeof AdminNetworkCommissionsRoute
   '/admin/network-rules': typeof AdminNetworkRulesRoute
   '/admin/payouts': typeof AdminPayoutsRoute
   '/admin/products': typeof AdminProductsRoute
@@ -247,6 +254,7 @@ export interface FileRoutesByTo {
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/network': typeof AdminNetworkRoute
+  '/admin/network-commissions': typeof AdminNetworkCommissionsRoute
   '/admin/network-rules': typeof AdminNetworkRulesRoute
   '/admin/payouts': typeof AdminPayoutsRoute
   '/admin/products': typeof AdminProductsRoute
@@ -281,6 +289,7 @@ export interface FileRoutesById {
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/network': typeof AdminNetworkRoute
+  '/admin/network-commissions': typeof AdminNetworkCommissionsRoute
   '/admin/network-rules': typeof AdminNetworkRulesRoute
   '/admin/payouts': typeof AdminPayoutsRoute
   '/admin/products': typeof AdminProductsRoute
@@ -316,6 +325,7 @@ export interface FileRouteTypes {
     | '/admin/leads'
     | '/admin/login'
     | '/admin/network'
+    | '/admin/network-commissions'
     | '/admin/network-rules'
     | '/admin/payouts'
     | '/admin/products'
@@ -349,6 +359,7 @@ export interface FileRouteTypes {
     | '/admin/leads'
     | '/admin/login'
     | '/admin/network'
+    | '/admin/network-commissions'
     | '/admin/network-rules'
     | '/admin/payouts'
     | '/admin/products'
@@ -382,6 +393,7 @@ export interface FileRouteTypes {
     | '/admin/leads'
     | '/admin/login'
     | '/admin/network'
+    | '/admin/network-commissions'
     | '/admin/network-rules'
     | '/admin/payouts'
     | '/admin/products'
@@ -416,6 +428,7 @@ export interface RootRouteChildren {
   AdminLeadsRoute: typeof AdminLeadsRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminNetworkRoute: typeof AdminNetworkRoute
+  AdminNetworkCommissionsRoute: typeof AdminNetworkCommissionsRoute
   AdminNetworkRulesRoute: typeof AdminNetworkRulesRoute
   AdminPayoutsRoute: typeof AdminPayoutsRoute
   AdminProductsRoute: typeof AdminProductsRoute
@@ -590,6 +603,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminNetworkRulesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/network-commissions': {
+      id: '/admin/network-commissions'
+      path: '/admin/network-commissions'
+      fullPath: '/admin/network-commissions'
+      preLoaderRoute: typeof AdminNetworkCommissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/network': {
       id: '/admin/network'
       path: '/admin/network'
@@ -672,6 +692,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminLeadsRoute: AdminLeadsRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminNetworkRoute: AdminNetworkRoute,
+  AdminNetworkCommissionsRoute: AdminNetworkCommissionsRoute,
   AdminNetworkRulesRoute: AdminNetworkRulesRoute,
   AdminPayoutsRoute: AdminPayoutsRoute,
   AdminProductsRoute: AdminProductsRoute,

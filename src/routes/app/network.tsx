@@ -27,11 +27,14 @@ function MyNetwork() {
   const { data: members = [] } = useQuery({
     queryKey: ["my-network-members", affiliate?.id],
     enabled: !!affiliate?.id,
+    refetchOnMount: "always",
+    staleTime: 0,
     queryFn: async () => {
       const { data } = await supabase
         .from("affiliate_network")
         .select("id, status, linked_at, affiliate_id")
-        .eq("referrer_id", affiliate!.id);
+        .eq("referrer_id", affiliate!.id)
+        .order("linked_at", { ascending: false });
       const ids = (data ?? []).map((r) => r.affiliate_id);
       if (ids.length === 0) return [];
       const { data: affs } = await supabase.from("affiliates").select("id, full_name, email, slug").in("id", ids);
@@ -39,6 +42,27 @@ function MyNetwork() {
         const aff = (affs ?? []).find((a) => a.id === link.affiliate_id);
         return { ...link, aff };
       });
+    },
+  });
+
+  // Se EU sou indicado, busca meu afiliador
+  const { data: myReferrer } = useQuery({
+    queryKey: ["my-referrer", affiliate?.id],
+    enabled: !!affiliate?.id,
+    refetchOnMount: "always",
+    queryFn: async () => {
+      const { data: link } = await supabase
+        .from("affiliate_network")
+        .select("status, linked_at, referrer_id")
+        .eq("affiliate_id", affiliate!.id)
+        .maybeSingle();
+      if (!link?.referrer_id) return null;
+      const { data: ref } = await supabase
+        .from("affiliates")
+        .select("id, full_name, email")
+        .eq("id", link.referrer_id)
+        .maybeSingle();
+      return ref ? { ...ref, status: link.status, linked_at: link.linked_at } : null;
     },
   });
 
