@@ -64,8 +64,9 @@ export async function notifyAdminLeadPaid(opts: {
   affiliate_name?: string | null;
   product_name?: string | null;
   amount?: number | null;
+  admin_email?: string | null;
 }) {
-  const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
+  const adminEmail = opts.admin_email || process.env.ADMIN_NOTIFICATION_EMAIL;
   if (!adminEmail) {
     console.warn("[notify] ADMIN_NOTIFICATION_EMAIL not set; skipping paid notification");
     return { ok: false, error: "ADMIN_NOTIFICATION_EMAIL not configured" };
