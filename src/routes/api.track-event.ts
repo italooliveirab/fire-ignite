@@ -100,11 +100,12 @@ export const Route = createFileRoute("/api/track-event")({
           // Dispara email para admin quando lead vira "paid" (apenas na transição)
           if (newStatus === "paid" && lead.status !== "paid") {
             try {
-              const [{ data: aff }, { data: prod }] = await Promise.all([
+              const [{ data: aff }, { data: prod }, { data: settings }] = await Promise.all([
                 supabaseAdmin.from("affiliates").select("full_name").eq("id", updated.affiliate_id).maybeSingle(),
                 updated.product_id
                   ? supabaseAdmin.from("products").select("name").eq("id", updated.product_id).maybeSingle()
                   : Promise.resolve({ data: null }),
+                supabaseAdmin.from("settings").select("admin_notification_email").limit(1).maybeSingle(),
               ]);
               await notifyAdminLeadPaid({
                 customer_name: updated.customer_name,
@@ -112,6 +113,7 @@ export const Route = createFileRoute("/api/track-event")({
                 affiliate_name: aff?.full_name ?? null,
                 product_name: (prod as { name?: string } | null)?.name ?? null,
                 amount: updated.payment_amount,
+                admin_email: (settings as { admin_notification_email?: string | null } | null)?.admin_notification_email ?? null,
               });
             } catch (notifyErr) {
               console.error("notify admin paid failed:", notifyErr);

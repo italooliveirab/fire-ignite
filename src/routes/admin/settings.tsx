@@ -159,6 +159,15 @@ function SettingsPage() {
 
         <Section title="Teste de Email (SMTP)">
           <p className="text-xs text-muted-foreground">Envie um email de teste para verificar se o SMTP está funcionando.</p>
+          <Field label="Email para receber notificações de vendas">
+            <Input
+              type="email"
+              placeholder="admin@suaempresa.com"
+              value={String(data.admin_notification_email ?? "")}
+              onChange={(e) => set("admin_notification_email", e.target.value)}
+            />
+            <p className="text-[11px] text-muted-foreground mt-1">Receberá um email sempre que um lead for marcado como pago.</p>
+          </Field>
           <Field label="Destinatário do teste">
             <Input type="email" placeholder="seu@email.com" value={testEmail} onChange={(e) => setTestEmail(e.target.value)} />
           </Field>
