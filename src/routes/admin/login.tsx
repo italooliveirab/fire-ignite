@@ -1,7 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { Mail, Lock, ArrowRight } from "lucide-react";
-import { BrandMark } from "@/components/BrandMark";
+import { Mail, Lock, ArrowRight, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -9,24 +8,24 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 
-export const Route = createFileRoute("/login")({
-  validateSearch: (s: Record<string, unknown>) => ({ redirect: (s.redirect as string) || "" }),
-  component: LoginPage,
+export const Route = createFileRoute("/admin/login")({
+  component: AdminLoginPage,
 });
 
-function LoginPage() {
+function AdminLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const nav = useNavigate();
   const { user, role } = useAuth();
-  const search = Route.useSearch();
 
   useEffect(() => {
-    if (user && role) {
-      nav({ to: search.redirect || (role === "admin" ? "/admin" : "/app") });
+    if (user && role === "admin") nav({ to: "/admin" });
+    else if (user && role === "affiliate") {
+      toast.error("Esta área é restrita a administradores.");
+      nav({ to: "/app" });
     }
-  }, [user, role, nav, search.redirect]);
+  }, [user, role, nav]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,51 +36,51 @@ function LoginPage() {
       toast.error("Credenciais inválidas", { description: error.message });
       return;
     }
-    toast.success("Bem-vindo de volta!");
+    toast.success("Bem-vindo, admin!");
   };
 
   return (
     <div className="min-h-screen relative flex items-center justify-center px-4 overflow-hidden">
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-primary/25 rounded-full blur-[160px]" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-info/10 rounded-full blur-[120px]" />
       </div>
 
       <div className="w-full max-w-md">
         <Link to="/" className="flex justify-center mb-8">
-          <BrandMark size="lg" subtitle="Afiliados" />
+          <div className="flex items-center gap-3">
+            <img src="/brand/fire-logo.png" alt="FIRE" className="h-12 w-12 rounded-xl object-contain" />
+            <div>
+              <div className="font-display font-bold text-2xl leading-none">FIRE</div>
+              <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-1">Admin</div>
+            </div>
+          </div>
         </Link>
 
         <div className="rounded-2xl border border-border bg-card/80 backdrop-blur-xl p-8 shadow-card-premium">
-          <h1 className="font-display text-2xl font-bold mb-1">Painel do Afiliado</h1>
-          <p className="text-sm text-muted-foreground mb-6">Entre com seu email e senha.</p>
+          <div className="flex items-center gap-2 mb-1">
+            <ShieldCheck className="h-5 w-5 text-primary" />
+            <h1 className="font-display text-2xl font-bold">Acesso Administrativo</h1>
+          </div>
+          <p className="text-sm text-muted-foreground mb-6">Área restrita. Acesse com sua conta de administrador.</p>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email" type="email" required value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu@email.com" className="pl-10 h-11 bg-background/50"
-                />
+                <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@empresa.com" className="pl-10 h-11 bg-background/50" />
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Senha</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password" type="password" required value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••" className="pl-10 h-11 bg-background/50"
-                />
+                <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="pl-10 h-11 bg-background/50" />
               </div>
             </div>
 
             <Button type="submit" disabled={loading} className="w-full h-11 bg-gradient-fire shadow-fire hover:opacity-90 text-white font-semibold">
-              {loading ? "Entrando..." : <>Entrar <ArrowRight className="ml-2 h-4 w-4" /></>}
+              {loading ? "Entrando..." : <>Entrar como admin <ArrowRight className="ml-2 h-4 w-4" /></>}
             </Button>
           </form>
 
@@ -90,14 +89,10 @@ function LoginPage() {
               Esqueceu a senha?
             </Link>
           </div>
-
-          <div className="mt-6 pt-6 border-t border-border text-center text-xs text-muted-foreground">
-            Ainda não é afiliado? Fale com nosso time para receber seu acesso.
-          </div>
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-6">
-          🔒 Conexão segura · Plataforma FIRE
+          🔒 Área restrita · Apenas administradores autorizados
         </p>
       </div>
     </div>
