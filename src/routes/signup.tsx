@@ -1,43 +1,10 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { BrandMark } from "@/components/BrandMark";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { ShieldAlert } from "lucide-react";
 
-export const Route = createFileRoute("/signup")({ component: SignupPage });
+export const Route = createFileRoute("/signup")({ component: SignupClosedPage });
 
-function SignupPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const nav = useNavigate();
-
-  const handleSignup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email, password,
-      options: {
-        data: { full_name: name },
-        emailRedirectTo: window.location.origin + "/admin",
-      },
-    });
-    if (error || !data.user) {
-      setLoading(false);
-      toast.error("Erro ao criar conta", { description: error?.message });
-      return;
-    }
-    // Atribui papel admin (primeira conta = admin do FIRE)
-    await supabase.from("user_roles").insert({ user_id: data.user.id, role: "admin" });
-    setLoading(false);
-    toast.success("Conta admin criada com sucesso!");
-    nav({ to: "/admin" });
-  };
-
+function SignupClosedPage() {
   return (
     <div className="min-h-screen relative flex items-center justify-center px-4 overflow-hidden">
       <div className="absolute inset-0 -z-10">
@@ -46,34 +13,26 @@ function SignupPage() {
 
       <div className="w-full max-w-md">
         <Link to="/" className="flex justify-center mb-8">
-          <BrandMark size="lg" subtitle="Admin" />
+          <BrandMark size="lg" />
         </Link>
 
-        <div className="rounded-2xl border border-border bg-card/80 backdrop-blur-xl p-8 shadow-card-premium">
-          <h1 className="font-display text-2xl font-bold mb-1">Criar conta admin</h1>
-          <p className="text-sm text-muted-foreground mb-6">Configure o primeiro acesso administrativo.</p>
-
-          <form onSubmit={handleSignup} className="space-y-4">
-            <div className="space-y-2">
-              <Label>Nome completo</Label>
-              <Input required value={name} onChange={(e) => setName(e.target.value)} className="h-11 bg-background/50" />
-            </div>
-            <div className="space-y-2">
-              <Label>Email</Label>
-              <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="h-11 bg-background/50" />
-            </div>
-            <div className="space-y-2">
-              <Label>Senha</Label>
-              <Input type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="h-11 bg-background/50" />
-            </div>
-            <Button type="submit" disabled={loading} className="w-full h-11 bg-gradient-fire shadow-fire text-white font-semibold">
-              {loading ? "Criando..." : "Criar conta admin"}
-            </Button>
-          </form>
-
-          <div className="mt-6 pt-6 border-t border-border text-center text-xs text-muted-foreground">
-            Já tem conta? <Link to="/login" className="text-primary font-medium hover:underline">Entrar</Link>
+        <div className="rounded-2xl border border-border bg-card/80 backdrop-blur-xl p-8 shadow-card-premium text-center">
+          <div className="mx-auto h-12 w-12 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center mb-4">
+            <ShieldAlert className="h-6 w-6 text-primary" />
           </div>
+          <h1 className="font-display text-2xl font-bold mb-2">Cadastro fechado</h1>
+          <p className="text-sm text-muted-foreground mb-6">
+            O acesso à FIRE Afiliados é apenas por convite. Se você já é afiliado, faça login no seu painel.
+          </p>
+          <Link
+            to="/login"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-fire text-white font-semibold shadow-fire hover:opacity-90 transition"
+          >
+            Entrar no painel
+          </Link>
+          <p className="text-xs text-muted-foreground mt-6">
+            Quer se tornar afiliado? Entre em contato pelo WhatsApp.
+          </p>
         </div>
       </div>
     </div>
