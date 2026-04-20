@@ -12,6 +12,8 @@ import { formatBRL, formatDate } from "@/lib/format";
 import { exportCSV } from "@/lib/csv";
 import { toast } from "sonner";
 import { Download, Paperclip, FileText, Upload, Check, X, Banknote, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { approvePayoutFn, rejectPayoutFn, markPayoutPaidFn } from "@/server/payouts";
 
 export const Route = createFileRoute("/admin/payouts")({ component: PayoutsPage });
 
@@ -30,6 +32,7 @@ function PayoutsPage() {
   const [payDialog, setPayDialog] = useState<Payout | null>(null);
   const [rejectDialog, setRejectDialog] = useState<Payout | null>(null);
   const [statusFilter, setStatusFilter] = useState<PayoutStatus | "all">("all");
+  const approveFn = useServerFn(approvePayoutFn);
 
   const { data: payouts = [], isLoading } = useQuery({
     queryKey: ["payouts", statusFilter],
@@ -54,7 +57,7 @@ function PayoutsPage() {
   const counts = payouts.reduce((acc, p) => { acc[p.status] = (acc[p.status] ?? 0) + 1; return acc; }, {} as Record<PayoutStatus, number>);
 
   const approve = useMutation({
-    mutationFn: async (id: string) => { const { error } = await supabase.rpc("approve_payout", { _payout_id: id }); if (error) throw error; },
+    mutationFn: async (id: string) => { await approveFn({ data: { payout_id: id } }); },
     onSuccess: () => { toast.success("Aprovado"); qc.invalidateQueries({ queryKey: ["payouts"] }); },
     onError: (e) => toast.error("Erro", { description: (e as Error).message }),
   });
