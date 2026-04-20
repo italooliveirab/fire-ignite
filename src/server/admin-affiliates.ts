@@ -12,8 +12,6 @@ interface CreateAffiliateInput {
   instagram?: string | null;
   pix_key?: string | null;
   pix_type?: "cpf" | "cnpj" | "email" | "phone" | "random" | null;
-  commission_type: "percentage" | "fixed";
-  commission_value: number;
   status: "active" | "paused" | "blocked";
 }
 
@@ -53,13 +51,10 @@ export const adminCreateAffiliate = createServerFn({ method: "POST" })
       instagram: data.instagram ?? null,
       pix_key: data.pix_key ?? null,
       pix_type: data.pix_type ?? null,
-      commission_type: data.commission_type,
-      commission_value: data.commission_value,
       status: data.status,
     }).select().single();
 
     if (affErr) {
-      // rollback auth user
       await supabaseAdmin.auth.admin.deleteUser(uid).catch(() => {});
       throw new Error(affErr.message);
     }

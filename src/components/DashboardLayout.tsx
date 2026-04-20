@@ -21,7 +21,8 @@ export function DashboardLayout({ variant, title, children }: Props) {
   useEffect(() => {
     if (loading) return;
     if (!user) {
-      nav({ to: "/login", search: { redirect: loc.pathname } });
+      const target = variant === "admin" ? "/admin/login" : "/login";
+      nav({ to: target, search: { redirect: loc.pathname } });
       return;
     }
     if (variant === "admin" && role !== "admin") nav({ to: "/app" });
