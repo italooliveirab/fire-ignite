@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { slugify } from "@/lib/format";
-import { adminCreateAffiliate, adminUpdateAffiliateAuth } from "@/server/admin-affiliates";
+import { adminCreateAffiliate, adminUpdateAffiliateAuth, adminGetAffiliateAuthInfo } from "@/server/admin-affiliates";
 
 export const Route = createFileRoute("/admin/affiliates")({ component: AffiliatesPage });
 
