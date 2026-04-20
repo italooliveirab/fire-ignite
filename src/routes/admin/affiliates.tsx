@@ -8,11 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { slugify } from "@/lib/format";
-import { adminCreateAffiliate } from "@/server/admin-affiliates";
+import { adminCreateAffiliate, adminUpdateAffiliateAuth } from "@/server/admin-affiliates";
 
 export const Route = createFileRoute("/admin/affiliates")({ component: AffiliatesPage });
 
@@ -123,7 +124,26 @@ function AffiliatesPage() {
           <DialogHeader>
             <DialogTitle className="font-display text-2xl">{editing ? "Editar afiliado" : "Novo afiliado"}</DialogTitle>
           </DialogHeader>
-          <AffiliateForm initial={editing} onClose={() => { setOpen(false); qc.invalidateQueries({ queryKey: ["affiliates"] }); }} />
+          {editing ? (
+            <Tabs defaultValue="data" className="w-full">
+              <TabsList className="grid grid-cols-3 w-full">
+                <TabsTrigger value="data">Dados</TabsTrigger>
+                <TabsTrigger value="auth">Acesso</TabsTrigger>
+                <TabsTrigger value="products">Produtos</TabsTrigger>
+              </TabsList>
+              <TabsContent value="data" className="mt-4">
+                <AffiliateForm initial={editing} onClose={() => { setOpen(false); qc.invalidateQueries({ queryKey: ["affiliates"] }); }} />
+              </TabsContent>
+              <TabsContent value="auth" className="mt-4">
+                <AuthForm affiliate={editing} onSaved={() => qc.invalidateQueries({ queryKey: ["affiliates"] })} />
+              </TabsContent>
+              <TabsContent value="products" className="mt-4">
+                <ProductsTab affiliateId={editing.id} />
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <AffiliateForm initial={null} onClose={() => { setOpen(false); qc.invalidateQueries({ queryKey: ["affiliates"] }); }} />
+          )}
         </DialogContent>
       </Dialog>
     </DashboardLayout>
@@ -151,7 +171,7 @@ function AffiliateForm({ initial, onClose }: { initial: Affiliate | null; onClos
     try {
       if (initial) {
         const payload = {
-          full_name: form.full_name, username: form.username, email: form.email,
+          full_name: form.full_name, username: form.username,
           phone: form.phone || null, instagram: form.instagram || null,
           pix_key: form.pix_key || null, pix_type: form.pix_type,
           slug: form.slug || slugify(form.username || form.full_name), status: form.status,
@@ -192,7 +212,9 @@ function AffiliateForm({ initial, onClose }: { initial: Affiliate | null; onClos
       <div className="grid sm:grid-cols-2 gap-3">
         <Field label="Nome completo"><Input required value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} /></Field>
         <Field label="Username"><Input required value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value, slug: form.slug || slugify(e.target.value) })} /></Field>
-        <Field label="Email"><Input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} disabled={!!initial} /></Field>
+        {!initial && (
+          <Field label="Email"><Input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
+        )}
         {!initial && (
           <Field label="Senha de acesso">
             <Input type="password" required minLength={6} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Mínimo 6 caracteres" />
@@ -200,7 +222,7 @@ function AffiliateForm({ initial, onClose }: { initial: Affiliate | null; onClos
         )}
         <Field label="Telefone"><Input value={form.phone ?? ""} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></Field>
         <Field label="Instagram"><Input value={form.instagram ?? ""} onChange={(e) => setForm({ ...form, instagram: e.target.value })} /></Field>
-        <Field label="Slug (link)"><Input value={form.slug} onChange={(e) => setForm({ ...form, slug: slugify(e.target.value) })} /></Field>
+        <Field label="Slug padrão (link)"><Input value={form.slug} onChange={(e) => setForm({ ...form, slug: slugify(e.target.value) })} /></Field>
         <Field label="Tipo Pix">
           <Select value={form.pix_type} onValueChange={(v: "cpf" | "cnpj" | "email" | "phone" | "random") => setForm({ ...form, pix_type: v })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
@@ -223,9 +245,6 @@ function AffiliateForm({ initial, onClose }: { initial: Affiliate | null; onClos
           </Select>
         </Field>
       </div>
-      <div className="rounded-lg bg-muted/40 border border-border p-3 text-xs text-muted-foreground">
-        💡 A comissão deste afiliado é definida <strong className="text-foreground">por produto</strong>, na tela de Solicitações ao aprovar cada afiliação.
-      </div>
       <div className="flex justify-end gap-2 pt-2 border-t border-border">
         <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
         <Button type="submit" disabled={saving} className="bg-gradient-fire text-white shadow-fire">
@@ -233,6 +252,160 @@ function AffiliateForm({ initial, onClose }: { initial: Affiliate | null; onClos
         </Button>
       </div>
     </form>
+  );
+}
+
+function AuthForm({ affiliate, onSaved }: { affiliate: Affiliate; onSaved: () => void }) {
+  const [email, setEmail] = useState(affiliate.email);
+  const [password, setPassword] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const emailChanged = email && email !== affiliate.email;
+    const wantsPassword = password.length > 0;
+    if (!emailChanged && !wantsPassword) {
+      toast.info("Nada para alterar");
+      return;
+    }
+    setSaving(true);
+    try {
+      await adminUpdateAffiliateAuth({
+        data: {
+          affiliate_id: affiliate.id,
+          ...(emailChanged ? { email } : {}),
+          ...(wantsPassword ? { password } : {}),
+        },
+      });
+      toast.success("Credenciais atualizadas");
+      setPassword("");
+      onSaved();
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="rounded-lg bg-amber-500/10 border border-amber-500/30 p-3 text-xs text-amber-200">
+        ⚠️ Alterar o email muda o login do afiliado. A nova senha entra em vigor imediatamente.
+      </div>
+      <Field label="Email de login">
+        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+      </Field>
+      <Field label="Nova senha (deixe em branco para não alterar)">
+        <Input type="password" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" />
+      </Field>
+      <div className="flex justify-end pt-2 border-t border-border">
+        <Button type="submit" disabled={saving} className="bg-gradient-fire text-white shadow-fire">
+          {saving ? "Salvando..." : "Atualizar credenciais"}
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+interface AffiliateProductRow {
+  id: string;
+  product_id: string;
+  status: "pending" | "approved" | "rejected";
+  commission_type: "percentage" | "fixed";
+  commission_value: number;
+  custom_slug: string | null;
+  product: { id: string; name: string; slug: string } | null;
+}
+
+function ProductsTab({ affiliateId }: { affiliateId: string }) {
+  const qc = useQueryClient();
+  const { data: rows = [], isLoading } = useQuery({
+    queryKey: ["affiliate-products-admin", affiliateId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("affiliate_products")
+        .select("id, product_id, status, commission_type, commission_value, custom_slug, product:products(id, name, slug)")
+        .eq("affiliate_id", affiliateId)
+        .eq("status", "approved")
+        .order("requested_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as unknown as AffiliateProductRow[];
+    },
+  });
+
+  if (isLoading) return <div className="py-8 text-center text-muted-foreground text-sm">Carregando...</div>;
+  if (rows.length === 0) return <div className="py-8 text-center text-muted-foreground text-sm">Nenhum produto aprovado para este afiliado.</div>;
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs text-muted-foreground">Edite a comissão e o slug personalizado de cada produto aprovado. Slug vazio usa o slug padrão do afiliado.</p>
+      {rows.map((row) => (
+        <ProductRowEditor key={row.id} row={row} onSaved={() => qc.invalidateQueries({ queryKey: ["affiliate-products-admin", affiliateId] })} />
+      ))}
+    </div>
+  );
+}
+
+function ProductRowEditor({ row, onSaved }: { row: AffiliateProductRow; onSaved: () => void }) {
+  const [type, setType] = useState<"percentage" | "fixed">(row.commission_type);
+  const [value, setValue] = useState<string>(String(row.commission_value));
+  const [slug, setSlug] = useState<string>(row.custom_slug ?? "");
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      const num = Number(value);
+      if (Number.isNaN(num) || num < 0) throw new Error("Valor de comissão inválido");
+      const { error } = await supabase
+        .from("affiliate_products")
+        .update({
+          commission_type: type,
+          commission_value: num,
+          custom_slug: slug ? slugify(slug) : null,
+        })
+        .eq("id", row.id);
+      if (error) throw error;
+      toast.success(`${row.product?.name ?? "Produto"} atualizado`);
+      onSaved();
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="rounded-lg border border-border bg-background/40 p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="font-medium text-sm">{row.product?.name ?? "—"}</div>
+          <div className="text-xs text-muted-foreground font-mono">/p/{row.product?.slug}/{slug ? slugify(slug) : "{slug-padrão}"}</div>
+        </div>
+      </div>
+      <div className="grid sm:grid-cols-3 gap-3">
+        <Field label="Tipo">
+          <Select value={type} onValueChange={(v: "percentage" | "fixed") => setType(v)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="percentage">Percentual (%)</SelectItem>
+              <SelectItem value="fixed">Fixo (R$)</SelectItem>
+            </SelectContent>
+          </Select>
+        </Field>
+        <Field label={type === "percentage" ? "Valor (%)" : "Valor (R$)"}>
+          <Input type="number" step="0.01" min="0" value={value} onChange={(e) => setValue(e.target.value)} />
+        </Field>
+        <Field label="Slug personalizado (opcional)">
+          <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="ex: black-friday" />
+        </Field>
+      </div>
+      <div className="flex justify-end">
+        <Button size="sm" onClick={save} disabled={saving} className="bg-gradient-fire text-white shadow-fire">
+          {saving ? "Salvando..." : "Salvar produto"}
+        </Button>
+      </div>
+    </div>
   );
 }
 
