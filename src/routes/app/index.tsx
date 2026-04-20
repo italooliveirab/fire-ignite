@@ -11,6 +11,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
+import { TopAffiliatesRanking } from "@/components/TopAffiliatesRanking";
 
 export const Route = createFileRoute("/app/")({ component: AffiliateDashboard });
 
@@ -115,17 +116,20 @@ function AffiliateDashboard() {
             <StatCard label="Não pagaram" value={formatNumber(stats.notpaid)} icon={XCircle} accent="fire" />
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-5 shadow-card-premium">
-            <h3 className="font-display font-semibold mb-4">Desempenho — últimos 30 dias</h3>
-            <ResponsiveContainer width="100%" height={260}>
-              <LineChart data={stats.days}>
-                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.25 0 0)" />
-                <XAxis dataKey="date" stroke="oklch(0.6 0 0)" fontSize={11} />
-                <YAxis stroke="oklch(0.6 0 0)" fontSize={11} />
-                <Tooltip contentStyle={{ background: "oklch(0.16 0 0)", border: "1px solid oklch(0.25 0 0)", borderRadius: 8 }} />
-                <Line type="monotone" dataKey="leads" stroke="#FF5A00" strokeWidth={2.5} dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
+          <div className="grid lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2 rounded-2xl border border-border bg-card p-5 shadow-card-premium">
+              <h3 className="font-display font-semibold mb-4">Desempenho — últimos 30 dias</h3>
+              <ResponsiveContainer width="100%" height={260}>
+                <LineChart data={stats.days}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.25 0 0)" />
+                  <XAxis dataKey="date" stroke="oklch(0.6 0 0)" fontSize={11} />
+                  <YAxis stroke="oklch(0.6 0 0)" fontSize={11} />
+                  <Tooltip contentStyle={{ background: "oklch(0.16 0 0)", border: "1px solid oklch(0.25 0 0)", borderRadius: 8 }} />
+                  <Line type="monotone" dataKey="leads" stroke="#FF5A00" strokeWidth={2.5} dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <TopAffiliatesRanking currentAffiliateId={affiliate.id} />
           </div>
         </>
       )}
