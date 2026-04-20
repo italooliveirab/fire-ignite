@@ -18,6 +18,7 @@ import { Route as DocsRouteImport } from './routes/docs'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as HooksWeeklyPayoutSummaryRouteImport } from './routes/hooks/weekly-payout-summary'
 import { Route as AppRulesRouteImport } from './routes/app/rules'
 import { Route as AppProfileRouteImport } from './routes/app/profile'
 import { Route as AppProductsRouteImport } from './routes/app/products'
@@ -87,6 +88,12 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HooksWeeklyPayoutSummaryRoute =
+  HooksWeeklyPayoutSummaryRouteImport.update({
+    id: '/hooks/weekly-payout-summary',
+    path: '/hooks/weekly-payout-summary',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AppRulesRoute = AppRulesRouteImport.update({
   id: '/app/rules',
   path: '/app/rules',
@@ -234,6 +241,7 @@ export interface FileRoutesByFullPath {
   '/app/products': typeof AppProductsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/rules': typeof AppRulesRoute
+  '/hooks/weekly-payout-summary': typeof HooksWeeklyPayoutSummaryRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/p/$productSlug/$affiliateSlug': typeof PProductSlugAffiliateSlugRoute
@@ -268,6 +276,7 @@ export interface FileRoutesByTo {
   '/app/products': typeof AppProductsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/rules': typeof AppRulesRoute
+  '/hooks/weekly-payout-summary': typeof HooksWeeklyPayoutSummaryRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/p/$productSlug/$affiliateSlug': typeof PProductSlugAffiliateSlugRoute
@@ -303,6 +312,7 @@ export interface FileRoutesById {
   '/app/products': typeof AppProductsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/rules': typeof AppRulesRoute
+  '/hooks/weekly-payout-summary': typeof HooksWeeklyPayoutSummaryRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/p/$productSlug/$affiliateSlug': typeof PProductSlugAffiliateSlugRoute
@@ -339,6 +349,7 @@ export interface FileRouteTypes {
     | '/app/products'
     | '/app/profile'
     | '/app/rules'
+    | '/hooks/weekly-payout-summary'
     | '/admin/'
     | '/app/'
     | '/p/$productSlug/$affiliateSlug'
@@ -373,6 +384,7 @@ export interface FileRouteTypes {
     | '/app/products'
     | '/app/profile'
     | '/app/rules'
+    | '/hooks/weekly-payout-summary'
     | '/admin'
     | '/app'
     | '/p/$productSlug/$affiliateSlug'
@@ -407,6 +419,7 @@ export interface FileRouteTypes {
     | '/app/products'
     | '/app/profile'
     | '/app/rules'
+    | '/hooks/weekly-payout-summary'
     | '/admin/'
     | '/app/'
     | '/p/$productSlug/$affiliateSlug'
@@ -442,6 +455,7 @@ export interface RootRouteChildren {
   AppProductsRoute: typeof AppProductsRoute
   AppProfileRoute: typeof AppProfileRoute
   AppRulesRoute: typeof AppRulesRoute
+  HooksWeeklyPayoutSummaryRoute: typeof HooksWeeklyPayoutSummaryRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AppIndexRoute: typeof AppIndexRoute
   PProductSlugAffiliateSlugRoute: typeof PProductSlugAffiliateSlugRoute
@@ -510,6 +524,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/hooks/weekly-payout-summary': {
+      id: '/hooks/weekly-payout-summary'
+      path: '/hooks/weekly-payout-summary'
+      fullPath: '/hooks/weekly-payout-summary'
+      preLoaderRoute: typeof HooksWeeklyPayoutSummaryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/rules': {
@@ -706,6 +727,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppProductsRoute: AppProductsRoute,
   AppProfileRoute: AppProfileRoute,
   AppRulesRoute: AppRulesRoute,
+  HooksWeeklyPayoutSummaryRoute: HooksWeeklyPayoutSummaryRoute,
   AdminIndexRoute: AdminIndexRoute,
   AppIndexRoute: AppIndexRoute,
   PProductSlugAffiliateSlugRoute: PProductSlugAffiliateSlugRoute,
@@ -713,3 +735,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
