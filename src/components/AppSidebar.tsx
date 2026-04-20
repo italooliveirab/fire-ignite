@@ -1,4 +1,6 @@
 import { Link, useLocation } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   LayoutDashboard, Users, Target, DollarSign, Banknote, Settings, FileCode2,
   LogOut, Link2, User, ScrollText, ShoppingCart, Package, Inbox,
@@ -7,11 +9,12 @@ import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { BrandMark } from "@/components/BrandMark";
+import { supabase } from "@/integrations/supabase/client";
 
 const adminNav = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/admin/products", label: "Produtos", icon: Package },
-  { to: "/admin/requests", label: "Solicitações", icon: Inbox },
+  { to: "/admin/requests", label: "Solicitações", icon: Inbox, badgeKey: "pending-requests" as const },
   { to: "/admin/affiliates", label: "Afiliados", icon: Users },
   { to: "/admin/leads", label: "Leads", icon: Target },
   { to: "/admin/buyers", label: "Compradores", icon: ShoppingCart },
@@ -32,10 +35,46 @@ const affiliateNav = [
   { to: "/app/rules", label: "Regras", icon: ScrollText },
 ];
 
+function usePendingRequestsCount(enabled: boolean) {
+  const qc = useQueryClient();
+  const { data = 0 } = useQuery({
+    queryKey: ["pending-requests-count"],
+    enabled,
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from("affiliate_products")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending");
+      if (error) throw error;
+      return count ?? 0;
+    },
+    staleTime: 30_000,
+  });
+
+  useEffect(() => {
+    if (!enabled) return;
+    const channel = supabase
+      .channel("sidebar-affiliate-products")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "affiliate_products" },
+        () => {
+          qc.invalidateQueries({ queryKey: ["pending-requests-count"] });
+          qc.invalidateQueries({ queryKey: ["affiliate-requests"] });
+        },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [enabled, qc]);
+
+  return data;
+}
+
 export function AppSidebar({ variant }: { variant: "admin" | "affiliate" }) {
   const items = variant === "admin" ? adminNav : affiliateNav;
   const { signOut, user } = useAuth();
   const loc = useLocation();
+  const pendingRequests = usePendingRequestsCount(variant === "admin");
 
   return (
     <aside className="hidden md:flex w-64 flex-col bg-sidebar border-r border-sidebar-border h-screen sticky top-0">
@@ -49,6 +88,7 @@ export function AppSidebar({ variant }: { variant: "admin" | "affiliate" }) {
         {items.map((item) => {
           const active = item.exact ? loc.pathname === item.to : loc.pathname.startsWith(item.to);
           const Icon = item.icon;
+          const badge = "badgeKey" in item && item.badgeKey === "pending-requests" ? pendingRequests : 0;
           return (
             <Link
               key={item.to}
@@ -61,7 +101,12 @@ export function AppSidebar({ variant }: { variant: "admin" | "affiliate" }) {
               )}
             >
               <Icon className={cn("h-4 w-4 transition-colors", active && "text-primary")} />
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {badge > 0 && (
+                <span className="ml-auto inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold animate-pulse">
+                  {badge > 99 ? "99+" : badge}
+                </span>
+              )}
             </Link>
           );
         })}
