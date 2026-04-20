@@ -201,7 +201,12 @@ function AffiliateForm({ initial, onClose }: { initial: Affiliate | null; onClos
       <div className="grid sm:grid-cols-2 gap-3">
         <Field label="Nome completo"><Input required value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} /></Field>
         <Field label="Username"><Input required value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value, slug: form.slug || slugify(e.target.value) })} /></Field>
-        <Field label="Email"><Input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
+        <Field label="Email"><Input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} disabled={!!initial} /></Field>
+        {!initial && (
+          <Field label="Senha de acesso">
+            <Input type="password" required minLength={6} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Mínimo 6 caracteres" />
+          </Field>
+        )}
         <Field label="Telefone"><Input value={form.phone ?? ""} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></Field>
         <Field label="Instagram"><Input value={form.instagram ?? ""} onChange={(e) => setForm({ ...form, instagram: e.target.value })} /></Field>
         <Field label="Slug (link)"><Input value={form.slug} onChange={(e) => setForm({ ...form, slug: slugify(e.target.value) })} /></Field>
