@@ -35,6 +35,7 @@ import { Route as AdminCommissionsRouteImport } from './routes/admin/commissions
 import { Route as AdminBuyersRouteImport } from './routes/admin/buyers'
 import { Route as AdminApiRouteImport } from './routes/admin/api'
 import { Route as AdminAffiliatesRouteImport } from './routes/admin/affiliates'
+import { Route as PProductSlugAffiliateSlugRouteImport } from './routes/p.$productSlug.$affiliateSlug'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -166,6 +167,12 @@ const AdminAffiliatesRoute = AdminAffiliatesRouteImport.update({
   path: '/admin/affiliates',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PProductSlugAffiliateSlugRoute =
+  PProductSlugAffiliateSlugRouteImport.update({
+    id: '/p/$productSlug/$affiliateSlug',
+    path: '/p/$productSlug/$affiliateSlug',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -194,6 +201,7 @@ export interface FileRoutesByFullPath {
   '/app/rules': typeof AppRulesRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/p/$productSlug/$affiliateSlug': typeof PProductSlugAffiliateSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -222,6 +230,7 @@ export interface FileRoutesByTo {
   '/app/rules': typeof AppRulesRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
+  '/p/$productSlug/$affiliateSlug': typeof PProductSlugAffiliateSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -251,6 +260,7 @@ export interface FileRoutesById {
   '/app/rules': typeof AppRulesRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/p/$productSlug/$affiliateSlug': typeof PProductSlugAffiliateSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -281,6 +291,7 @@ export interface FileRouteTypes {
     | '/app/rules'
     | '/admin/'
     | '/app/'
+    | '/p/$productSlug/$affiliateSlug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -309,6 +320,7 @@ export interface FileRouteTypes {
     | '/app/rules'
     | '/admin'
     | '/app'
+    | '/p/$productSlug/$affiliateSlug'
   id:
     | '__root__'
     | '/'
@@ -337,6 +349,7 @@ export interface FileRouteTypes {
     | '/app/rules'
     | '/admin/'
     | '/app/'
+    | '/p/$productSlug/$affiliateSlug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -366,6 +379,7 @@ export interface RootRouteChildren {
   AppRulesRoute: typeof AppRulesRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AppIndexRoute: typeof AppIndexRoute
+  PProductSlugAffiliateSlugRoute: typeof PProductSlugAffiliateSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -552,6 +566,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAffiliatesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/p/$productSlug/$affiliateSlug': {
+      id: '/p/$productSlug/$affiliateSlug'
+      path: '/p/$productSlug/$affiliateSlug'
+      fullPath: '/p/$productSlug/$affiliateSlug'
+      preLoaderRoute: typeof PProductSlugAffiliateSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -582,6 +603,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRulesRoute: AppRulesRoute,
   AdminIndexRoute: AdminIndexRoute,
   AppIndexRoute: AppIndexRoute,
+  PProductSlugAffiliateSlugRoute: PProductSlugAffiliateSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
