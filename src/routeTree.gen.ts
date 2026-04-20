@@ -33,6 +33,7 @@ import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminLeadsRouteImport } from './routes/admin/leads'
 import { Route as AdminCommissionsRouteImport } from './routes/admin/commissions'
 import { Route as AdminBuyersRouteImport } from './routes/admin/buyers'
+import { Route as AdminAuditRouteImport } from './routes/admin/audit'
 import { Route as AdminApiRouteImport } from './routes/admin/api'
 import { Route as AdminAffiliatesRouteImport } from './routes/admin/affiliates'
 import { Route as PProductSlugAffiliateSlugRouteImport } from './routes/p.$productSlug.$affiliateSlug'
@@ -157,6 +158,11 @@ const AdminBuyersRoute = AdminBuyersRouteImport.update({
   path: '/admin/buyers',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAuditRoute = AdminAuditRouteImport.update({
+  id: '/admin/audit',
+  path: '/admin/audit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminApiRoute = AdminApiRouteImport.update({
   id: '/admin/api',
   path: '/admin/api',
@@ -184,6 +190,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/admin/affiliates': typeof AdminAffiliatesRoute
   '/admin/api': typeof AdminApiRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/buyers': typeof AdminBuyersRoute
   '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/leads': typeof AdminLeadsRoute
@@ -213,6 +220,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/admin/affiliates': typeof AdminAffiliatesRoute
   '/admin/api': typeof AdminApiRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/buyers': typeof AdminBuyersRoute
   '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/leads': typeof AdminLeadsRoute
@@ -243,6 +251,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/admin/affiliates': typeof AdminAffiliatesRoute
   '/admin/api': typeof AdminApiRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/buyers': typeof AdminBuyersRoute
   '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/leads': typeof AdminLeadsRoute
@@ -274,6 +283,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin/affiliates'
     | '/admin/api'
+    | '/admin/audit'
     | '/admin/buyers'
     | '/admin/commissions'
     | '/admin/leads'
@@ -303,6 +313,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin/affiliates'
     | '/admin/api'
+    | '/admin/audit'
     | '/admin/buyers'
     | '/admin/commissions'
     | '/admin/leads'
@@ -332,6 +343,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/admin/affiliates'
     | '/admin/api'
+    | '/admin/audit'
     | '/admin/buyers'
     | '/admin/commissions'
     | '/admin/leads'
@@ -362,6 +374,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   AdminAffiliatesRoute: typeof AdminAffiliatesRoute
   AdminApiRoute: typeof AdminApiRoute
+  AdminAuditRoute: typeof AdminAuditRoute
   AdminBuyersRoute: typeof AdminBuyersRoute
   AdminCommissionsRoute: typeof AdminCommissionsRoute
   AdminLeadsRoute: typeof AdminLeadsRoute
@@ -552,6 +565,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminBuyersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/audit': {
+      id: '/admin/audit'
+      path: '/admin/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AdminAuditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/api': {
       id: '/admin/api'
       path: '/admin/api'
@@ -586,6 +606,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   AdminAffiliatesRoute: AdminAffiliatesRoute,
   AdminApiRoute: AdminApiRoute,
+  AdminAuditRoute: AdminAuditRoute,
   AdminBuyersRoute: AdminBuyersRoute,
   AdminCommissionsRoute: AdminCommissionsRoute,
   AdminLeadsRoute: AdminLeadsRoute,

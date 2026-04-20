@@ -477,15 +477,34 @@ interface AuditRow {
 function HistoryTab({ affiliateId }: { affiliateId: string }) {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | "email" | "password">("all");
-  const { data: rows = [], isLoading } = useQuery({
-    queryKey: ["credential-audit", affiliateId],
+  const [page, setPage] = useState(0);
+  const pageSize = 25;
+  useEffect(() => { setPage(0); }, [search, typeFilter]);
+
+  const { data: countData } = useQuery({
+    queryKey: ["credential-audit-count", affiliateId],
     queryFn: async () => {
+      const { count, error } = await supabase
+        .from("affiliate_credential_audit")
+        .select("id", { count: "exact", head: true })
+        .eq("affiliate_id", affiliateId);
+      if (error) throw error;
+      return count ?? 0;
+    },
+  });
+  const total = countData ?? 0;
+
+  const { data: rows = [], isLoading } = useQuery({
+    queryKey: ["credential-audit", affiliateId, page],
+    queryFn: async () => {
+      const from = page * pageSize;
+      const to = from + pageSize - 1;
       const { data, error } = await supabase
         .from("affiliate_credential_audit")
         .select("id, created_at, changed_by_email, email_changed, password_changed, old_email, new_email")
         .eq("affiliate_id", affiliateId)
         .order("created_at", { ascending: false })
-        .limit(50);
+        .range(from, to);
       if (error) throw error;
       return (data ?? []) as AuditRow[];
     },
@@ -548,7 +567,9 @@ function HistoryTab({ affiliateId }: { affiliateId: string }) {
           <Download className="h-3.5 w-3.5 mr-1" /> CSV
         </Button>
       </div>
-      <p className="text-xs text-muted-foreground">{filtered.length} de {rows.length} alteração(ões) — últimas 50.</p>
+      <p className="text-xs text-muted-foreground">
+        {filtered.length} de {rows.length} nesta página · {total} no total
+      </p>
       {filtered.length === 0 ? (
         <div className="py-8 text-center text-muted-foreground text-sm">
           {rows.length === 0 ? "Nenhuma alteração de credenciais registrada." : "Nenhum resultado para esses filtros."}
@@ -572,6 +593,17 @@ function HistoryTab({ affiliateId }: { affiliateId: string }) {
           </div>
         </div>
       ))}
+      {total > pageSize && (
+        <div className="flex items-center justify-between pt-2">
+          <Button type="button" variant="outline" size="sm" disabled={page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))}>
+            Anterior
+          </Button>
+          <span className="text-xs text-muted-foreground">Página {page + 1} de {Math.max(1, Math.ceil(total / pageSize))}</span>
+          <Button type="button" variant="outline" size="sm" disabled={(page + 1) * pageSize >= total} onClick={() => setPage((p) => p + 1)}>
+            Próxima
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
