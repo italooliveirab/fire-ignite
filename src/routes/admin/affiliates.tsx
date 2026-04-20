@@ -102,15 +102,24 @@ function AffiliatesPage() {
                 <th className="text-left px-5 py-3.5">Afiliado</th>
                 <th className="text-left px-5 py-3.5 hidden md:table-cell">Slug</th>
                 <th className="text-left px-5 py-3.5">Status</th>
+                <th className="text-left px-5 py-3.5 hidden lg:table-cell">
+                  <button type="button" onClick={cycleSort} className="inline-flex items-center gap-1 hover:text-foreground transition">
+                    Último acesso
+                    <ArrowUpDown className="h-3 w-3" />
+                    {sortLastAccess !== "none" && (
+                      <span className="text-[10px] normal-case">({sortLastAccess === "desc" ? "recente" : "antigo"})</span>
+                    )}
+                  </button>
+                </th>
                 <th className="text-right px-5 py-3.5">Ações</th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
-                <tr><td colSpan={4} className="py-12 text-center text-muted-foreground">Carregando...</td></tr>
-              ) : filtered.length === 0 ? (
-                <tr><td colSpan={4} className="py-12 text-center text-muted-foreground">Nenhum afiliado encontrado.</td></tr>
-              ) : filtered.map((a) => (
+                <tr><td colSpan={5} className="py-12 text-center text-muted-foreground">Carregando...</td></tr>
+              ) : sorted.length === 0 ? (
+                <tr><td colSpan={5} className="py-12 text-center text-muted-foreground">Nenhum afiliado encontrado.</td></tr>
+              ) : sorted.map((a) => (
                 <tr key={a.id} className="border-b border-border/50 hover:bg-background/40 transition">
                   <td className="px-5 py-3.5">
                     <div className="font-medium text-foreground">{a.full_name}</div>
@@ -119,6 +128,9 @@ function AffiliatesPage() {
                   </td>
                   <td className="px-5 py-3.5 hidden md:table-cell font-mono text-xs text-muted-foreground">/{a.slug}</td>
                   <td className="px-5 py-3.5"><StatusBadge status={a.status} /></td>
+                  <td className="px-5 py-3.5 hidden lg:table-cell text-xs text-muted-foreground">
+                    {lastSignInMap[a.id] ? formatDateTime(lastSignInMap[a.id] as string) : <span className="italic">nunca</span>}
+                  </td>
                   <td className="px-5 py-3.5 text-right">
                     <div className="inline-flex gap-1">
                       <Button size="icon" variant="ghost" onClick={() => { setEditing(a); setOpen(true); }}><Edit className="h-4 w-4" /></Button>
