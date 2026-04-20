@@ -11,6 +11,7 @@ import { formatBRL, formatDateTime } from "@/lib/format";
 import { exportCSV } from "@/lib/csv";
 import { toast } from "sonner";
 import { Search, Download, MousePointerClick, MessageCircle, Beaker, CreditCard, CheckCircle2, TrendingUp } from "lucide-react";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 const STATUS_LABEL: Record<string, string> = {
   initiated_conversation: "Iniciou conversa",
@@ -69,6 +70,28 @@ function LeadsPage() {
     return { total, conv, trials, payments, paid, revenue, rate };
   }, [filtered]);
 
+  // Série diária dos últimos 30 dias (baseada nos filtros aplicados)
+  const dailySeries = useMemo(() => {
+    const days: { date: string; label: string; leads: number; paid: number }[] = [];
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      days.push({ date: key, label: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }), leads: 0, paid: 0 });
+    }
+    const idx = new Map(days.map((d, i) => [d.date, i]));
+    for (const l of filtered) {
+      const k = new Date(l.created_at).toISOString().slice(0, 10);
+      const i = idx.get(k);
+      if (i == null) continue;
+      days[i].leads += 1;
+      if (l.status === "paid") days[i].paid += 1;
+    }
+    return days;
+  }, [filtered]);
+
   return (
     <DashboardLayout variant="admin" title="Leads">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6">
@@ -123,6 +146,38 @@ function LeadsPage() {
       <div className="rounded-xl border border-border bg-card px-5 py-3 mb-4 flex items-center justify-between">
         <span className="text-sm text-muted-foreground">Receita gerada (filtros aplicados)</span>
         <span className="font-mono font-bold text-emerald-400">{formatBRL(funnel.revenue)}</span>
+      </div>
+
+      {/* Gráfico de evolução diária */}
+      <div className="rounded-2xl border border-border bg-card p-5 mb-6 shadow-card-premium">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="font-display text-lg font-semibold">Evolução diária</h2>
+            <p className="text-xs text-muted-foreground">Últimos 30 dias · leads criados vs pagos</p>
+          </div>
+        </div>
+        <div className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={dailySeries} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="gLeads" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
+                  <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="gPaid" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.5} />
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+              <XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={11} interval={3} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} allowDecimals={false} />
+              <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+              <Area type="monotone" dataKey="leads" name="Leads" stroke="hsl(var(--primary))" fill="url(#gLeads)" strokeWidth={2} />
+              <Area type="monotone" dataKey="paid" name="Pagos" stroke="#10b981" fill="url(#gPaid)" strokeWidth={2} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
