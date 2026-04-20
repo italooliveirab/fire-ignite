@@ -452,6 +452,8 @@ interface AuditRow {
 }
 
 function HistoryTab({ affiliateId }: { affiliateId: string }) {
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState<"all" | "email" | "password">("all");
   const { data: rows = [], isLoading } = useQuery({
     queryKey: ["credential-audit", affiliateId],
     queryFn: async () => {
@@ -467,12 +469,40 @@ function HistoryTab({ affiliateId }: { affiliateId: string }) {
   });
 
   if (isLoading) return <div className="py-8 text-center text-muted-foreground text-sm">Carregando histórico...</div>;
-  if (rows.length === 0) return <div className="py-8 text-center text-muted-foreground text-sm">Nenhuma alteração de credenciais registrada.</div>;
+
+  const filtered = rows.filter((r) => {
+    if (typeFilter === "email" && !r.email_changed) return false;
+    if (typeFilter === "password" && !r.password_changed) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      const hay = [r.changed_by_email, r.old_email, r.new_email].filter(Boolean).join(" ").toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
 
   return (
-    <div className="space-y-2">
-      <p className="text-xs text-muted-foreground mb-2">Últimas 50 alterações de email/senha realizadas por administradores.</p>
-      {rows.map((r) => (
+    <div className="space-y-3">
+      <div className="flex flex-col sm:flex-row gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por admin ou email..." className="pl-9 h-9 text-sm" />
+        </div>
+        <Select value={typeFilter} onValueChange={(v: "all" | "email" | "password") => setTypeFilter(v)}>
+          <SelectTrigger className="w-full sm:w-[180px] h-9 text-sm"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos os tipos</SelectItem>
+            <SelectItem value="email">Apenas email</SelectItem>
+            <SelectItem value="password">Apenas senha</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <p className="text-xs text-muted-foreground">{filtered.length} de {rows.length} alteração(ões) — últimas 50.</p>
+      {filtered.length === 0 ? (
+        <div className="py-8 text-center text-muted-foreground text-sm">
+          {rows.length === 0 ? "Nenhuma alteração de credenciais registrada." : "Nenhum resultado para esses filtros."}
+        </div>
+      ) : filtered.map((r) => (
         <div key={r.id} className="rounded-lg border border-border bg-background/40 p-3 text-sm">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex gap-1.5 flex-wrap">
