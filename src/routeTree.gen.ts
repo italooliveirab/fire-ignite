@@ -29,6 +29,7 @@ import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminRequestsRouteImport } from './routes/admin/requests'
 import { Route as AdminProductsRouteImport } from './routes/admin/products'
 import { Route as AdminPayoutsRouteImport } from './routes/admin/payouts'
+import { Route as AdminNetworkRulesRouteImport } from './routes/admin/network-rules'
 import { Route as AdminNetworkRouteImport } from './routes/admin/network'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminLeadsRouteImport } from './routes/admin/leads'
@@ -139,6 +140,11 @@ const AdminPayoutsRoute = AdminPayoutsRouteImport.update({
   path: '/admin/payouts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminNetworkRulesRoute = AdminNetworkRulesRouteImport.update({
+  id: '/admin/network-rules',
+  path: '/admin/network-rules',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminNetworkRoute = AdminNetworkRouteImport.update({
   id: '/admin/network',
   path: '/admin/network',
@@ -202,6 +208,7 @@ export interface FileRoutesByFullPath {
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/network': typeof AdminNetworkRoute
+  '/admin/network-rules': typeof AdminNetworkRulesRoute
   '/admin/payouts': typeof AdminPayoutsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/requests': typeof AdminRequestsRoute
@@ -233,6 +240,7 @@ export interface FileRoutesByTo {
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/network': typeof AdminNetworkRoute
+  '/admin/network-rules': typeof AdminNetworkRulesRoute
   '/admin/payouts': typeof AdminPayoutsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/requests': typeof AdminRequestsRoute
@@ -265,6 +273,7 @@ export interface FileRoutesById {
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/network': typeof AdminNetworkRoute
+  '/admin/network-rules': typeof AdminNetworkRulesRoute
   '/admin/payouts': typeof AdminPayoutsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/requests': typeof AdminRequestsRoute
@@ -298,6 +307,7 @@ export interface FileRouteTypes {
     | '/admin/leads'
     | '/admin/login'
     | '/admin/network'
+    | '/admin/network-rules'
     | '/admin/payouts'
     | '/admin/products'
     | '/admin/requests'
@@ -329,6 +339,7 @@ export interface FileRouteTypes {
     | '/admin/leads'
     | '/admin/login'
     | '/admin/network'
+    | '/admin/network-rules'
     | '/admin/payouts'
     | '/admin/products'
     | '/admin/requests'
@@ -360,6 +371,7 @@ export interface FileRouteTypes {
     | '/admin/leads'
     | '/admin/login'
     | '/admin/network'
+    | '/admin/network-rules'
     | '/admin/payouts'
     | '/admin/products'
     | '/admin/requests'
@@ -392,6 +404,7 @@ export interface RootRouteChildren {
   AdminLeadsRoute: typeof AdminLeadsRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminNetworkRoute: typeof AdminNetworkRoute
+  AdminNetworkRulesRoute: typeof AdminNetworkRulesRoute
   AdminPayoutsRoute: typeof AdminPayoutsRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminRequestsRoute: typeof AdminRequestsRoute
@@ -550,6 +563,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPayoutsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/network-rules': {
+      id: '/admin/network-rules'
+      path: '/admin/network-rules'
+      fullPath: '/admin/network-rules'
+      preLoaderRoute: typeof AdminNetworkRulesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/network': {
       id: '/admin/network'
       path: '/admin/network'
@@ -632,6 +652,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminLeadsRoute: AdminLeadsRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminNetworkRoute: AdminNetworkRoute,
+  AdminNetworkRulesRoute: AdminNetworkRulesRoute,
   AdminPayoutsRoute: AdminPayoutsRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminRequestsRoute: AdminRequestsRoute,
