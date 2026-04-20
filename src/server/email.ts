@@ -3,10 +3,17 @@ import nodemailer from "nodemailer";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
-let _transporter: nodemailer.Transporter | null = null;
+let _transporterCache: { signature: string; transporter: nodemailer.Transporter } | null = null;
 
-function getTransporter() {
-  if (_transporter) return _transporter;
+type SmtpConfig = {
+  host: string;
+  port: number;
+  user: string;
+  pass: string;
+  secure: boolean;
+};
+
+function getPrimarySmtpConfig(): SmtpConfig {
   const host = process.env.SMTP_HOST;
   const port = Number(process.env.SMTP_PORT ?? 465);
   const user = process.env.SMTP_USER;
@@ -14,13 +21,34 @@ function getTransporter() {
   if (!host || !user || !pass) {
     throw new Error("SMTP não configurado: defina SMTP_HOST, SMTP_USER, SMTP_PASSWORD");
   }
-  _transporter = nodemailer.createTransport({
+  return {
     host,
     port,
-    secure: port === 465, // true para 465, false para 587/STARTTLS
-    auth: { user, pass },
+    user,
+    pass,
+    secure: port === 465,
+  };
+}
+
+function getFallbackSmtpConfig(config: SmtpConfig): SmtpConfig | null {
+  if (config.host === "smtp.titan.email") {
+    return { ...config, host: "smtp.hostinger.com" };
+  }
+  return null;
+}
+
+function getTransporter(config: SmtpConfig) {
+  const signature = `${config.host}|${config.port}|${config.user}|${config.pass}`;
+  if (_transporterCache?.signature === signature) return _transporterCache.transporter;
+
+  const transporter = nodemailer.createTransport({
+    host: config.host,
+    port: config.port,
+    secure: config.secure,
+    auth: { user: config.user, pass: config.pass },
   });
-  return _transporter;
+  _transporterCache = { signature, transporter };
+  return transporter;
 }
 
 export interface SendEmailInput {
@@ -39,15 +67,26 @@ export async function sendEmail(input: SendEmailInput): Promise<{ ok: boolean; e
   let errorMsg: string | undefined;
   try {
     const from = process.env.SMTP_FROM ?? process.env.SMTP_USER!;
-    const transporter = getTransporter();
-    await transporter.sendMail({
+    const config = getPrimarySmtpConfig();
+    const message = {
       from,
       to: recipient,
       subject: input.subject,
       html: input.html,
       text: input.text ?? input.html.replace(/<[^>]+>/g, ""),
       replyTo: input.replyTo,
-    });
+    };
+
+    try {
+      await getTransporter(config).sendMail(message);
+    } catch (primaryError) {
+      _transporterCache = null;
+      const fallbackConfig = getFallbackSmtpConfig(config);
+      const isAuthFailure = (primaryError as { responseCode?: number }).responseCode === 535;
+      if (!fallbackConfig || !isAuthFailure) throw primaryError;
+
+      await getTransporter(fallbackConfig).sendMail(message);
+    }
     okFlag = true;
   } catch (e) {
     console.error("[email] send failed:", e);
