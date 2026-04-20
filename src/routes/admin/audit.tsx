@@ -102,6 +102,8 @@ function AuditPage() {
     if (typeFilter === "email") q = q.eq("email_changed", true);
     if (typeFilter === "password") q = q.eq("password_changed", true);
     if (affiliateFilter !== "all") q = q.eq("affiliate_id", affiliateFilter);
+    if (fromIso) q = q.gte("created_at", fromIso);
+    if (toIso) q = q.lte("created_at", toIso);
     const { data, error } = await q;
     if (error || !data) return;
     const all = (data as AuditRow[]).filter((r) => {
@@ -158,6 +160,8 @@ function AuditPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar afiliado, admin ou email..." className="pl-10 bg-card" />
         </div>
+        <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-full md:w-[160px] bg-card" aria-label="De" />
+        <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-full md:w-[160px] bg-card" aria-label="Até" />
         <Select value={affiliateFilter} onValueChange={setAffiliateFilter}>
           <SelectTrigger className="w-full md:w-[240px] bg-card"><SelectValue /></SelectTrigger>
           <SelectContent>
@@ -175,6 +179,9 @@ function AuditPage() {
             <SelectItem value="password">Apenas senha</SelectItem>
           </SelectContent>
         </Select>
+        {(dateFrom || dateTo || affiliateFilter !== "all" || typeFilter !== "all" || search) && (
+          <Button variant="ghost" size="sm" onClick={() => { setSearch(""); setDateFrom(""); setDateTo(""); setAffiliateFilter("all"); setTypeFilter("all"); }}>Limpar</Button>
+        )}
       </div>
 
       <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-card-premium">
