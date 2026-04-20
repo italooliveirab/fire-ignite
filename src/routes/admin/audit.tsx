@@ -251,7 +251,7 @@ function AuditPage() {
         </TabsContent>
 
         <TabsContent value="emails">
-          <EmailLogsTable />
+          <EmailLogsTableView />
         </TabsContent>
       </Tabs>
     </DashboardLayout>
