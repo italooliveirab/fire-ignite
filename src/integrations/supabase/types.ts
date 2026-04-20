@@ -17,6 +17,8 @@ export type Database = {
       affiliate_products: {
         Row: {
           affiliate_id: string
+          commission_type: Database["public"]["Enums"]["commission_type"]
+          commission_value: number
           decided_at: string | null
           decided_by: string | null
           id: string
@@ -28,6 +30,8 @@ export type Database = {
         }
         Insert: {
           affiliate_id: string
+          commission_type?: Database["public"]["Enums"]["commission_type"]
+          commission_value?: number
           decided_at?: string | null
           decided_by?: string | null
           id?: string
@@ -39,6 +43,8 @@ export type Database = {
         }
         Update: {
           affiliate_id?: string
+          commission_type?: Database["public"]["Enums"]["commission_type"]
+          commission_value?: number
           decided_at?: string | null
           decided_by?: string | null
           id?: string
@@ -67,8 +73,6 @@ export type Database = {
       }
       affiliates: {
         Row: {
-          commission_type: Database["public"]["Enums"]["commission_type"]
-          commission_value: number
           created_at: string
           email: string
           full_name: string
@@ -84,8 +88,6 @@ export type Database = {
           username: string
         }
         Insert: {
-          commission_type?: Database["public"]["Enums"]["commission_type"]
-          commission_value?: number
           created_at?: string
           email: string
           full_name: string
@@ -101,8 +103,6 @@ export type Database = {
           username: string
         }
         Update: {
-          commission_type?: Database["public"]["Enums"]["commission_type"]
-          commission_value?: number
           created_at?: string
           email?: string
           full_name?: string
@@ -319,8 +319,6 @@ export type Database = {
       }
       products: {
         Row: {
-          commission_type: Database["public"]["Enums"]["commission_type"]
-          commission_value: number
           created_at: string
           description: string | null
           id: string
@@ -331,8 +329,6 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          commission_type?: Database["public"]["Enums"]["commission_type"]
-          commission_value?: number
           created_at?: string
           description?: string | null
           id?: string
@@ -343,8 +339,6 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          commission_type?: Database["public"]["Enums"]["commission_type"]
-          commission_value?: number
           created_at?: string
           description?: string | null
           id?: string
