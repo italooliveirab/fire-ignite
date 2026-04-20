@@ -6,7 +6,7 @@ import { StatCard } from "@/components/StatCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { formatBRL, formatNumber } from "@/lib/format";
-import { Target, MessageCircle, Beaker, FileText, CheckCircle, XCircle, Clock, Banknote, Copy, Package } from "lucide-react";
+import { Target, MessageCircle, Beaker, FileText, CheckCircle, XCircle, Clock, Banknote, Copy, Package, Network } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
@@ -82,14 +82,17 @@ function AffiliateDashboard() {
     queryKey: ["my-stats", affiliate?.id],
     enabled: !!affiliate?.id,
     queryFn: async () => {
-      const [leads, comm] = await Promise.all([
+      const [leads, comm, net] = await Promise.all([
         supabase.from("leads").select("status, created_at, payment_amount").eq("affiliate_id", affiliate!.id),
         supabase.from("commissions").select("status, commission_value").eq("affiliate_id", affiliate!.id),
+        supabase.from("network_commissions").select("referrer_amount").eq("referrer_affiliate_id", affiliate!.id),
       ]);
       const L = leads.data ?? [];
       const C = comm.data ?? [];
+      const N = net.data ?? [];
       const by = (s: string) => L.filter((l) => l.status === s).length;
       const sumC = (s: string) => C.filter((c) => c.status === s).reduce((a, c) => a + Number(c.commission_value), 0);
+      const networkEarnings = N.reduce((a, r) => a + Number(r.referrer_amount ?? 0), 0);
 
       const days = Array.from({ length: 30 }).map((_, i) => {
         const d = new Date(); d.setDate(d.getDate() - (29 - i));
@@ -100,7 +103,7 @@ function AffiliateDashboard() {
       return {
         total: L.length, initiated: by("initiated_conversation"), trial: by("generated_trial"),
         gpay: by("generated_payment"), paid: by("paid"), notpaid: by("not_paid"),
-        commPending: sumC("pending") + sumC("released"), commPaid: sumC("paid"), days,
+        commPending: sumC("pending") + sumC("released"), commPaid: sumC("paid"), networkEarnings, days,
       };
     },
   });
@@ -127,9 +130,10 @@ function AffiliateDashboard() {
 
       {stats && (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
             <StatCard label="Comissão pendente" value={formatBRL(stats.commPending)} icon={Clock} accent="warning" />
             <StatCard label="Comissão paga" value={formatBRL(stats.commPaid)} icon={Banknote} accent="success" />
+            <StatCard label="Ganhos da rede" value={formatBRL(stats.networkEarnings)} icon={Network} accent="neon" />
             <StatCard label="Total leads" value={formatNumber(stats.total)} icon={Target} accent="fire" />
             <StatCard label="Pagaram" value={formatNumber(stats.paid)} icon={CheckCircle} accent="success" />
           </div>
