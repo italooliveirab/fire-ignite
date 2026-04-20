@@ -1,0 +1,1 @@
+UPDATE public.settings SET logo_url = 'https://jaajatugxxhwfgthmtia.supabase.co/storage/v1/object/public/logos/company/fire-icon.png';
