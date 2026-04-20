@@ -740,6 +740,7 @@ export type Database = {
       }
       settings: {
         Row: {
+          admin_notification_email: string | null
           affiliate_link_domain: string
           affiliate_link_prefix: string
           company_name: string
@@ -755,6 +756,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          admin_notification_email?: string | null
           affiliate_link_domain?: string
           affiliate_link_prefix?: string
           company_name?: string
@@ -770,6 +772,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          admin_notification_email?: string | null
           affiliate_link_domain?: string
           affiliate_link_prefix?: string
           company_name?: string
