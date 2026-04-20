@@ -29,6 +29,7 @@ import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminRequestsRouteImport } from './routes/admin/requests'
 import { Route as AdminProductsRouteImport } from './routes/admin/products'
 import { Route as AdminPayoutsRouteImport } from './routes/admin/payouts'
+import { Route as AdminNetworkRouteImport } from './routes/admin/network'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminLeadsRouteImport } from './routes/admin/leads'
 import { Route as AdminCommissionsRouteImport } from './routes/admin/commissions'
@@ -138,6 +139,11 @@ const AdminPayoutsRoute = AdminPayoutsRouteImport.update({
   path: '/admin/payouts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminNetworkRoute = AdminNetworkRouteImport.update({
+  id: '/admin/network',
+  path: '/admin/network',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
@@ -195,6 +201,7 @@ export interface FileRoutesByFullPath {
   '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/network': typeof AdminNetworkRoute
   '/admin/payouts': typeof AdminPayoutsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/requests': typeof AdminRequestsRoute
@@ -225,6 +232,7 @@ export interface FileRoutesByTo {
   '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/network': typeof AdminNetworkRoute
   '/admin/payouts': typeof AdminPayoutsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/requests': typeof AdminRequestsRoute
@@ -256,6 +264,7 @@ export interface FileRoutesById {
   '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/network': typeof AdminNetworkRoute
   '/admin/payouts': typeof AdminPayoutsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/requests': typeof AdminRequestsRoute
@@ -288,6 +297,7 @@ export interface FileRouteTypes {
     | '/admin/commissions'
     | '/admin/leads'
     | '/admin/login'
+    | '/admin/network'
     | '/admin/payouts'
     | '/admin/products'
     | '/admin/requests'
@@ -318,6 +328,7 @@ export interface FileRouteTypes {
     | '/admin/commissions'
     | '/admin/leads'
     | '/admin/login'
+    | '/admin/network'
     | '/admin/payouts'
     | '/admin/products'
     | '/admin/requests'
@@ -348,6 +359,7 @@ export interface FileRouteTypes {
     | '/admin/commissions'
     | '/admin/leads'
     | '/admin/login'
+    | '/admin/network'
     | '/admin/payouts'
     | '/admin/products'
     | '/admin/requests'
@@ -379,6 +391,7 @@ export interface RootRouteChildren {
   AdminCommissionsRoute: typeof AdminCommissionsRoute
   AdminLeadsRoute: typeof AdminLeadsRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminNetworkRoute: typeof AdminNetworkRoute
   AdminPayoutsRoute: typeof AdminPayoutsRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminRequestsRoute: typeof AdminRequestsRoute
@@ -537,6 +550,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPayoutsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/network': {
+      id: '/admin/network'
+      path: '/admin/network'
+      fullPath: '/admin/network'
+      preLoaderRoute: typeof AdminNetworkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/admin/login'
@@ -611,6 +631,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminCommissionsRoute: AdminCommissionsRoute,
   AdminLeadsRoute: AdminLeadsRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AdminNetworkRoute: AdminNetworkRoute,
   AdminPayoutsRoute: AdminPayoutsRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminRequestsRoute: AdminRequestsRoute,
