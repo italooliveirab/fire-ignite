@@ -6,7 +6,7 @@ import { StatCard } from "@/components/StatCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { formatBRL, formatNumber } from "@/lib/format";
-import { Target, MessageCircle, Beaker, FileText, CheckCircle, XCircle, Clock, Banknote, Copy, Package } from "lucide-react";
+import { Target, MessageCircle, Beaker, FileText, CheckCircle, XCircle, Clock, Banknote, Copy, Package, Network } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
@@ -130,9 +130,10 @@ function AffiliateDashboard() {
 
       {stats && (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
             <StatCard label="Comissão pendente" value={formatBRL(stats.commPending)} icon={Clock} accent="warning" />
             <StatCard label="Comissão paga" value={formatBRL(stats.commPaid)} icon={Banknote} accent="success" />
+            <StatCard label="Ganhos da rede" value={formatBRL(stats.networkEarnings)} icon={Network} accent="neon" />
             <StatCard label="Total leads" value={formatNumber(stats.total)} icon={Target} accent="fire" />
             <StatCard label="Pagaram" value={formatNumber(stats.paid)} icon={CheckCircle} accent="success" />
           </div>
