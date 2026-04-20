@@ -29,9 +29,14 @@ function AuditPage() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | "email" | "password">("all");
   const [affiliateFilter, setAffiliateFilter] = useState<string>("all");
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
   const [page, setPage] = useState(0);
   const pageSize = 50;
-  useEffect(() => { setPage(0); }, [search, typeFilter, affiliateFilter]);
+  useEffect(() => { setPage(0); }, [search, typeFilter, affiliateFilter, dateFrom, dateTo]);
+
+  const fromIso = dateFrom ? new Date(dateFrom + "T00:00:00").toISOString() : null;
+  const toIso = dateTo ? new Date(dateTo + "T23:59:59.999").toISOString() : null;
 
   const { data: affiliates = [] } = useQuery({
     queryKey: ["audit-affiliates-list"],
@@ -44,12 +49,14 @@ function AuditPage() {
   const affMap = new Map(affiliates.map((a) => [a.id, a]));
 
   const { data: total = 0 } = useQuery({
-    queryKey: ["audit-count", typeFilter, affiliateFilter],
+    queryKey: ["audit-count", typeFilter, affiliateFilter, fromIso, toIso],
     queryFn: async () => {
       let q = supabase.from("affiliate_credential_audit").select("id", { count: "exact", head: true });
       if (typeFilter === "email") q = q.eq("email_changed", true);
       if (typeFilter === "password") q = q.eq("password_changed", true);
       if (affiliateFilter !== "all") q = q.eq("affiliate_id", affiliateFilter);
+      if (fromIso) q = q.gte("created_at", fromIso);
+      if (toIso) q = q.lte("created_at", toIso);
       const { count, error } = await q;
       if (error) throw error;
       return count ?? 0;
@@ -57,7 +64,7 @@ function AuditPage() {
   });
 
   const { data: rows = [], isLoading } = useQuery({
-    queryKey: ["audit-rows", typeFilter, affiliateFilter, page],
+    queryKey: ["audit-rows", typeFilter, affiliateFilter, fromIso, toIso, page],
     queryFn: async () => {
       const from = page * pageSize;
       const to = from + pageSize - 1;
@@ -69,6 +76,8 @@ function AuditPage() {
       if (typeFilter === "email") q = q.eq("email_changed", true);
       if (typeFilter === "password") q = q.eq("password_changed", true);
       if (affiliateFilter !== "all") q = q.eq("affiliate_id", affiliateFilter);
+      if (fromIso) q = q.gte("created_at", fromIso);
+      if (toIso) q = q.lte("created_at", toIso);
       const { data, error } = await q;
       if (error) throw error;
       return (data ?? []) as AuditRow[];
