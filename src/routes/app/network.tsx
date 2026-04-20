@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { StatCard } from "@/components/StatCard";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +14,7 @@ export const Route = createFileRoute("/app/network")({ component: MyNetwork });
 
 function MyNetwork() {
   const { user } = useAuth();
+  const qc = useQueryClient();
   const [origin, setOrigin] = useState("");
 
   useEffect(() => { setOrigin(window.location.origin); }, []);
@@ -81,6 +82,20 @@ function MyNetwork() {
 
   const totalEarnings = networkComm.reduce((a, c) => a + Number(c.referrer_amount), 0);
   const totalSold = networkComm.reduce((a, c) => a + Number(c.payment_amount), 0);
+
+  // Realtime: atualiza ao vivo quando alguém entra na minha rede ou gera comissão
+  useEffect(() => {
+    if (!affiliate?.id) return;
+    const ch = supabase.channel(`my-net-rt-${affiliate.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "affiliate_network", filter: `referrer_id=eq.${affiliate.id}` },
+        () => { qc.invalidateQueries({ queryKey: ["my-network-members", affiliate.id] }); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "affiliate_network", filter: `affiliate_id=eq.${affiliate.id}` },
+        () => { qc.invalidateQueries({ queryKey: ["my-referrer", affiliate.id] }); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "network_commissions", filter: `referrer_affiliate_id=eq.${affiliate.id}` },
+        () => { qc.invalidateQueries({ queryKey: ["my-network-comm", affiliate.id] }); })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [affiliate?.id, qc]);
 
   const refLink = origin && affiliate?.referral_code ? `${origin}/signup?ref=${affiliate.referral_code}` : "";
 

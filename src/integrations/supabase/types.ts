@@ -539,39 +539,98 @@ export type Database = {
           },
         ]
       }
+      payout_items: {
+        Row: {
+          amount: number
+          commission_id: string | null
+          created_at: string
+          id: string
+          network_commission_id: string | null
+          payout_id: string
+          source_type: string
+        }
+        Insert: {
+          amount: number
+          commission_id?: string | null
+          created_at?: string
+          id?: string
+          network_commission_id?: string | null
+          payout_id: string
+          source_type: string
+        }
+        Update: {
+          amount?: number
+          commission_id?: string | null
+          created_at?: string
+          id?: string
+          network_commission_id?: string | null
+          payout_id?: string
+          source_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payout_items_payout_id_fkey"
+            columns: ["payout_id"]
+            isOneToOne: false
+            referencedRelation: "payouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payouts: {
         Row: {
           affiliate_id: string
-          amount_paid: number
+          amount_paid: number | null
+          amount_requested: number | null
+          approved_at: string | null
+          approved_by: string | null
           created_at: string
           id: string
           notes: string | null
+          paid_at: string | null
           payment_date: string
           pix_key_used: string | null
           proof_file_url: string | null
           reference_period: string | null
+          rejected_reason: string | null
+          requested_at: string | null
+          status: Database["public"]["Enums"]["payout_status"]
         }
         Insert: {
           affiliate_id: string
-          amount_paid: number
+          amount_paid?: number | null
+          amount_requested?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
           id?: string
           notes?: string | null
+          paid_at?: string | null
           payment_date?: string
           pix_key_used?: string | null
           proof_file_url?: string | null
           reference_period?: string | null
+          rejected_reason?: string | null
+          requested_at?: string | null
+          status?: Database["public"]["Enums"]["payout_status"]
         }
         Update: {
           affiliate_id?: string
-          amount_paid?: number
+          amount_paid?: number | null
+          amount_requested?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
           created_at?: string
           id?: string
           notes?: string | null
+          paid_at?: string | null
           payment_date?: string
           pix_key_used?: string | null
           proof_file_url?: string | null
           reference_period?: string | null
+          rejected_reason?: string | null
+          requested_at?: string | null
+          status?: Database["public"]["Enums"]["payout_status"]
         }
         Relationships: [
           {
@@ -720,7 +779,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_payout: { Args: { _payout_id: string }; Returns: undefined }
       generate_referral_code: { Args: never; Returns: string }
+      get_affiliate_balance: {
+        Args: { _affiliate_id: string }
+        Returns: {
+          available: number
+          lifetime_earned: number
+          pending_request: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -729,6 +797,20 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      mark_payout_paid: {
+        Args: {
+          _amount_paid: number
+          _notes?: string
+          _payout_id: string
+          _proof_url?: string
+        }
+        Returns: undefined
+      }
+      reject_payout: {
+        Args: { _payout_id: string; _reason: string }
+        Returns: undefined
+      }
+      request_payout: { Args: { _affiliate_id: string }; Returns: string }
     }
     Enums: {
       affiliate_status: "active" | "paused" | "blocked"
@@ -745,6 +827,7 @@ export type Database = {
         | "not_paid"
       network_link_status: "active" | "paused" | "removed"
       payout_frequency: "weekly" | "biweekly" | "monthly"
+      payout_status: "requested" | "approved" | "paid" | "rejected"
       pix_type: "cpf" | "cnpj" | "email" | "phone" | "random"
     }
     CompositeTypes: {
@@ -888,6 +971,7 @@ export const Constants = {
       ],
       network_link_status: ["active", "paused", "removed"],
       payout_frequency: ["weekly", "biweekly", "monthly"],
+      payout_status: ["requested", "approved", "paid", "rejected"],
       pix_type: ["cpf", "cnpj", "email", "phone", "random"],
     },
   },
