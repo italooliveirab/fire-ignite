@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus, Search, Edit, Trash2, Pause, Play } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { slugify } from "@/lib/format";
-import { adminCreateAffiliate, adminUpdateAffiliateAuth } from "@/server/admin-affiliates";
+import { adminCreateAffiliate, adminUpdateAffiliateAuth, adminGetAffiliateAuthInfo } from "@/server/admin-affiliates";
 
 export const Route = createFileRoute("/admin/affiliates")({ component: AffiliatesPage });
 
@@ -264,6 +264,21 @@ function AuthForm({ affiliate, onSaved }: { affiliate: Affiliate; onSaved: () =>
   const [email, setEmail] = useState(affiliate.email);
   const [password, setPassword] = useState("");
   const [saving, setSaving] = useState(false);
+  const [authInfo, setAuthInfo] = useState<{ last_sign_in_at: string | null; created_at: string | null; email_confirmed_at: string | null } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    adminGetAffiliateAuthInfo({ data: { affiliate_id: affiliate.id } })
+      .then((info) => { if (!cancelled) setAuthInfo(info); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [affiliate.id]);
+
+  const fmt = (iso: string | null) => {
+    if (!iso) return "—";
+    const d = new Date(iso);
+    return d.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -294,6 +309,11 @@ function AuthForm({ affiliate, onSaved }: { affiliate: Affiliate; onSaved: () =>
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="rounded-lg bg-muted/40 border border-border p-3 text-xs space-y-1">
+        <div className="flex justify-between"><span className="text-muted-foreground">Último login</span><span className="font-mono">{fmt(authInfo?.last_sign_in_at ?? null)}</span></div>
+        <div className="flex justify-between"><span className="text-muted-foreground">Conta criada</span><span className="font-mono">{fmt(authInfo?.created_at ?? null)}</span></div>
+        <div className="flex justify-between"><span className="text-muted-foreground">Email confirmado</span><span className="font-mono">{fmt(authInfo?.email_confirmed_at ?? null)}</span></div>
+      </div>
       <div className="rounded-lg bg-amber-500/10 border border-amber-500/30 p-3 text-xs text-amber-200">
         ⚠️ Alterar o email muda o login do afiliado. A nova senha entra em vigor imediatamente.
       </div>

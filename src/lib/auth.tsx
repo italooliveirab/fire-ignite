@@ -43,7 +43,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
-    return () => sub.subscription.unsubscribe();
+    // Refresh session when tab regains focus (avoids silent expiry on long sessions)
+    const refreshIfStale = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!data.session) return;
+      const expiresAt = (data.session.expires_at ?? 0) * 1000;
+      // Refresh if expiring within 5 minutes
+      if (expiresAt - Date.now() < 5 * 60 * 1000) {
+        await supabase.auth.refreshSession().catch(() => {});
+      }
+    };
+    const onVisible = () => { if (document.visibilityState === "visible") refreshIfStale(); };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", refreshIfStale);
+    // Periodic safety net every 4 minutes
+    const interval = window.setInterval(refreshIfStale, 4 * 60 * 1000);
+
+    return () => {
+      sub.subscription.unsubscribe();
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", refreshIfStale);
+      window.clearInterval(interval);
+    };
   }, []);
 
   const fetchRole = async (uid: string) => {
