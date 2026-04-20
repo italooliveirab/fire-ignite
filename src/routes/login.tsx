@@ -10,7 +10,9 @@ import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/login")({
-  validateSearch: (s: Record<string, unknown>) => ({ redirect: (s.redirect as string) || "" }),
+  validateSearch: (s: Record<string, unknown>): { redirect?: string } => ({
+    redirect: typeof s.redirect === "string" && s.redirect ? s.redirect : undefined,
+  }),
   component: LoginPage,
 });
 
@@ -24,7 +26,7 @@ function LoginPage() {
 
   useEffect(() => {
     if (user && role) {
-      nav({ to: search.redirect || (role === "admin" ? "/admin" : "/app") });
+      nav({ to: (search.redirect as "/app") || (role === "admin" ? "/admin" : "/app") });
     }
   }, [user, role, nav, search.redirect]);
 
