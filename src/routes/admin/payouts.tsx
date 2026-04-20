@@ -12,6 +12,8 @@ import { formatBRL, formatDate } from "@/lib/format";
 import { exportCSV } from "@/lib/csv";
 import { toast } from "sonner";
 import { Download, Paperclip, FileText, Upload, Check, X, Banknote, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { approvePayoutFn, rejectPayoutFn, markPayoutPaidFn } from "@/server/payouts";
 
 export const Route = createFileRoute("/admin/payouts")({ component: PayoutsPage });
 
@@ -30,6 +32,7 @@ function PayoutsPage() {
   const [payDialog, setPayDialog] = useState<Payout | null>(null);
   const [rejectDialog, setRejectDialog] = useState<Payout | null>(null);
   const [statusFilter, setStatusFilter] = useState<PayoutStatus | "all">("all");
+  const approveFn = useServerFn(approvePayoutFn);
 
   const { data: payouts = [], isLoading } = useQuery({
     queryKey: ["payouts", statusFilter],
@@ -54,7 +57,7 @@ function PayoutsPage() {
   const counts = payouts.reduce((acc, p) => { acc[p.status] = (acc[p.status] ?? 0) + 1; return acc; }, {} as Record<PayoutStatus, number>);
 
   const approve = useMutation({
-    mutationFn: async (id: string) => { const { error } = await supabase.rpc("approve_payout", { _payout_id: id }); if (error) throw error; },
+    mutationFn: async (id: string) => { await approveFn({ data: { payout_id: id } }); },
     onSuccess: () => { toast.success("Aprovado"); qc.invalidateQueries({ queryKey: ["payouts"] }); },
     onError: (e) => toast.error("Erro", { description: (e as Error).message }),
   });
@@ -174,6 +177,7 @@ function PayForm({ payout, onClose }: { payout: Payout; onClose: () => void }) {
   const [notes, setNotes] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const markPaidFn = useServerFn(markPayoutPaidFn);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -191,8 +195,7 @@ function PayForm({ payout, onClose }: { payout: Payout; onClose: () => void }) {
       if (pix !== payout.pix_key_used) {
         await supabase.from("payouts").update({ pix_key_used: pix }).eq("id", payout.id);
       }
-      const { error } = await supabase.rpc("mark_payout_paid", { _payout_id: payout.id, _amount_paid: Number(amount), _proof_url: proofPath ?? undefined, _notes: notes || undefined });
-      if (error) throw error;
+      await markPaidFn({ data: { payout_id: payout.id, amount_paid: Number(amount), proof_url: proofPath ?? undefined, notes: notes || undefined } });
       toast.success("Pagamento registrado!");
       onClose();
     } catch (err) {
@@ -222,12 +225,15 @@ function PayForm({ payout, onClose }: { payout: Payout; onClose: () => void }) {
 function RejectForm({ payout, onClose }: { payout: Payout; onClose: () => void }) {
   const [reason, setReason] = useState("");
   const [saving, setSaving] = useState(false);
+  const rejectFn = useServerFn(rejectPayoutFn);
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    const { error } = await supabase.rpc("reject_payout", { _payout_id: payout.id, _reason: reason });
-    setSaving(false);
-    if (error) toast.error(error.message); else { toast.success("Rejeitado"); onClose(); }
+    try {
+      await rejectFn({ data: { payout_id: payout.id, reason } });
+      toast.success("Rejeitado"); onClose();
+    } catch (err) { toast.error((err as Error).message); }
+    finally { setSaving(false); }
   };
   return (
     <form onSubmit={submit} className="space-y-3">
