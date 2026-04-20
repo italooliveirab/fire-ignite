@@ -498,3 +498,13 @@ function HistoryTab({ affiliateId }: { affiliateId: string }) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return <div className="space-y-1.5"><Label className="text-xs">{label}</Label>{children}</div>;
 }
+
+function InactivityBadge({ lastSignInAt }: { lastSignInAt: string | null }) {
+  if (!lastSignInAt) {
+    return <span className="inline-block mt-1 text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-muted text-muted-foreground">nunca acessou</span>;
+  }
+  const days = Math.floor((Date.now() - new Date(lastSignInAt).getTime()) / 86_400_000);
+  if (days < 7) return null;
+  const tone = days >= 30 ? "bg-destructive/15 text-destructive" : "bg-amber-500/15 text-amber-400";
+  return <span className={`inline-block mt-1 text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded font-medium ${tone}`}>inativo há {days} dias</span>;
+}
