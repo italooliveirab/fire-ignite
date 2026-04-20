@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as RankingRouteImport } from './routes/ranking'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as DocsRouteImport } from './routes/docs'
@@ -39,6 +40,11 @@ const SignupRoute = SignupRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RankingRoute = RankingRouteImport.update({
+  id: '/ranking',
+  path: '/ranking',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -142,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/docs': typeof DocsRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/ranking': typeof RankingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/admin/affiliates': typeof AdminAffiliatesRoute
@@ -165,6 +172,7 @@ export interface FileRoutesByTo {
   '/docs': typeof DocsRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/ranking': typeof RankingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/admin/affiliates': typeof AdminAffiliatesRoute
@@ -189,6 +197,7 @@ export interface FileRoutesById {
   '/docs': typeof DocsRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
+  '/ranking': typeof RankingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/admin/affiliates': typeof AdminAffiliatesRoute
@@ -214,6 +223,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/forgot-password'
     | '/login'
+    | '/ranking'
     | '/reset-password'
     | '/signup'
     | '/admin/affiliates'
@@ -237,6 +247,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/forgot-password'
     | '/login'
+    | '/ranking'
     | '/reset-password'
     | '/signup'
     | '/admin/affiliates'
@@ -260,6 +271,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/forgot-password'
     | '/login'
+    | '/ranking'
     | '/reset-password'
     | '/signup'
     | '/admin/affiliates'
@@ -284,6 +296,7 @@ export interface RootRouteChildren {
   DocsRoute: typeof DocsRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
+  RankingRoute: typeof RankingRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   AdminAffiliatesRoute: typeof AdminAffiliatesRoute
@@ -317,6 +330,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ranking': {
+      id: '/ranking'
+      path: '/ranking'
+      fullPath: '/ranking'
+      preLoaderRoute: typeof RankingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -460,6 +480,7 @@ const rootRouteChildren: RootRouteChildren = {
   DocsRoute: DocsRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
+  RankingRoute: RankingRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   AdminAffiliatesRoute: AdminAffiliatesRoute,
