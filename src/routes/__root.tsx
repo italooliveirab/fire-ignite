@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/lib/auth";
+import { BrandHead } from "@/components/BrandHead";
 import { Flame } from "lucide-react";
 
 import appCss from "../styles.css?url";
@@ -62,6 +63,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={qc}>
       <AuthProvider>
+        <BrandHead />
         <Outlet />
         <Toaster theme="dark" position="top-right" richColors />
       </AuthProvider>
