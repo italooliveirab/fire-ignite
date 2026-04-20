@@ -56,12 +56,12 @@ function RankingPage() {
       <header className="border-b border-border">
         <div className="max-w-3xl mx-auto px-5 py-4 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 font-display font-bold">
-            {brand.logo_url ? (
-              <img src={brand.logo_url} alt={brand.company_name} className="h-7 w-7 rounded object-cover" />
+            {brand.logoUrl ? (
+              <img src={brand.logoUrl} alt={brand.companyName} className="h-7 w-7 rounded object-cover" />
             ) : (
               <Flame className="h-6 w-6 text-primary" />
             )}
-            <span>{brand.company_name}</span>
+            <span>{brand.companyName}</span>
           </Link>
           <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground transition">
             Entrar
