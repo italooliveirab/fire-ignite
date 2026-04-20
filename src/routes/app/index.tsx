@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
@@ -6,8 +6,7 @@ import { StatCard } from "@/components/StatCard";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { formatBRL, formatNumber } from "@/lib/format";
-import { Target, MessageCircle, Beaker, FileText, CheckCircle, XCircle, Clock, Banknote, Copy, Share2 } from "lucide-react";
-import { QRCodeSVG } from "qrcode.react";
+import { Target, MessageCircle, Beaker, FileText, CheckCircle, XCircle, Clock, Banknote, Copy, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
@@ -18,11 +17,10 @@ export const Route = createFileRoute("/app/")({ component: AffiliateDashboard })
 function AffiliateDashboard() {
   const { user } = useAuth();
   const [domain, setDomain] = useState("fire.com");
-  const [prefix, setPrefix] = useState("");
 
   useEffect(() => {
-    supabase.from("settings").select("affiliate_link_domain, affiliate_link_prefix").limit(1).single()
-      .then(({ data }) => { if (data) { setDomain(data.affiliate_link_domain); setPrefix(data.affiliate_link_prefix ?? ""); } });
+    supabase.from("settings").select("affiliate_link_domain").limit(1).single()
+      .then(({ data }) => { if (data) setDomain(data.affiliate_link_domain); });
   }, []);
 
   const { data: affiliate } = useQuery({
@@ -69,14 +67,6 @@ function AffiliateDashboard() {
     );
   }
 
-  const link = `${domain}/${prefix}${affiliate.slug}`;
-  const fullLink = `https://${link}`;
-  const copy = () => { navigator.clipboard.writeText(fullLink); toast.success("Link copiado!"); };
-  const share = async () => {
-    if (navigator.share) await navigator.share({ title: "Meu link FIRE", url: fullLink });
-    else copy();
-  };
-
   return (
     <DashboardLayout variant="affiliate">
       <div className="mb-6">
@@ -84,22 +74,7 @@ function AffiliateDashboard() {
         <p className="text-muted-foreground text-sm mt-1">Sua máquina de vendas, em tempo real.</p>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-4 mb-6">
-        <div className="lg:col-span-2 rounded-2xl border border-border bg-card p-6 shadow-card-premium">
-          <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Seu link exclusivo</div>
-          <div className="font-mono text-base md:text-lg text-primary break-all mb-4">{fullLink}</div>
-          <div className="flex gap-2 flex-wrap">
-            <Button onClick={copy} className="bg-gradient-fire shadow-fire text-white"><Copy className="h-4 w-4 mr-1" /> Copiar link</Button>
-            <Button onClick={share} variant="outline" className="border-primary/40 text-primary hover:bg-primary/10"><Share2 className="h-4 w-4 mr-1" /> Compartilhar</Button>
-          </div>
-        </div>
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-card-premium flex flex-col items-center">
-          <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">QR Code</div>
-          <div className="bg-white p-3 rounded-xl">
-            <QRCodeSVG value={fullLink} size={120} fgColor="#050505" />
-          </div>
-        </div>
-      </div>
+      <ApprovedLinksCard affiliateId={affiliate.id} affiliateSlug={affiliate.slug} domain={domain} />
 
       {stats && (
         <>
