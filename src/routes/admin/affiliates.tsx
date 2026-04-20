@@ -309,6 +309,11 @@ function AuthForm({ affiliate, onSaved }: { affiliate: Affiliate; onSaved: () =>
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="rounded-lg bg-muted/40 border border-border p-3 text-xs space-y-1">
+        <div className="flex justify-between"><span className="text-muted-foreground">Último login</span><span className="font-mono">{fmt(authInfo?.last_sign_in_at ?? null)}</span></div>
+        <div className="flex justify-between"><span className="text-muted-foreground">Conta criada</span><span className="font-mono">{fmt(authInfo?.created_at ?? null)}</span></div>
+        <div className="flex justify-between"><span className="text-muted-foreground">Email confirmado</span><span className="font-mono">{fmt(authInfo?.email_confirmed_at ?? null)}</span></div>
+      </div>
       <div className="rounded-lg bg-amber-500/10 border border-amber-500/30 p-3 text-xs text-amber-200">
         ⚠️ Alterar o email muda o login do afiliado. A nova senha entra em vigor imediatamente.
       </div>
