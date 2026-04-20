@@ -55,6 +55,7 @@ function MyPayouts() {
     return () => { supabase.removeChannel(ch); };
   }, [affiliate?.id, qc]);
 
+  const requestPayoutFnCall = useServerFn(requestPayoutFn);
   const request = useMutation({
     mutationFn: async () => {
       await requestPayoutFnCall({ data: { affiliate_id: affiliate!.id } });
@@ -62,7 +63,6 @@ function MyPayouts() {
     onSuccess: () => { toast.success("Solicitação de saque enviada!"); qc.invalidateQueries({ queryKey: ["my-balance", affiliate?.id] }); qc.invalidateQueries({ queryKey: ["my-payouts", affiliate?.id] }); },
     onError: (e) => toast.error("Não foi possível solicitar", { description: (e as Error).message }),
   });
-  const requestPayoutFnCall = useServerFn(requestPayoutFn);
 
   const minPayout = Number(settings?.minimum_payout ?? 50);
   const available = Number(balance?.available ?? 0);
