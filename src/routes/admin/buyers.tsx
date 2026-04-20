@@ -13,7 +13,7 @@ function BuyersPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("leads")
-        .select("*, affiliates(full_name, commission_type, commission_value), commissions(commission_value)")
+        .select("*, affiliates(full_name), commissions(commission_value)")
         .eq("status", "paid")
         .order("paid_at", { ascending: false });
       return data ?? [];
@@ -53,7 +53,7 @@ function BuyersPage() {
               ) : data.length === 0 ? (
                 <tr><td colSpan={6} className="py-12 text-center text-muted-foreground">Nenhum comprador ainda.</td></tr>
               ) : data.map((l) => {
-                const a = (l as { affiliates?: { full_name: string; commission_type: string; commission_value: number } }).affiliates;
+                const a = (l as { affiliates?: { full_name: string } }).affiliates;
                 const c = (l as { commissions?: { commission_value: number }[] }).commissions?.[0];
                 return (
                   <tr key={l.id} className="border-b border-border/50 hover:bg-background/40">
