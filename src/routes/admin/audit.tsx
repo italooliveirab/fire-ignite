@@ -336,7 +336,7 @@ function EmailLogsTable() {
                   <td className="px-5 py-3.5 text-xs text-muted-foreground">{r.template ?? "—"}</td>
                   <td className="px-5 py-3.5">
                     {r.status === "sent" ? (
-                      <span className="text-xs px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-500 font-medium">Enviado</span>
+                      <span className="text-xs px-2 py-0.5 rounded bg-primary/15 text-primary font-medium">Enviado</span>
                     ) : (
                       <span className="text-xs px-2 py-0.5 rounded bg-destructive/15 text-destructive font-medium">Falha</span>
                     )}
