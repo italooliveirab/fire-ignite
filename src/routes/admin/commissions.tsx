@@ -38,14 +38,50 @@ function CommissionsPage() {
 
   const markPaid = useMutation({
     mutationFn: async (ids: string[]) => {
-      const { error } = await supabase.from("commissions").update({ status: "paid" as const }).in("id", ids);
-      if (error) throw error;
-      return ids.length;
+      // Buscar comissões selecionadas com dados do afiliado (pix)
+      const { data: rows, error: fetchErr } = await supabase
+        .from("commissions")
+        .select("id, affiliate_id, commission_value, affiliates(pix_key)")
+        .in("id", ids);
+      if (fetchErr) throw fetchErr;
+      if (!rows?.length) throw new Error("Nenhuma comissão encontrada");
+
+      // Atualizar status para paga
+      const { error: updErr } = await supabase
+        .from("commissions")
+        .update({ status: "paid" as const })
+        .in("id", ids);
+      if (updErr) throw updErr;
+
+      // Agrupar por afiliado e criar payouts
+      const byAffiliate = new Map<string, { total: number; pix: string | null }>();
+      for (const r of rows) {
+        const cur = byAffiliate.get(r.affiliate_id) ?? { total: 0, pix: null };
+        cur.total += Number(r.commission_value);
+        const aff = (r as { affiliates?: { pix_key: string | null } }).affiliates;
+        cur.pix = aff?.pix_key ?? cur.pix;
+        byAffiliate.set(r.affiliate_id, cur);
+      }
+      const today = new Date().toISOString().slice(0, 10);
+      const period = new Date().toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+      const payoutsToInsert = Array.from(byAffiliate.entries()).map(([affiliate_id, v]) => ({
+        affiliate_id,
+        amount_paid: v.total,
+        payment_date: today,
+        reference_period: period,
+        pix_key_used: v.pix,
+        notes: `Pagamento automático de ${ids.length} comissão(ões) em lote`,
+      }));
+      const { error: payErr } = await supabase.from("payouts").insert(payoutsToInsert);
+      if (payErr) throw payErr;
+
+      return { count: ids.length, payouts: payoutsToInsert.length };
     },
-    onSuccess: (count) => {
-      toast.success(`${count} ${count === 1 ? "comissão marcada" : "comissões marcadas"} como paga(s)`);
+    onSuccess: ({ count, payouts }) => {
+      toast.success(`${count} comissão(ões) paga(s) · ${payouts} pagamento(s) gerado(s)`);
       setSelected(new Set());
       qc.invalidateQueries({ queryKey: ["commissions"] });
+      qc.invalidateQueries({ queryKey: ["payouts"] });
     },
     onError: (e) => toast.error((e as Error).message),
   });
