@@ -130,3 +130,29 @@ export const adminUpdateAffiliateAuth = createServerFn({ method: "POST" })
 
     return { ok: true };
   });
+
+interface GetAffiliateAuthInfoInput {
+  affiliate_id: string;
+}
+
+export const adminGetAffiliateAuthInfo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: GetAffiliateAuthInfoInput) => {
+    if (!input.affiliate_id) throw new Error("affiliate_id obrigatório");
+    return input;
+  })
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context);
+    const { data: aff, error: affErr } = await supabaseAdmin
+      .from("affiliates")
+      .select("user_id")
+      .eq("id", data.affiliate_id)
+      .single();
+    if (affErr || !aff?.user_id) return { last_sign_in_at: null, created_at: null, email_confirmed_at: null };
+    const { data: u } = await supabaseAdmin.auth.admin.getUserById(aff.user_id);
+    return {
+      last_sign_in_at: u?.user?.last_sign_in_at ?? null,
+      created_at: u?.user?.created_at ?? null,
+      email_confirmed_at: u?.user?.email_confirmed_at ?? null,
+    };
+  });
