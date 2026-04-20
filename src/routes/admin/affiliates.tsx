@@ -104,6 +104,7 @@ function AffiliatesPage() {
                   <td className="px-5 py-3.5">
                     <div className="font-medium text-foreground">{a.full_name}</div>
                     <div className="text-xs text-muted-foreground">{a.email}</div>
+                    <InactivityBadge lastSignInAt={lastSignInMap[a.id] ?? null} />
                   </td>
                   <td className="px-5 py-3.5 hidden md:table-cell font-mono text-xs text-muted-foreground">/{a.slug}</td>
                   <td className="px-5 py-3.5"><StatusBadge status={a.status} /></td>
