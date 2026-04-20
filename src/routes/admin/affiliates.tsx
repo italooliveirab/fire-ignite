@@ -413,6 +413,60 @@ function ProductRowEditor({ row, onSaved }: { row: AffiliateProductRow; onSaved:
   );
 }
 
+interface AuditRow {
+  id: string;
+  created_at: string;
+  changed_by_email: string | null;
+  email_changed: boolean;
+  password_changed: boolean;
+  old_email: string | null;
+  new_email: string | null;
+}
+
+function HistoryTab({ affiliateId }: { affiliateId: string }) {
+  const { data: rows = [], isLoading } = useQuery({
+    queryKey: ["credential-audit", affiliateId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("affiliate_credential_audit")
+        .select("id, created_at, changed_by_email, email_changed, password_changed, old_email, new_email")
+        .eq("affiliate_id", affiliateId)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return (data ?? []) as AuditRow[];
+    },
+  });
+
+  if (isLoading) return <div className="py-8 text-center text-muted-foreground text-sm">Carregando histórico...</div>;
+  if (rows.length === 0) return <div className="py-8 text-center text-muted-foreground text-sm">Nenhuma alteração de credenciais registrada.</div>;
+
+  return (
+    <div className="space-y-2">
+      <p className="text-xs text-muted-foreground mb-2">Últimas 50 alterações de email/senha realizadas por administradores.</p>
+      {rows.map((r) => (
+        <div key={r.id} className="rounded-lg border border-border bg-background/40 p-3 text-sm">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex gap-1.5 flex-wrap">
+              {r.email_changed && <span className="text-xs px-2 py-0.5 rounded bg-primary/15 text-primary font-medium">Email</span>}
+              {r.password_changed && <span className="text-xs px-2 py-0.5 rounded bg-primary/15 text-primary font-medium">Senha</span>}
+            </div>
+            <span className="text-xs text-muted-foreground">
+              {new Date(r.created_at).toLocaleString("pt-BR")}
+            </span>
+          </div>
+          <div className="mt-2 text-xs text-muted-foreground">
+            por <span className="text-foreground font-medium">{r.changed_by_email ?? "admin"}</span>
+            {r.email_changed && r.old_email && r.new_email && (
+              <div className="mt-1 font-mono">{r.old_email} → {r.new_email}</div>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return <div className="space-y-1.5"><Label className="text-xs">{label}</Label>{children}</div>;
 }
