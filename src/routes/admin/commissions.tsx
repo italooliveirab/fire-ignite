@@ -1,14 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useMemo } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { formatBRL, formatDate } from "@/lib/format";
 import { exportCSV } from "@/lib/csv";
 import { toast } from "sonner";
-import { Download } from "lucide-react";
+import { Download, CheckCheck, Loader2 } from "lucide-react";
 
 const STATUS_LABEL: Record<string, string> = { pending: "Pendente", released: "Liberada", paid: "Paga" };
 
@@ -16,6 +18,8 @@ export const Route = createFileRoute("/admin/commissions")({ component: Commissi
 
 function CommissionsPage() {
   const qc = useQueryClient();
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+
   const { data = [], isLoading } = useQuery({
     queryKey: ["commissions"],
     queryFn: async () => {
@@ -31,6 +35,41 @@ function CommissionsPage() {
     },
     onSuccess: () => { toast.success("Status atualizado"); qc.invalidateQueries({ queryKey: ["commissions"] }); },
   });
+
+  const markPaid = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase.from("commissions").update({ status: "paid" as const }).in("id", ids);
+      if (error) throw error;
+      return ids.length;
+    },
+    onSuccess: (count) => {
+      toast.success(`${count} ${count === 1 ? "comissão marcada" : "comissões marcadas"} como paga(s)`);
+      setSelected(new Set());
+      qc.invalidateQueries({ queryKey: ["commissions"] });
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  const toggle = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const selectableIds = useMemo(() => data.filter((c) => c.status !== "paid").map((c) => c.id), [data]);
+  const allSelected = selectableIds.length > 0 && selectableIds.every((id) => selected.has(id));
+  const toggleAll = () => {
+    if (allSelected) setSelected(new Set());
+    else setSelected(new Set(selectableIds));
+  };
+
+  const selectedCount = selected.size;
+  const selectedTotal = useMemo(
+    () => data.filter((c) => selected.has(c.id)).reduce((s, c) => s + Number(c.commission_value), 0),
+    [data, selected],
+  );
 
   return (
     <DashboardLayout variant="admin" title="Comissões">
@@ -66,11 +105,45 @@ function CommissionsPage() {
         </Button>
       </div>
 
+      {selectedCount > 0 && (
+        <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-primary/40 bg-primary/5 px-4 py-3 shadow-card-premium">
+          <div className="text-sm">
+            <span className="font-semibold text-foreground">{selectedCount}</span>{" "}
+            <span className="text-muted-foreground">selecionada(s) · total</span>{" "}
+            <span className="font-mono text-primary font-semibold">{formatBRL(selectedTotal)}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())}>Limpar</Button>
+            <Button
+              size="sm"
+              disabled={markPaid.isPending}
+              onClick={() => {
+                if (confirm(`Marcar ${selectedCount} comissão(ões) como paga(s)?`)) {
+                  markPaid.mutate(Array.from(selected));
+                }
+              }}
+              className="bg-gradient-fire text-white shadow-fire"
+            >
+              {markPaid.isPending ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <CheckCheck className="h-4 w-4 mr-1" />}
+              Marcar selecionadas como pagas
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-card-premium">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-background/50 border-b border-border text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
+                <th className="w-10 px-5 py-3.5">
+                  <Checkbox
+                    checked={allSelected}
+                    onCheckedChange={toggleAll}
+                    disabled={selectableIds.length === 0}
+                    aria-label="Selecionar todas"
+                  />
+                </th>
                 <th className="text-left px-5 py-3.5">Afiliado</th>
                 <th className="text-left px-5 py-3.5 hidden md:table-cell">Cliente</th>
                 <th className="text-right px-5 py-3.5 hidden md:table-cell">Venda</th>
@@ -81,13 +154,23 @@ function CommissionsPage() {
               </tr>
             </thead>
             <tbody>
-              {isLoading ? <tr><td colSpan={7} className="py-12 text-center text-muted-foreground">Carregando...</td></tr>
-              : data.length === 0 ? <tr><td colSpan={7} className="py-12 text-center text-muted-foreground">Nenhuma comissão.</td></tr>
+              {isLoading ? <tr><td colSpan={8} className="py-12 text-center text-muted-foreground">Carregando...</td></tr>
+              : data.length === 0 ? <tr><td colSpan={8} className="py-12 text-center text-muted-foreground">Nenhuma comissão.</td></tr>
               : data.map((c) => {
                 const a = (c as { affiliates?: { full_name: string } }).affiliates;
                 const l = (c as { leads?: { customer_name: string; payment_amount: number } }).leads;
+                const isPaid = c.status === "paid";
+                const isChecked = selected.has(c.id);
                 return (
-                  <tr key={c.id} className="border-b border-border/50 hover:bg-background/40">
+                  <tr key={c.id} className={`border-b border-border/50 hover:bg-background/40 ${isChecked ? "bg-primary/5" : ""}`}>
+                    <td className="px-5 py-3.5">
+                      <Checkbox
+                        checked={isChecked}
+                        onCheckedChange={() => toggle(c.id)}
+                        disabled={isPaid}
+                        aria-label={`Selecionar comissão ${c.id}`}
+                      />
+                    </td>
                     <td className="px-5 py-3.5 font-medium">{a?.full_name ?? "—"}</td>
                     <td className="px-5 py-3.5 hidden md:table-cell text-muted-foreground">{l?.customer_name ?? "—"}</td>
                     <td className="px-5 py-3.5 hidden md:table-cell text-right font-mono">{l?.payment_amount ? formatBRL(l.payment_amount) : "—"}</td>
