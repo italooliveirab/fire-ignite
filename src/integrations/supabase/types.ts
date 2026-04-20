@@ -297,6 +297,39 @@ export type Database = {
           },
         ]
       }
+      email_log: {
+        Row: {
+          context: Json | null
+          created_at: string
+          error: string | null
+          id: string
+          recipient: string
+          status: string
+          subject: string
+          template: string | null
+        }
+        Insert: {
+          context?: Json | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          recipient: string
+          status: string
+          subject: string
+          template?: string | null
+        }
+        Update: {
+          context?: Json | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          recipient?: string
+          status?: string
+          subject?: string
+          template?: string | null
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           affiliate_id: string
