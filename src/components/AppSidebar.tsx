@@ -1,11 +1,12 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   LayoutDashboard, Users, Target, DollarSign, Banknote, Settings, FileCode2,
-  LogOut, Flame, Link2, User, ScrollText, ShoppingCart,
+  LogOut, Link2, User, ScrollText, ShoppingCart,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { BrandMark } from "@/components/BrandMark";
 
 const adminNav = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -36,16 +37,8 @@ export function AppSidebar({ variant }: { variant: "admin" | "affiliate" }) {
   return (
     <aside className="hidden md:flex w-64 flex-col bg-sidebar border-r border-sidebar-border h-screen sticky top-0">
       <div className="px-6 py-6 border-b border-sidebar-border">
-        <Link to="/" className="flex items-center gap-2.5">
-          <div className="h-9 w-9 rounded-lg bg-gradient-fire flex items-center justify-center shadow-fire">
-            <Flame className="h-5 w-5 text-white" strokeWidth={2.5} />
-          </div>
-          <div>
-            <div className="font-display font-bold text-lg leading-none text-foreground">FIRE</div>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground mt-0.5">
-              {variant === "admin" ? "Admin" : "Afiliado"}
-            </div>
-          </div>
+        <Link to="/">
+          <BrandMark size="sm" subtitle={variant === "admin" ? "Admin" : "Afiliado"} />
         </Link>
       </div>
 

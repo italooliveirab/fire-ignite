@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Upload, Image as ImageIcon, Save, Loader2 } from "lucide-react";
+import { refreshBrand } from "@/hooks/useBrand";
 
 export const Route = createFileRoute("/admin/settings")({ component: SettingsPage });
 
@@ -31,7 +32,8 @@ function SettingsPage() {
     void created_at; void updated_at;
     const { error } = await supabase.from("settings").update(payload as never).eq("id", id as string);
     setSaving(false);
-    if (error) toast.error(error.message); else toast.success("Configurações salvas");
+    if (error) toast.error(error.message);
+    else { toast.success("Configurações salvas"); refreshBrand(); }
   };
 
   const handleLogoUpload = async (file: File) => {

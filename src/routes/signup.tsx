@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Flame } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { BrandMark } from "@/components/BrandMark";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,14 +45,8 @@ function SignupPage() {
       </div>
 
       <div className="w-full max-w-md">
-        <Link to="/" className="flex items-center justify-center gap-2.5 mb-8">
-          <div className="h-12 w-12 rounded-xl bg-gradient-fire flex items-center justify-center shadow-fire">
-            <Flame className="h-6 w-6 text-white" strokeWidth={2.5} />
-          </div>
-          <div>
-            <div className="font-display font-bold text-2xl leading-none">FIRE</div>
-            <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Admin</div>
-          </div>
+        <Link to="/" className="flex justify-center mb-8">
+          <BrandMark size="lg" subtitle="Admin" />
         </Link>
 
         <div className="rounded-2xl border border-border bg-card/80 backdrop-blur-xl p-8 shadow-card-premium">
