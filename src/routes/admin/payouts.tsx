@@ -177,6 +177,7 @@ function PayForm({ payout, onClose }: { payout: Payout; onClose: () => void }) {
   const [notes, setNotes] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const markPaidFn = useServerFn(markPayoutPaidFn);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -194,8 +195,7 @@ function PayForm({ payout, onClose }: { payout: Payout; onClose: () => void }) {
       if (pix !== payout.pix_key_used) {
         await supabase.from("payouts").update({ pix_key_used: pix }).eq("id", payout.id);
       }
-      const { error } = await supabase.rpc("mark_payout_paid", { _payout_id: payout.id, _amount_paid: Number(amount), _proof_url: proofPath ?? undefined, _notes: notes || undefined });
-      if (error) throw error;
+      await markPaidFn({ data: { payout_id: payout.id, amount_paid: Number(amount), proof_url: proofPath ?? undefined, notes: notes || undefined } });
       toast.success("Pagamento registrado!");
       onClose();
     } catch (err) {
