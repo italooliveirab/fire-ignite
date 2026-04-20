@@ -19,6 +19,7 @@ export type Database = {
           affiliate_id: string
           commission_type: Database["public"]["Enums"]["commission_type"]
           commission_value: number
+          custom_slug: string | null
           decided_at: string | null
           decided_by: string | null
           id: string
@@ -32,6 +33,7 @@ export type Database = {
           affiliate_id: string
           commission_type?: Database["public"]["Enums"]["commission_type"]
           commission_value?: number
+          custom_slug?: string | null
           decided_at?: string | null
           decided_by?: string | null
           id?: string
@@ -45,6 +47,7 @@ export type Database = {
           affiliate_id?: string
           commission_type?: Database["public"]["Enums"]["commission_type"]
           commission_value?: number
+          custom_slug?: string | null
           decided_at?: string | null
           decided_by?: string | null
           id?: string
