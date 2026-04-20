@@ -82,14 +82,17 @@ function AffiliateDashboard() {
     queryKey: ["my-stats", affiliate?.id],
     enabled: !!affiliate?.id,
     queryFn: async () => {
-      const [leads, comm] = await Promise.all([
+      const [leads, comm, net] = await Promise.all([
         supabase.from("leads").select("status, created_at, payment_amount").eq("affiliate_id", affiliate!.id),
         supabase.from("commissions").select("status, commission_value").eq("affiliate_id", affiliate!.id),
+        supabase.from("network_commissions").select("referrer_amount").eq("referrer_affiliate_id", affiliate!.id),
       ]);
       const L = leads.data ?? [];
       const C = comm.data ?? [];
+      const N = net.data ?? [];
       const by = (s: string) => L.filter((l) => l.status === s).length;
       const sumC = (s: string) => C.filter((c) => c.status === s).reduce((a, c) => a + Number(c.commission_value), 0);
+      const networkEarnings = N.reduce((a, r) => a + Number(r.referrer_amount ?? 0), 0);
 
       const days = Array.from({ length: 30 }).map((_, i) => {
         const d = new Date(); d.setDate(d.getDate() - (29 - i));
@@ -100,7 +103,7 @@ function AffiliateDashboard() {
       return {
         total: L.length, initiated: by("initiated_conversation"), trial: by("generated_trial"),
         gpay: by("generated_payment"), paid: by("paid"), notpaid: by("not_paid"),
-        commPending: sumC("pending") + sumC("released"), commPaid: sumC("paid"), days,
+        commPending: sumC("pending") + sumC("released"), commPaid: sumC("paid"), networkEarnings, days,
       };
     },
   });
