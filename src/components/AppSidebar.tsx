@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   LayoutDashboard, Users, Target, DollarSign, Banknote, Settings, FileCode2,
-  LogOut, Link2, User, ScrollText, ShoppingCart, Package, Inbox, ShieldCheck,
+  LogOut, Link2, User, ScrollText, ShoppingCart, Package, Inbox, ShieldCheck, Network, Settings2,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,8 @@ const adminNav = [
   { to: "/admin/leads", label: "Leads", icon: Target },
   { to: "/admin/buyers", label: "Compradores", icon: ShoppingCart },
   { to: "/admin/commissions", label: "Comissões", icon: DollarSign },
+  { to: "/admin/network", label: "Rede", icon: Network },
+  { to: "/admin/network-rules", label: "Regras da Rede", icon: Settings2 },
   { to: "/admin/payouts", label: "Pagamentos", icon: Banknote },
   { to: "/admin/audit", label: "Auditoria", icon: ShieldCheck },
   { to: "/admin/api", label: "API & Docs", icon: FileCode2 },
@@ -31,6 +33,7 @@ const affiliateNav = [
   { to: "/app/link", label: "Meus Links", icon: Link2 },
   { to: "/app/leads", label: "Meus Leads", icon: Target },
   { to: "/app/commissions", label: "Comissões", icon: DollarSign },
+  { to: "/app/network", label: "Minha Rede", icon: Network },
   { to: "/app/payouts", label: "Pagamentos", icon: Banknote },
   { to: "/app/profile", label: "Perfil", icon: User },
   { to: "/app/rules", label: "Regras", icon: ScrollText },

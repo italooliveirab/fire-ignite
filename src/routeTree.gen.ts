@@ -22,6 +22,7 @@ import { Route as AppRulesRouteImport } from './routes/app/rules'
 import { Route as AppProfileRouteImport } from './routes/app/profile'
 import { Route as AppProductsRouteImport } from './routes/app/products'
 import { Route as AppPayoutsRouteImport } from './routes/app/payouts'
+import { Route as AppNetworkRouteImport } from './routes/app/network'
 import { Route as AppLinkRouteImport } from './routes/app/link'
 import { Route as AppLeadsRouteImport } from './routes/app/leads'
 import { Route as AppCommissionsRouteImport } from './routes/app/commissions'
@@ -29,6 +30,8 @@ import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminRequestsRouteImport } from './routes/admin/requests'
 import { Route as AdminProductsRouteImport } from './routes/admin/products'
 import { Route as AdminPayoutsRouteImport } from './routes/admin/payouts'
+import { Route as AdminNetworkRulesRouteImport } from './routes/admin/network-rules'
+import { Route as AdminNetworkRouteImport } from './routes/admin/network'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminLeadsRouteImport } from './routes/admin/leads'
 import { Route as AdminCommissionsRouteImport } from './routes/admin/commissions'
@@ -103,6 +106,11 @@ const AppPayoutsRoute = AppPayoutsRouteImport.update({
   path: '/app/payouts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppNetworkRoute = AppNetworkRouteImport.update({
+  id: '/app/network',
+  path: '/app/network',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppLinkRoute = AppLinkRouteImport.update({
   id: '/app/link',
   path: '/app/link',
@@ -136,6 +144,16 @@ const AdminProductsRoute = AdminProductsRouteImport.update({
 const AdminPayoutsRoute = AdminPayoutsRouteImport.update({
   id: '/admin/payouts',
   path: '/admin/payouts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminNetworkRulesRoute = AdminNetworkRulesRouteImport.update({
+  id: '/admin/network-rules',
+  path: '/admin/network-rules',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminNetworkRoute = AdminNetworkRouteImport.update({
+  id: '/admin/network',
+  path: '/admin/network',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
@@ -195,6 +213,8 @@ export interface FileRoutesByFullPath {
   '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/network': typeof AdminNetworkRoute
+  '/admin/network-rules': typeof AdminNetworkRulesRoute
   '/admin/payouts': typeof AdminPayoutsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/requests': typeof AdminRequestsRoute
@@ -202,6 +222,7 @@ export interface FileRoutesByFullPath {
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
   '/app/link': typeof AppLinkRoute
+  '/app/network': typeof AppNetworkRoute
   '/app/payouts': typeof AppPayoutsRoute
   '/app/products': typeof AppProductsRoute
   '/app/profile': typeof AppProfileRoute
@@ -225,6 +246,8 @@ export interface FileRoutesByTo {
   '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/network': typeof AdminNetworkRoute
+  '/admin/network-rules': typeof AdminNetworkRulesRoute
   '/admin/payouts': typeof AdminPayoutsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/requests': typeof AdminRequestsRoute
@@ -232,6 +255,7 @@ export interface FileRoutesByTo {
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
   '/app/link': typeof AppLinkRoute
+  '/app/network': typeof AppNetworkRoute
   '/app/payouts': typeof AppPayoutsRoute
   '/app/products': typeof AppProductsRoute
   '/app/profile': typeof AppProfileRoute
@@ -256,6 +280,8 @@ export interface FileRoutesById {
   '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/network': typeof AdminNetworkRoute
+  '/admin/network-rules': typeof AdminNetworkRulesRoute
   '/admin/payouts': typeof AdminPayoutsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/requests': typeof AdminRequestsRoute
@@ -263,6 +289,7 @@ export interface FileRoutesById {
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
   '/app/link': typeof AppLinkRoute
+  '/app/network': typeof AppNetworkRoute
   '/app/payouts': typeof AppPayoutsRoute
   '/app/products': typeof AppProductsRoute
   '/app/profile': typeof AppProfileRoute
@@ -288,6 +315,8 @@ export interface FileRouteTypes {
     | '/admin/commissions'
     | '/admin/leads'
     | '/admin/login'
+    | '/admin/network'
+    | '/admin/network-rules'
     | '/admin/payouts'
     | '/admin/products'
     | '/admin/requests'
@@ -295,6 +324,7 @@ export interface FileRouteTypes {
     | '/app/commissions'
     | '/app/leads'
     | '/app/link'
+    | '/app/network'
     | '/app/payouts'
     | '/app/products'
     | '/app/profile'
@@ -318,6 +348,8 @@ export interface FileRouteTypes {
     | '/admin/commissions'
     | '/admin/leads'
     | '/admin/login'
+    | '/admin/network'
+    | '/admin/network-rules'
     | '/admin/payouts'
     | '/admin/products'
     | '/admin/requests'
@@ -325,6 +357,7 @@ export interface FileRouteTypes {
     | '/app/commissions'
     | '/app/leads'
     | '/app/link'
+    | '/app/network'
     | '/app/payouts'
     | '/app/products'
     | '/app/profile'
@@ -348,6 +381,8 @@ export interface FileRouteTypes {
     | '/admin/commissions'
     | '/admin/leads'
     | '/admin/login'
+    | '/admin/network'
+    | '/admin/network-rules'
     | '/admin/payouts'
     | '/admin/products'
     | '/admin/requests'
@@ -355,6 +390,7 @@ export interface FileRouteTypes {
     | '/app/commissions'
     | '/app/leads'
     | '/app/link'
+    | '/app/network'
     | '/app/payouts'
     | '/app/products'
     | '/app/profile'
@@ -379,6 +415,8 @@ export interface RootRouteChildren {
   AdminCommissionsRoute: typeof AdminCommissionsRoute
   AdminLeadsRoute: typeof AdminLeadsRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminNetworkRoute: typeof AdminNetworkRoute
+  AdminNetworkRulesRoute: typeof AdminNetworkRulesRoute
   AdminPayoutsRoute: typeof AdminPayoutsRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminRequestsRoute: typeof AdminRequestsRoute
@@ -386,6 +424,7 @@ export interface RootRouteChildren {
   AppCommissionsRoute: typeof AppCommissionsRoute
   AppLeadsRoute: typeof AppLeadsRoute
   AppLinkRoute: typeof AppLinkRoute
+  AppNetworkRoute: typeof AppNetworkRoute
   AppPayoutsRoute: typeof AppPayoutsRoute
   AppProductsRoute: typeof AppProductsRoute
   AppProfileRoute: typeof AppProfileRoute
@@ -488,6 +527,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPayoutsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/network': {
+      id: '/app/network'
+      path: '/app/network'
+      fullPath: '/app/network'
+      preLoaderRoute: typeof AppNetworkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/link': {
       id: '/app/link'
       path: '/app/link'
@@ -535,6 +581,20 @@ declare module '@tanstack/react-router' {
       path: '/admin/payouts'
       fullPath: '/admin/payouts'
       preLoaderRoute: typeof AdminPayoutsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/network-rules': {
+      id: '/admin/network-rules'
+      path: '/admin/network-rules'
+      fullPath: '/admin/network-rules'
+      preLoaderRoute: typeof AdminNetworkRulesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/network': {
+      id: '/admin/network'
+      path: '/admin/network'
+      fullPath: '/admin/network'
+      preLoaderRoute: typeof AdminNetworkRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/login': {
@@ -611,6 +671,8 @@ const rootRouteChildren: RootRouteChildren = {
   AdminCommissionsRoute: AdminCommissionsRoute,
   AdminLeadsRoute: AdminLeadsRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AdminNetworkRoute: AdminNetworkRoute,
+  AdminNetworkRulesRoute: AdminNetworkRulesRoute,
   AdminPayoutsRoute: AdminPayoutsRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminRequestsRoute: AdminRequestsRoute,
@@ -618,6 +680,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppCommissionsRoute: AppCommissionsRoute,
   AppLeadsRoute: AppLeadsRoute,
   AppLinkRoute: AppLinkRoute,
+  AppNetworkRoute: AppNetworkRoute,
   AppPayoutsRoute: AppPayoutsRoute,
   AppProductsRoute: AppProductsRoute,
   AppProfileRoute: AppProfileRoute,

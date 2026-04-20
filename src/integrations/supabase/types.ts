@@ -50,6 +50,54 @@ export type Database = {
         }
         Relationships: []
       }
+      affiliate_network: {
+        Row: {
+          affiliate_id: string
+          created_at: string
+          id: string
+          linked_at: string
+          notes: string | null
+          referrer_id: string
+          status: Database["public"]["Enums"]["network_link_status"]
+          updated_at: string
+        }
+        Insert: {
+          affiliate_id: string
+          created_at?: string
+          id?: string
+          linked_at?: string
+          notes?: string | null
+          referrer_id: string
+          status?: Database["public"]["Enums"]["network_link_status"]
+          updated_at?: string
+        }
+        Update: {
+          affiliate_id?: string
+          created_at?: string
+          id?: string
+          linked_at?: string
+          notes?: string | null
+          referrer_id?: string
+          status?: Database["public"]["Enums"]["network_link_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_network_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: true
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_network_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       affiliate_products: {
         Row: {
           affiliate_id: string
@@ -120,6 +168,7 @@ export type Database = {
           phone: string | null
           pix_key: string | null
           pix_type: Database["public"]["Enums"]["pix_type"] | null
+          referral_code: string | null
           slug: string
           status: Database["public"]["Enums"]["affiliate_status"]
           updated_at: string
@@ -135,6 +184,7 @@ export type Database = {
           phone?: string | null
           pix_key?: string | null
           pix_type?: Database["public"]["Enums"]["pix_type"] | null
+          referral_code?: string | null
           slug: string
           status?: Database["public"]["Enums"]["affiliate_status"]
           updated_at?: string
@@ -150,6 +200,7 @@ export type Database = {
           phone?: string | null
           pix_key?: string | null
           pix_type?: Database["public"]["Enums"]["pix_type"] | null
+          referral_code?: string | null
           slug?: string
           status?: Database["public"]["Enums"]["affiliate_status"]
           updated_at?: string
@@ -308,6 +359,182 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      network_commission_rules: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          priority: number
+          product_id: string | null
+          referrer_commission_type: Database["public"]["Enums"]["commission_type"]
+          referrer_commission_value: number
+          referrer_recurrence: Database["public"]["Enums"]["commission_recurrence"]
+          seller_commission_type: Database["public"]["Enums"]["commission_type"]
+          seller_commission_value: number
+          seller_recurrence: Database["public"]["Enums"]["commission_recurrence"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          priority?: number
+          product_id?: string | null
+          referrer_commission_type?: Database["public"]["Enums"]["commission_type"]
+          referrer_commission_value?: number
+          referrer_recurrence?: Database["public"]["Enums"]["commission_recurrence"]
+          seller_commission_type?: Database["public"]["Enums"]["commission_type"]
+          seller_commission_value?: number
+          seller_recurrence?: Database["public"]["Enums"]["commission_recurrence"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          priority?: number
+          product_id?: string | null
+          referrer_commission_type?: Database["public"]["Enums"]["commission_type"]
+          referrer_commission_value?: number
+          referrer_recurrence?: Database["public"]["Enums"]["commission_recurrence"]
+          seller_commission_type?: Database["public"]["Enums"]["commission_type"]
+          seller_commission_value?: number
+          seller_recurrence?: Database["public"]["Enums"]["commission_recurrence"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "network_commission_rules_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      network_commissions: {
+        Row: {
+          created_at: string
+          customer_whatsapp_id: string | null
+          id: string
+          lead_id: string
+          payment_amount: number
+          payment_cycle: number
+          platform_amount: number
+          product_id: string | null
+          referrer_affiliate_id: string | null
+          referrer_amount: number
+          referrer_commission_type:
+            | Database["public"]["Enums"]["commission_type"]
+            | null
+          referrer_recurrence:
+            | Database["public"]["Enums"]["commission_recurrence"]
+            | null
+          rule_id: string | null
+          seller_affiliate_id: string
+          seller_amount: number
+          seller_commission_type:
+            | Database["public"]["Enums"]["commission_type"]
+            | null
+          seller_recurrence:
+            | Database["public"]["Enums"]["commission_recurrence"]
+            | null
+        }
+        Insert: {
+          created_at?: string
+          customer_whatsapp_id?: string | null
+          id?: string
+          lead_id: string
+          payment_amount: number
+          payment_cycle?: number
+          platform_amount?: number
+          product_id?: string | null
+          referrer_affiliate_id?: string | null
+          referrer_amount?: number
+          referrer_commission_type?:
+            | Database["public"]["Enums"]["commission_type"]
+            | null
+          referrer_recurrence?:
+            | Database["public"]["Enums"]["commission_recurrence"]
+            | null
+          rule_id?: string | null
+          seller_affiliate_id: string
+          seller_amount?: number
+          seller_commission_type?:
+            | Database["public"]["Enums"]["commission_type"]
+            | null
+          seller_recurrence?:
+            | Database["public"]["Enums"]["commission_recurrence"]
+            | null
+        }
+        Update: {
+          created_at?: string
+          customer_whatsapp_id?: string | null
+          id?: string
+          lead_id?: string
+          payment_amount?: number
+          payment_cycle?: number
+          platform_amount?: number
+          product_id?: string | null
+          referrer_affiliate_id?: string | null
+          referrer_amount?: number
+          referrer_commission_type?:
+            | Database["public"]["Enums"]["commission_type"]
+            | null
+          referrer_recurrence?:
+            | Database["public"]["Enums"]["commission_recurrence"]
+            | null
+          rule_id?: string | null
+          seller_affiliate_id?: string
+          seller_amount?: number
+          seller_commission_type?:
+            | Database["public"]["Enums"]["commission_type"]
+            | null
+          seller_recurrence?:
+            | Database["public"]["Enums"]["commission_recurrence"]
+            | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "network_commissions_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: true
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "network_commissions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "network_commissions_referrer_affiliate_id_fkey"
+            columns: ["referrer_affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "network_commissions_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "network_commission_rules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "network_commissions_seller_affiliate_id_fkey"
+            columns: ["seller_affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
             referencedColumns: ["id"]
           },
         ]
@@ -493,6 +720,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_referral_code: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -506,6 +734,7 @@ export type Database = {
       affiliate_status: "active" | "paused" | "blocked"
       affiliation_status: "pending" | "approved" | "rejected"
       app_role: "admin" | "affiliate"
+      commission_recurrence: "one_time" | "recurring"
       commission_status: "pending" | "released" | "paid"
       commission_type: "percentage" | "fixed"
       lead_status:
@@ -514,6 +743,7 @@ export type Database = {
         | "generated_payment"
         | "paid"
         | "not_paid"
+      network_link_status: "active" | "paused" | "removed"
       payout_frequency: "weekly" | "biweekly" | "monthly"
       pix_type: "cpf" | "cnpj" | "email" | "phone" | "random"
     }
@@ -646,6 +876,7 @@ export const Constants = {
       affiliate_status: ["active", "paused", "blocked"],
       affiliation_status: ["pending", "approved", "rejected"],
       app_role: ["admin", "affiliate"],
+      commission_recurrence: ["one_time", "recurring"],
       commission_status: ["pending", "released", "paid"],
       commission_type: ["percentage", "fixed"],
       lead_status: [
@@ -655,6 +886,7 @@ export const Constants = {
         "paid",
         "not_paid",
       ],
+      network_link_status: ["active", "paused", "removed"],
       payout_frequency: ["weekly", "biweekly", "monthly"],
       pix_type: ["cpf", "cnpj", "email", "phone", "random"],
     },
