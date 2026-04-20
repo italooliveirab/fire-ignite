@@ -172,9 +172,15 @@ html { color-scheme: dark; }
     transform-origin: center;
   }
 
+  :where(button, a, [role="button"], [data-radix-collection-item]):hover {
+    transform: scale(1.02);
+    opacity: 0.95;
+  }
+
   :where(button, a, [role="button"], [data-radix-collection-item]):active {
-    transform: scale(0.98);
+    transform: scale(0.96);
     filter: brightness(1.06);
+    opacity: 0.9;
   }
 }
 
