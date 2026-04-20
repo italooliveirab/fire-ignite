@@ -519,6 +519,34 @@ function HistoryTab({ affiliateId }: { affiliateId: string }) {
             <SelectItem value="password">Apenas senha</SelectItem>
           </SelectContent>
         </Select>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-9"
+          disabled={filtered.length === 0}
+          onClick={() => exportCSV(
+            `historico-credenciais-${affiliateId.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}`,
+            filtered.map((r) => ({
+              data: formatDateTime(r.created_at),
+              admin: r.changed_by_email ?? "",
+              email_alterado: r.email_changed ? "sim" : "nao",
+              senha_alterada: r.password_changed ? "sim" : "nao",
+              email_anterior: r.old_email ?? "",
+              email_novo: r.new_email ?? "",
+            })),
+            [
+              { key: "data", label: "Data" },
+              { key: "admin", label: "Admin" },
+              { key: "email_alterado", label: "Email alterado" },
+              { key: "senha_alterada", label: "Senha alterada" },
+              { key: "email_anterior", label: "Email anterior" },
+              { key: "email_novo", label: "Email novo" },
+            ],
+          )}
+        >
+          <Download className="h-3.5 w-3.5 mr-1" /> CSV
+        </Button>
       </div>
       <p className="text-xs text-muted-foreground">{filtered.length} de {rows.length} alteração(ões) — últimas 50.</p>
       {filtered.length === 0 ? (
