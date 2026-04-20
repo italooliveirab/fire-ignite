@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Edit, Trash2, Pause, Play } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Pause, Play, ArrowUpDown, Download } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { slugify } from "@/lib/format";
+import { formatDateTime } from "@/lib/format";
+import { exportCSV } from "@/lib/csv";
 import { adminCreateAffiliate, adminUpdateAffiliateAuth, adminGetAffiliateAuthInfo, adminListAffiliatesLastSignIn } from "@/server/admin-affiliates";
 
 export const Route = createFileRoute("/admin/affiliates")({ component: AffiliatesPage });
@@ -29,6 +31,7 @@ function AffiliatesPage() {
   const [search, setSearch] = useState("");
   const [editing, setEditing] = useState<Affiliate | null>(null);
   const [open, setOpen] = useState(false);
+  const [sortLastAccess, setSortLastAccess] = useState<"none" | "asc" | "desc">("none");
 
   const { data: affiliates = [], isLoading } = useQuery({
     queryKey: ["affiliates"],
@@ -48,6 +51,14 @@ function AffiliatesPage() {
   const filtered = affiliates.filter((a) =>
     [a.full_name, a.username, a.email].some((f) => f?.toLowerCase().includes(search.toLowerCase())),
   );
+
+  const sorted = sortLastAccess === "none" ? filtered : [...filtered].sort((a, b) => {
+    const av = lastSignInMap[a.id] ? new Date(lastSignInMap[a.id] as string).getTime() : 0;
+    const bv = lastSignInMap[b.id] ? new Date(lastSignInMap[b.id] as string).getTime() : 0;
+    return sortLastAccess === "asc" ? av - bv : bv - av;
+  });
+
+  const cycleSort = () => setSortLastAccess((s) => s === "none" ? "desc" : s === "desc" ? "asc" : "none");
 
   const deleteAff = useMutation({
     mutationFn: async (id: string) => {
@@ -91,15 +102,24 @@ function AffiliatesPage() {
                 <th className="text-left px-5 py-3.5">Afiliado</th>
                 <th className="text-left px-5 py-3.5 hidden md:table-cell">Slug</th>
                 <th className="text-left px-5 py-3.5">Status</th>
+                <th className="text-left px-5 py-3.5 hidden lg:table-cell">
+                  <button type="button" onClick={cycleSort} className="inline-flex items-center gap-1 hover:text-foreground transition">
+                    Último acesso
+                    <ArrowUpDown className="h-3 w-3" />
+                    {sortLastAccess !== "none" && (
+                      <span className="text-[10px] normal-case">({sortLastAccess === "desc" ? "recente" : "antigo"})</span>
+                    )}
+                  </button>
+                </th>
                 <th className="text-right px-5 py-3.5">Ações</th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
-                <tr><td colSpan={4} className="py-12 text-center text-muted-foreground">Carregando...</td></tr>
-              ) : filtered.length === 0 ? (
-                <tr><td colSpan={4} className="py-12 text-center text-muted-foreground">Nenhum afiliado encontrado.</td></tr>
-              ) : filtered.map((a) => (
+                <tr><td colSpan={5} className="py-12 text-center text-muted-foreground">Carregando...</td></tr>
+              ) : sorted.length === 0 ? (
+                <tr><td colSpan={5} className="py-12 text-center text-muted-foreground">Nenhum afiliado encontrado.</td></tr>
+              ) : sorted.map((a) => (
                 <tr key={a.id} className="border-b border-border/50 hover:bg-background/40 transition">
                   <td className="px-5 py-3.5">
                     <div className="font-medium text-foreground">{a.full_name}</div>
@@ -108,6 +128,9 @@ function AffiliatesPage() {
                   </td>
                   <td className="px-5 py-3.5 hidden md:table-cell font-mono text-xs text-muted-foreground">/{a.slug}</td>
                   <td className="px-5 py-3.5"><StatusBadge status={a.status} /></td>
+                  <td className="px-5 py-3.5 hidden lg:table-cell text-xs text-muted-foreground">
+                    {lastSignInMap[a.id] ? formatDateTime(lastSignInMap[a.id] as string) : <span className="italic">nunca</span>}
+                  </td>
                   <td className="px-5 py-3.5 text-right">
                     <div className="inline-flex gap-1">
                       <Button size="icon" variant="ghost" onClick={() => { setEditing(a); setOpen(true); }}><Edit className="h-4 w-4" /></Button>
@@ -496,6 +519,34 @@ function HistoryTab({ affiliateId }: { affiliateId: string }) {
             <SelectItem value="password">Apenas senha</SelectItem>
           </SelectContent>
         </Select>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-9"
+          disabled={filtered.length === 0}
+          onClick={() => exportCSV(
+            `historico-credenciais-${affiliateId.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}`,
+            filtered.map((r) => ({
+              data: formatDateTime(r.created_at),
+              admin: r.changed_by_email ?? "",
+              email_alterado: r.email_changed ? "sim" : "nao",
+              senha_alterada: r.password_changed ? "sim" : "nao",
+              email_anterior: r.old_email ?? "",
+              email_novo: r.new_email ?? "",
+            })),
+            [
+              { key: "data", label: "Data" },
+              { key: "admin", label: "Admin" },
+              { key: "email_alterado", label: "Email alterado" },
+              { key: "senha_alterada", label: "Senha alterada" },
+              { key: "email_anterior", label: "Email anterior" },
+              { key: "email_novo", label: "Email novo" },
+            ],
+          )}
+        >
+          <Download className="h-3.5 w-3.5 mr-1" /> CSV
+        </Button>
       </div>
       <p className="text-xs text-muted-foreground">{filtered.length} de {rows.length} alteração(ões) — últimas 50.</p>
       {filtered.length === 0 ? (
