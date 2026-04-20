@@ -13,9 +13,14 @@ export const Route = createFileRoute("/app/products")({ component: AffiliateProd
 
 interface Product {
   id: string; name: string; slug: string; description: string | null; media_kit_url: string | null;
-  commission_type: "percentage" | "fixed"; commission_value: number;
 }
-interface Affiliation { id: string; product_id: string; status: "pending" | "approved" | "rejected" }
+interface Affiliation {
+  id: string;
+  product_id: string;
+  status: "pending" | "approved" | "rejected";
+  commission_type: "percentage" | "fixed";
+  commission_value: number;
+}
 
 function AffiliateProducts() {
   const { user } = useAuth();
@@ -35,7 +40,7 @@ function AffiliateProducts() {
   const { data: products = [], isLoading: loadingProducts } = useQuery({
     queryKey: ["public-products"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("products").select("*").eq("is_active", true).order("name");
+      const { data, error } = await supabase.from("products").select("id, name, slug, description, media_kit_url").eq("is_active", true).order("name");
       if (error) throw error;
       return data as Product[];
     },
@@ -44,7 +49,10 @@ function AffiliateProducts() {
   const { data: affiliations = [] } = useQuery({
     queryKey: ["my-affiliations", aff?.id], enabled: !!aff?.id,
     queryFn: async () => {
-      const { data, error } = await supabase.from("affiliate_products").select("id, product_id, status").eq("affiliate_id", aff!.id);
+      const { data, error } = await supabase
+        .from("affiliate_products")
+        .select("id, product_id, status, commission_type, commission_value")
+        .eq("affiliate_id", aff!.id);
       if (error) throw error;
       return data as Affiliation[];
     },
@@ -60,7 +68,7 @@ function AffiliateProducts() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const statusOf = (pid: string) => affiliations.find((a) => a.product_id === pid)?.status;
+  const affiliationOf = (pid: string) => affiliations.find((a) => a.product_id === pid);
   const linkFor = (pSlug: string) => `https://${domain}/p/${pSlug}/${aff?.slug ?? ""}`;
   const copy = (txt: string) => { navigator.clipboard.writeText(txt); toast.success("Link copiado!"); };
 
@@ -68,7 +76,7 @@ function AffiliateProducts() {
     <DashboardLayout variant="affiliate" title="Produtos">
       <div className="mb-6">
         <h1 className="font-display text-3xl font-bold">Catálogo de produtos</h1>
-        <p className="text-muted-foreground text-sm mt-1">Escolha quais produtos da FIRE você quer revender. Cada solicitação passa por aprovação.</p>
+        <p className="text-muted-foreground text-sm mt-1">Escolha quais produtos da FIRE você quer revender. Sua comissão é definida por produto na aprovação.</p>
       </div>
 
       {!aff && (
@@ -90,7 +98,8 @@ function AffiliateProducts() {
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map((p) => {
-            const status = statusOf(p.id);
+            const ap = affiliationOf(p.id);
+            const status = ap?.status;
             return (
               <div key={p.id} className="rounded-2xl border border-border bg-card p-5 shadow-card-premium flex flex-col">
                 <div className="flex items-start justify-between gap-2 mb-2">
@@ -98,12 +107,14 @@ function AffiliateProducts() {
                   <Sparkles className="h-4 w-4 text-primary shrink-0" />
                 </div>
                 {p.description && <p className="text-sm text-muted-foreground line-clamp-3 mb-3">{p.description}</p>}
-                <div className="text-sm mb-3">
-                  <span className="text-muted-foreground">Sua comissão: </span>
-                  <span className="font-semibold text-primary">
-                    {p.commission_type === "percentage" ? `${p.commission_value}%` : formatBRL(p.commission_value)}
-                  </span>
-                </div>
+                {status === "approved" && ap && (
+                  <div className="text-sm mb-3">
+                    <span className="text-muted-foreground">Sua comissão: </span>
+                    <span className="font-semibold text-primary">
+                      {ap.commission_type === "percentage" ? `${ap.commission_value}%` : formatBRL(ap.commission_value)}
+                    </span>
+                  </div>
+                )}
                 {p.media_kit_url && (
                   <a href={p.media_kit_url} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1 mb-3">
                     <ExternalLink className="h-3 w-3" /> Ver mídia kit

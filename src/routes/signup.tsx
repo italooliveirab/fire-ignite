@@ -54,8 +54,6 @@ function SignupPage() {
         username,
         slug,
         status: "active",
-        commission_type: "percentage",
-        commission_value: 0,
       });
       if (affErr) throw affErr;
 

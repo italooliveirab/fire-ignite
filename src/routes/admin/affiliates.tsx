@@ -7,11 +7,11 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { slugify, formatBRL } from "@/lib/format";
+import { slugify } from "@/lib/format";
 import { adminCreateAffiliate } from "@/server/admin-affiliates";
 
 export const Route = createFileRoute("/admin/affiliates")({ component: AffiliatesPage });
@@ -19,7 +19,7 @@ export const Route = createFileRoute("/admin/affiliates")({ component: Affiliate
 interface Affiliate {
   id: string; full_name: string; username: string; email: string; phone: string | null;
   instagram: string | null; pix_key: string | null; pix_type: string | null;
-  commission_type: "percentage" | "fixed"; commission_value: number; slug: string;
+  slug: string;
   status: "active" | "paused" | "blocked"; created_at: string;
 }
 
@@ -64,7 +64,7 @@ function AffiliatesPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="font-display text-3xl font-bold">Afiliados</h1>
-          <p className="text-muted-foreground text-sm mt-1">{affiliates.length} cadastrados</p>
+          <p className="text-muted-foreground text-sm mt-1">{affiliates.length} cadastrados · comissões são definidas por produto em "Solicitações"</p>
         </div>
         <Button onClick={() => { setEditing(null); setOpen(true); }} className="bg-gradient-fire shadow-fire text-white font-semibold">
           <Plus className="h-4 w-4 mr-1" /> Novo Afiliado
@@ -83,16 +83,15 @@ function AffiliatesPage() {
               <tr>
                 <th className="text-left px-5 py-3.5">Afiliado</th>
                 <th className="text-left px-5 py-3.5 hidden md:table-cell">Slug</th>
-                <th className="text-left px-5 py-3.5 hidden lg:table-cell">Comissão</th>
                 <th className="text-left px-5 py-3.5">Status</th>
                 <th className="text-right px-5 py-3.5">Ações</th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
-                <tr><td colSpan={5} className="py-12 text-center text-muted-foreground">Carregando...</td></tr>
+                <tr><td colSpan={4} className="py-12 text-center text-muted-foreground">Carregando...</td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={5} className="py-12 text-center text-muted-foreground">Nenhum afiliado encontrado.</td></tr>
+                <tr><td colSpan={4} className="py-12 text-center text-muted-foreground">Nenhum afiliado encontrado.</td></tr>
               ) : filtered.map((a) => (
                 <tr key={a.id} className="border-b border-border/50 hover:bg-background/40 transition">
                   <td className="px-5 py-3.5">
@@ -100,9 +99,6 @@ function AffiliatesPage() {
                     <div className="text-xs text-muted-foreground">{a.email}</div>
                   </td>
                   <td className="px-5 py-3.5 hidden md:table-cell font-mono text-xs text-muted-foreground">/{a.slug}</td>
-                  <td className="px-5 py-3.5 hidden lg:table-cell">
-                    {a.commission_type === "percentage" ? `${a.commission_value}%` : formatBRL(a.commission_value)}
-                  </td>
                   <td className="px-5 py-3.5"><StatusBadge status={a.status} /></td>
                   <td className="px-5 py-3.5 text-right">
                     <div className="inline-flex gap-1">
@@ -144,8 +140,6 @@ function AffiliateForm({ initial, onClose }: { initial: Affiliate | null; onClos
     instagram: initial?.instagram ?? "",
     pix_key: initial?.pix_key ?? "",
     pix_type: (initial?.pix_type ?? "email") as "cpf" | "cnpj" | "email" | "phone" | "random",
-    commission_type: (initial?.commission_type ?? "percentage") as "percentage" | "fixed",
-    commission_value: initial?.commission_value ?? 30,
     slug: initial?.slug ?? "",
     status: (initial?.status ?? "active") as "active" | "paused" | "blocked",
   });
@@ -160,7 +154,6 @@ function AffiliateForm({ initial, onClose }: { initial: Affiliate | null; onClos
           full_name: form.full_name, username: form.username, email: form.email,
           phone: form.phone || null, instagram: form.instagram || null,
           pix_key: form.pix_key || null, pix_type: form.pix_type,
-          commission_type: form.commission_type, commission_value: Number(form.commission_value),
           slug: form.slug || slugify(form.username || form.full_name), status: form.status,
         };
         const { error } = await supabase.from("affiliates").update(payload).eq("id", initial.id);
@@ -181,8 +174,6 @@ function AffiliateForm({ initial, onClose }: { initial: Affiliate | null; onClos
             instagram: form.instagram || null,
             pix_key: form.pix_key || null,
             pix_type: form.pix_type,
-            commission_type: form.commission_type,
-            commission_value: Number(form.commission_value),
             status: form.status,
           },
         });
@@ -221,18 +212,6 @@ function AffiliateForm({ initial, onClose }: { initial: Affiliate | null; onClos
           </Select>
         </Field>
         <Field label="Chave Pix"><Input value={form.pix_key ?? ""} onChange={(e) => setForm({ ...form, pix_key: e.target.value })} /></Field>
-        <Field label="Tipo de comissão">
-          <Select value={form.commission_type} onValueChange={(v: "percentage" | "fixed") => setForm({ ...form, commission_type: v })}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="percentage">Porcentagem (%)</SelectItem>
-              <SelectItem value="fixed">Valor fixo (R$)</SelectItem>
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field label={form.commission_type === "percentage" ? "Valor (%)" : "Valor (R$)"}>
-          <Input type="number" step="0.01" required value={form.commission_value} onChange={(e) => setForm({ ...form, commission_value: Number(e.target.value) })} />
-        </Field>
         <Field label="Status">
           <Select value={form.status} onValueChange={(v: "active" | "paused" | "blocked") => setForm({ ...form, status: v })}>
             <SelectTrigger><SelectValue /></SelectTrigger>
@@ -243,6 +222,9 @@ function AffiliateForm({ initial, onClose }: { initial: Affiliate | null; onClos
             </SelectContent>
           </Select>
         </Field>
+      </div>
+      <div className="rounded-lg bg-muted/40 border border-border p-3 text-xs text-muted-foreground">
+        💡 A comissão deste afiliado é definida <strong className="text-foreground">por produto</strong>, na tela de Solicitações ao aprovar cada afiliação.
       </div>
       <div className="flex justify-end gap-2 pt-2 border-t border-border">
         <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
