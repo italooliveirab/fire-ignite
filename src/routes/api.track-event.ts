@@ -5,7 +5,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import crypto from "crypto";
-import { notifyAdminLeadPaid, notifyAffiliateLeadPaid } from "@/server/notifications";
+import { notifyAdminLeadPaid, notifyAffiliateLeadPaid } from "@/server/lead-notifications";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
