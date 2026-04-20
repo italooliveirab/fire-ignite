@@ -48,7 +48,7 @@ function AdminLoginPage() {
       <div className="w-full max-w-md">
         <Link to="/" className="flex justify-center mb-8">
           <div className="flex items-center gap-3">
-            <img src="/brand/fire-logo.png" alt="FIRE" className="h-12 w-12 rounded-xl object-contain" />
+            <img src="/brand/fire-icon.png" alt="FIRE" className="h-12 w-12 rounded-xl object-contain" />
             <div>
               <div className="font-display font-bold text-2xl leading-none">FIRE</div>
               <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-1">Admin</div>

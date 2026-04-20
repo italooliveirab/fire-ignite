@@ -9,7 +9,7 @@ const listeners = new Set<(b: Brand) => void>();
 async function fetchBrand(): Promise<Brand> {
   const { data } = await supabase.from("settings").select("logo_url, company_name").limit(1).maybeSingle();
   const brand: Brand = {
-    logoUrl: data?.logo_url ?? "/brand/fire-logo.png",
+    logoUrl: data?.logo_url ?? "/brand/fire-icon.png",
     companyName: data?.company_name ?? "FIRE",
   };
   cached = brand;
@@ -18,7 +18,7 @@ async function fetchBrand(): Promise<Brand> {
 }
 
 export function useBrand(): Brand {
-  const [brand, setBrand] = useState<Brand>(cached ?? { logoUrl: "/brand/fire-logo.png", companyName: "FIRE" });
+  const [brand, setBrand] = useState<Brand>(cached ?? { logoUrl: "/brand/fire-icon.png", companyName: "FIRE" });
 
   useEffect(() => {
     listeners.add(setBrand);
