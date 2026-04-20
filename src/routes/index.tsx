@@ -23,7 +23,7 @@ function Landing() {
             <span className="text-xs text-muted-foreground hidden sm:inline">Afiliados</span>
           </Link>
           <Link to="/login" className="px-5 py-2 rounded-lg bg-gradient-fire text-white text-sm font-semibold shadow-fire hover:opacity-90 transition">
-            Entrar
+            Área do Afiliado
           </Link>
         </div>
       </header>
@@ -41,10 +41,10 @@ function Landing() {
         </p>
         <div className="mt-10 flex flex-col sm:flex-row gap-3 justify-center">
           <Link to="/login" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-fire text-white font-semibold shadow-fire hover:shadow-glow transition">
-            Acessar painel <ArrowRight className="h-4 w-4" />
+            Entrar como afiliado <ArrowRight className="h-4 w-4" />
           </Link>
-          <Link to="/docs" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border border-border bg-card/40 text-foreground font-semibold hover:border-primary/50 transition">
-            Documentação API
+          <Link to="/ranking" className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border border-border bg-card/40 text-foreground font-semibold hover:border-primary/50 transition">
+            Ver Ranking do Mês
           </Link>
         </div>
       </section>

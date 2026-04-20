@@ -26,6 +26,7 @@ import { Route as AppLeadsRouteImport } from './routes/app/leads'
 import { Route as AppCommissionsRouteImport } from './routes/app/commissions'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminPayoutsRouteImport } from './routes/admin/payouts'
+import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminLeadsRouteImport } from './routes/admin/leads'
 import { Route as AdminCommissionsRouteImport } from './routes/admin/commissions'
 import { Route as AdminBuyersRouteImport } from './routes/admin/buyers'
@@ -117,6 +118,11 @@ const AdminPayoutsRoute = AdminPayoutsRouteImport.update({
   path: '/admin/payouts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLeadsRoute = AdminLeadsRouteImport.update({
   id: '/admin/leads',
   path: '/admin/leads',
@@ -156,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/admin/buyers': typeof AdminBuyersRoute
   '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/leads': typeof AdminLeadsRoute
+  '/admin/login': typeof AdminLoginRoute
   '/admin/payouts': typeof AdminPayoutsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/app/commissions': typeof AppCommissionsRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/admin/buyers': typeof AdminBuyersRoute
   '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/leads': typeof AdminLeadsRoute
+  '/admin/login': typeof AdminLoginRoute
   '/admin/payouts': typeof AdminPayoutsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/app/commissions': typeof AppCommissionsRoute
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/admin/buyers': typeof AdminBuyersRoute
   '/admin/commissions': typeof AdminCommissionsRoute
   '/admin/leads': typeof AdminLeadsRoute
+  '/admin/login': typeof AdminLoginRoute
   '/admin/payouts': typeof AdminPayoutsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/app/commissions': typeof AppCommissionsRoute
@@ -231,6 +240,7 @@ export interface FileRouteTypes {
     | '/admin/buyers'
     | '/admin/commissions'
     | '/admin/leads'
+    | '/admin/login'
     | '/admin/payouts'
     | '/admin/settings'
     | '/app/commissions'
@@ -255,6 +265,7 @@ export interface FileRouteTypes {
     | '/admin/buyers'
     | '/admin/commissions'
     | '/admin/leads'
+    | '/admin/login'
     | '/admin/payouts'
     | '/admin/settings'
     | '/app/commissions'
@@ -279,6 +290,7 @@ export interface FileRouteTypes {
     | '/admin/buyers'
     | '/admin/commissions'
     | '/admin/leads'
+    | '/admin/login'
     | '/admin/payouts'
     | '/admin/settings'
     | '/app/commissions'
@@ -304,6 +316,7 @@ export interface RootRouteChildren {
   AdminBuyersRoute: typeof AdminBuyersRoute
   AdminCommissionsRoute: typeof AdminCommissionsRoute
   AdminLeadsRoute: typeof AdminLeadsRoute
+  AdminLoginRoute: typeof AdminLoginRoute
   AdminPayoutsRoute: typeof AdminPayoutsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AppCommissionsRoute: typeof AppCommissionsRoute
@@ -437,6 +450,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPayoutsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/leads': {
       id: '/admin/leads'
       path: '/admin/leads'
@@ -488,6 +508,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminBuyersRoute: AdminBuyersRoute,
   AdminCommissionsRoute: AdminCommissionsRoute,
   AdminLeadsRoute: AdminLeadsRoute,
+  AdminLoginRoute: AdminLoginRoute,
   AdminPayoutsRoute: AdminPayoutsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AppCommissionsRoute: AppCommissionsRoute,
