@@ -115,7 +115,7 @@ export const adminUpdateAffiliateAuth = createServerFn({ method: "POST" })
     // Lookup admin email for audit
     const { data: adminUser } = await supabaseAdmin.auth.admin.getUserById(context.userId);
 
-    await supabaseAdmin.from("affiliate_credential_audit").insert({
+    const { error: auditErr } = await supabaseAdmin.from("affiliate_credential_audit").insert({
       affiliate_id: aff.id,
       changed_by: context.userId,
       changed_by_email: adminUser?.user?.email ?? null,
@@ -124,6 +124,9 @@ export const adminUpdateAffiliateAuth = createServerFn({ method: "POST" })
       old_email: data.email ? aff.email : null,
       new_email: data.email ?? null,
     });
+    if (auditErr) {
+      console.error("[adminUpdateAffiliateAuth] audit insert failed:", auditErr);
+    }
 
     return { ok: true };
   });

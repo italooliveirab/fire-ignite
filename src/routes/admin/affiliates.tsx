@@ -205,7 +205,8 @@ function AffiliateForm({ initial, onClose }: { initial: Affiliate | null; onClos
       }
       onClose();
     } catch (err) {
-      toast.error((err as Error).message);
+      const msg = (err as Error)?.message;
+      toast.error(!msg || msg === "[object Response]" ? "Sessão expirou. Recarregue a página e faça login novamente." : msg);
     } finally {
       setSaving(false);
     }
