@@ -25,11 +25,13 @@ export function DashboardLayout({ variant, title, children }: Props) {
       nav({ to: target, search: { redirect: loc.pathname } });
       return;
     }
+    // Wait until role is resolved before deciding to redirect
+    if (role === null) return;
     if (variant === "admin" && role !== "admin") nav({ to: "/app" });
     if (variant === "affiliate" && role !== "affiliate" && role !== "admin") nav({ to: "/login" });
   }, [user, role, loading, variant, nav, loc.pathname]);
 
-  if (loading || !user) {
+  if (loading || !user || role === null) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="h-10 w-10 rounded-full border-2 border-primary border-t-transparent animate-spin" />
