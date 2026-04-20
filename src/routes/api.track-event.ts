@@ -5,7 +5,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import crypto from "crypto";
-import { notifyAdminLeadPaid } from "@/server/notifications";
+import { notifyAdminLeadPaid, notifyAffiliateLeadPaid } from "@/server/notifications";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -101,20 +101,39 @@ export const Route = createFileRoute("/api/track-event")({
           if (newStatus === "paid" && lead.status !== "paid") {
             try {
               const [{ data: aff }, { data: prod }, { data: settings }] = await Promise.all([
-                supabaseAdmin.from("affiliates").select("full_name").eq("id", updated.affiliate_id).maybeSingle(),
+                supabaseAdmin.from("affiliates").select("full_name,email").eq("id", updated.affiliate_id).maybeSingle(),
                 updated.product_id
                   ? supabaseAdmin.from("products").select("name").eq("id", updated.product_id).maybeSingle()
                   : Promise.resolve({ data: null }),
                 supabaseAdmin.from("settings").select("admin_notification_email").limit(1).maybeSingle(),
               ]);
+              const productName = (prod as { name?: string } | null)?.name ?? null;
               await notifyAdminLeadPaid({
                 customer_name: updated.customer_name,
                 whatsapp_number: updated.whatsapp_number,
                 affiliate_name: aff?.full_name ?? null,
-                product_name: (prod as { name?: string } | null)?.name ?? null,
+                product_name: productName,
                 amount: updated.payment_amount,
                 admin_email: (settings as { admin_notification_email?: string | null } | null)?.admin_notification_email ?? null,
               });
+
+              // Busca a comissão gerada para este lead (trigger cria automaticamente)
+              if (aff?.email) {
+                const { data: commission } = await supabaseAdmin
+                  .from("commissions")
+                  .select("commission_value")
+                  .eq("lead_id", updated.id)
+                  .eq("affiliate_id", updated.affiliate_id)
+                  .maybeSingle();
+                await notifyAffiliateLeadPaid({
+                  affiliate_email: aff.email,
+                  affiliate_name: aff.full_name,
+                  customer_name: updated.customer_name,
+                  product_name: productName,
+                  payment_amount: updated.payment_amount,
+                  commission_amount: commission?.commission_value ?? null,
+                });
+              }
             } catch (notifyErr) {
               console.error("notify admin paid failed:", notifyErr);
             }
