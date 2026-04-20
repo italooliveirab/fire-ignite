@@ -1,7 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   LayoutDashboard, Users, Target, DollarSign, Banknote, Settings, FileCode2,
-  LogOut, Link2, User, ScrollText, ShoppingCart,
+  LogOut, Link2, User, ScrollText, ShoppingCart, Package, Inbox,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,8 @@ import { BrandMark } from "@/components/BrandMark";
 
 const adminNav = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { to: "/admin/products", label: "Produtos", icon: Package },
+  { to: "/admin/requests", label: "Solicitações", icon: Inbox },
   { to: "/admin/affiliates", label: "Afiliados", icon: Users },
   { to: "/admin/leads", label: "Leads", icon: Target },
   { to: "/admin/buyers", label: "Compradores", icon: ShoppingCart },
@@ -21,7 +23,8 @@ const adminNav = [
 
 const affiliateNav = [
   { to: "/app", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { to: "/app/link", label: "Meu Link", icon: Link2 },
+  { to: "/app/products", label: "Produtos", icon: Package },
+  { to: "/app/link", label: "Meus Links", icon: Link2 },
   { to: "/app/leads", label: "Meus Leads", icon: Target },
   { to: "/app/commissions", label: "Comissões", icon: DollarSign },
   { to: "/app/payouts", label: "Pagamentos", icon: Banknote },
