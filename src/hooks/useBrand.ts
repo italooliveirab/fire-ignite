@@ -4,9 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 type Brand = { logoUrl: string | null; companyName: string };
 
 let cached: Brand | null = null;
+let inflight: Promise<Brand> | null = null;
 const listeners = new Set<(b: Brand) => void>();
 
 async function fetchBrand(): Promise<Brand> {
+  if (cached) return cached;
+  if (inflight) return inflight;
+  inflight = (async () => {
   const { data } = await supabase.from("settings").select("company_name").limit(1).maybeSingle();
   const brand: Brand = {
     logoUrl: null,
@@ -14,7 +18,10 @@ async function fetchBrand(): Promise<Brand> {
   };
   cached = brand;
   listeners.forEach((l) => l(brand));
+  inflight = null;
   return brand;
+  })();
+  return inflight;
 }
 
 export function useBrand(): Brand {

@@ -166,5 +166,17 @@ html { color-scheme: dark; }
 }
 .animate-pulse-glow { animation: pulse-glow 2.4s ease-in-out infinite; }
 
+@media (prefers-reduced-motion: no-preference) {
+  :where(button, a, [role="button"], [data-radix-collection-item]) {
+    transition: transform 140ms ease, filter 140ms ease, opacity 140ms ease, box-shadow 180ms ease;
+    transform-origin: center;
+  }
+
+  :where(button, a, [role="button"], [data-radix-collection-item]):active {
+    transform: scale(0.98);
+    filter: brightness(1.06);
+  }
+}
+
 /* Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');

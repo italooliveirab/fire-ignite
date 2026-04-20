@@ -20,6 +20,7 @@ const adminNav = [
   { to: "/admin/buyers", label: "Compradores", icon: ShoppingCart },
   { to: "/admin/commissions", label: "Comissões", icon: DollarSign },
   { to: "/admin/network", label: "Rede", icon: Network },
+  { to: "/admin/network-commissions", label: "Comissões da Rede", icon: DollarSign },
   { to: "/admin/network-rules", label: "Regras da Rede", icon: Settings2 },
   { to: "/admin/payouts", label: "Pagamentos", icon: Banknote },
   { to: "/admin/audit", label: "Auditoria", icon: ShieldCheck },
@@ -97,6 +98,7 @@ export function AppSidebar({ variant }: { variant: "admin" | "affiliate" }) {
             <Link
               key={item.to}
               to={item.to}
+              preload="intent"
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all group",
                 active
