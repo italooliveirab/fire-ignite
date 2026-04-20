@@ -150,18 +150,16 @@ function PublicLandingRedirect() {
         // Fire-and-forget: track the lead via the server POST endpoint
         fetch(window.location.pathname, { method: "POST" }).catch(() => undefined);
 
-        // Redirect to WhatsApp shortly after
-        const phone = (settings?.support_whatsapp ?? "").replace(/\D/g, "");
-        if (phone) {
-          const msg = encodeURIComponent(
-            `Olá! Vim pelo link do afiliado ${affiliate.full_name} e quero saber mais sobre ${product.name}.`,
-          );
-          setTimeout(() => {
-            window.location.href = `https://wa.me/${phone}?text=${msg}`;
-          }, 1200);
-        } else {
-          setError("Canal de atendimento indisponível. Contate a FIRE.");
-        }
+        // Redirect to WhatsApp shortly after — fallback to official sales number
+        const OFFICIAL_WHATSAPP = "5575883306130";
+        const phone = (settings?.support_whatsapp ?? "").replace(/\D/g, "") || OFFICIAL_WHATSAPP;
+        const trackingCode = `${product.slug}-${affiliate.slug}`;
+        const msg = encodeURIComponent(
+          `Olá! Vim pelo link do afiliado *${affiliate.full_name}* e quero saber mais sobre *${product.name}*.\n\n_Código de rastreamento: ${trackingCode}_`,
+        );
+        setTimeout(() => {
+          window.location.href = `https://wa.me/${phone}?text=${msg}`;
+        }, 1200);
       } catch (e) {
         console.error(e);
         setError("Não foi possível abrir o atendimento. Tente novamente em instantes.");
