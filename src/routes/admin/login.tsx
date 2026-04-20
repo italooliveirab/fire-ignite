@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { Mail, Lock, ArrowRight, ShieldCheck } from "lucide-react";
+import { BrandMark } from "@/components/BrandMark";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -47,13 +48,7 @@ function AdminLoginPage() {
 
       <div className="w-full max-w-md">
         <Link to="/" className="flex justify-center mb-8">
-          <div className="flex items-center gap-3">
-            <img src="/brand/fire-logo.png" alt="FIRE" className="h-12 w-12 rounded-xl object-contain" />
-            <div>
-              <div className="font-display font-bold text-2xl leading-none">FIRE</div>
-              <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mt-1">Admin</div>
-            </div>
-          </div>
+          <BrandMark size="lg" subtitle="Admin" />
         </Link>
 
         <div className="rounded-2xl border border-border bg-card/80 backdrop-blur-xl p-8 shadow-card-premium">
