@@ -89,7 +89,7 @@ export const adminUpdateAffiliateAuth = createServerFn({ method: "POST" })
 
     const { data: aff, error: affErr } = await supabaseAdmin
       .from("affiliates")
-      .select("id, user_id")
+      .select("id, user_id, email")
       .eq("id", data.affiliate_id)
       .single();
     if (affErr || !aff?.user_id) throw new Error("Afiliado não encontrado ou sem usuário vinculado");
@@ -111,6 +111,19 @@ export const adminUpdateAffiliateAuth = createServerFn({ method: "POST" })
         .eq("id", aff.id);
       if (syncErr) throw new Error(syncErr.message);
     }
+
+    // Lookup admin email for audit
+    const { data: adminUser } = await supabaseAdmin.auth.admin.getUserById(context.userId);
+
+    await supabaseAdmin.from("affiliate_credential_audit").insert({
+      affiliate_id: aff.id,
+      changed_by: context.userId,
+      changed_by_email: adminUser?.user?.email ?? null,
+      email_changed: !!data.email,
+      password_changed: !!data.password,
+      old_email: data.email ? aff.email : null,
+      new_email: data.email ?? null,
+    });
 
     return { ok: true };
   });
