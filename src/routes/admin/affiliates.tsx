@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { slugify, formatBRL } from "@/lib/format";
+import { adminCreateAffiliate } from "@/server/admin-affiliates";
 
 export const Route = createFileRoute("/admin/affiliates")({ component: AffiliatesPage });
 
@@ -138,6 +139,7 @@ function AffiliateForm({ initial, onClose }: { initial: Affiliate | null; onClos
     full_name: initial?.full_name ?? "",
     username: initial?.username ?? "",
     email: initial?.email ?? "",
+    password: "",
     phone: initial?.phone ?? "",
     instagram: initial?.instagram ?? "",
     pix_key: initial?.pix_key ?? "",
@@ -152,14 +154,46 @@ function AffiliateForm({ initial, onClose }: { initial: Affiliate | null; onClos
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    const payload = { ...form, slug: form.slug || slugify(form.username || form.full_name), commission_value: Number(form.commission_value) };
-    const { error } = initial
-      ? await supabase.from("affiliates").update(payload as never).eq("id", initial.id)
-      : await supabase.from("affiliates").insert(payload as never);
-    setSaving(false);
-    if (error) { toast.error(error.message); return; }
-    toast.success(initial ? "Afiliado atualizado" : "Afiliado criado");
-    onClose();
+    try {
+      if (initial) {
+        const payload = {
+          full_name: form.full_name, username: form.username, email: form.email,
+          phone: form.phone || null, instagram: form.instagram || null,
+          pix_key: form.pix_key || null, pix_type: form.pix_type,
+          commission_type: form.commission_type, commission_value: Number(form.commission_value),
+          slug: form.slug || slugify(form.username || form.full_name), status: form.status,
+        };
+        const { error } = await supabase.from("affiliates").update(payload).eq("id", initial.id);
+        if (error) throw error;
+        toast.success("Afiliado atualizado");
+      } else {
+        if (!form.password || form.password.length < 6) {
+          throw new Error("Defina uma senha de pelo menos 6 caracteres para o afiliado");
+        }
+        await adminCreateAffiliate({
+          data: {
+            email: form.email,
+            password: form.password,
+            full_name: form.full_name,
+            username: form.username,
+            slug: form.slug || slugify(form.username || form.full_name),
+            phone: form.phone || null,
+            instagram: form.instagram || null,
+            pix_key: form.pix_key || null,
+            pix_type: form.pix_type,
+            commission_type: form.commission_type,
+            commission_value: Number(form.commission_value),
+            status: form.status,
+          },
+        });
+        toast.success("Afiliado criado e conta de acesso gerada");
+      }
+      onClose();
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -167,7 +201,12 @@ function AffiliateForm({ initial, onClose }: { initial: Affiliate | null; onClos
       <div className="grid sm:grid-cols-2 gap-3">
         <Field label="Nome completo"><Input required value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} /></Field>
         <Field label="Username"><Input required value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value, slug: form.slug || slugify(e.target.value) })} /></Field>
-        <Field label="Email"><Input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
+        <Field label="Email"><Input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} disabled={!!initial} /></Field>
+        {!initial && (
+          <Field label="Senha de acesso">
+            <Input type="password" required minLength={6} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Mínimo 6 caracteres" />
+          </Field>
+        )}
         <Field label="Telefone"><Input value={form.phone ?? ""} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></Field>
         <Field label="Instagram"><Input value={form.instagram ?? ""} onChange={(e) => setForm({ ...form, instagram: e.target.value })} /></Field>
         <Field label="Slug (link)"><Input value={form.slug} onChange={(e) => setForm({ ...form, slug: slugify(e.target.value) })} /></Field>

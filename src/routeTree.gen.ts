@@ -20,11 +20,14 @@ import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AppRulesRouteImport } from './routes/app/rules'
 import { Route as AppProfileRouteImport } from './routes/app/profile'
+import { Route as AppProductsRouteImport } from './routes/app/products'
 import { Route as AppPayoutsRouteImport } from './routes/app/payouts'
 import { Route as AppLinkRouteImport } from './routes/app/link'
 import { Route as AppLeadsRouteImport } from './routes/app/leads'
 import { Route as AppCommissionsRouteImport } from './routes/app/commissions'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
+import { Route as AdminRequestsRouteImport } from './routes/admin/requests'
+import { Route as AdminProductsRouteImport } from './routes/admin/products'
 import { Route as AdminPayoutsRouteImport } from './routes/admin/payouts'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AdminLeadsRouteImport } from './routes/admin/leads'
@@ -88,6 +91,11 @@ const AppProfileRoute = AppProfileRouteImport.update({
   path: '/app/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppProductsRoute = AppProductsRouteImport.update({
+  id: '/app/products',
+  path: '/app/products',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppPayoutsRoute = AppPayoutsRouteImport.update({
   id: '/app/payouts',
   path: '/app/payouts',
@@ -111,6 +119,16 @@ const AppCommissionsRoute = AppCommissionsRouteImport.update({
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/admin/settings',
   path: '/admin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRequestsRoute = AdminRequestsRouteImport.update({
+  id: '/admin/requests',
+  path: '/admin/requests',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminProductsRoute = AdminProductsRouteImport.update({
+  id: '/admin/products',
+  path: '/admin/products',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminPayoutsRoute = AdminPayoutsRouteImport.update({
@@ -164,11 +182,14 @@ export interface FileRoutesByFullPath {
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/payouts': typeof AdminPayoutsRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
   '/app/link': typeof AppLinkRoute
   '/app/payouts': typeof AppPayoutsRoute
+  '/app/products': typeof AppProductsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/rules': typeof AppRulesRoute
   '/admin/': typeof AdminIndexRoute
@@ -189,11 +210,14 @@ export interface FileRoutesByTo {
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/payouts': typeof AdminPayoutsRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
   '/app/link': typeof AppLinkRoute
   '/app/payouts': typeof AppPayoutsRoute
+  '/app/products': typeof AppProductsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/rules': typeof AppRulesRoute
   '/admin': typeof AdminIndexRoute
@@ -215,11 +239,14 @@ export interface FileRoutesById {
   '/admin/leads': typeof AdminLeadsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/payouts': typeof AdminPayoutsRoute
+  '/admin/products': typeof AdminProductsRoute
+  '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
   '/app/link': typeof AppLinkRoute
   '/app/payouts': typeof AppPayoutsRoute
+  '/app/products': typeof AppProductsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/rules': typeof AppRulesRoute
   '/admin/': typeof AdminIndexRoute
@@ -242,11 +269,14 @@ export interface FileRouteTypes {
     | '/admin/leads'
     | '/admin/login'
     | '/admin/payouts'
+    | '/admin/products'
+    | '/admin/requests'
     | '/admin/settings'
     | '/app/commissions'
     | '/app/leads'
     | '/app/link'
     | '/app/payouts'
+    | '/app/products'
     | '/app/profile'
     | '/app/rules'
     | '/admin/'
@@ -267,11 +297,14 @@ export interface FileRouteTypes {
     | '/admin/leads'
     | '/admin/login'
     | '/admin/payouts'
+    | '/admin/products'
+    | '/admin/requests'
     | '/admin/settings'
     | '/app/commissions'
     | '/app/leads'
     | '/app/link'
     | '/app/payouts'
+    | '/app/products'
     | '/app/profile'
     | '/app/rules'
     | '/admin'
@@ -292,11 +325,14 @@ export interface FileRouteTypes {
     | '/admin/leads'
     | '/admin/login'
     | '/admin/payouts'
+    | '/admin/products'
+    | '/admin/requests'
     | '/admin/settings'
     | '/app/commissions'
     | '/app/leads'
     | '/app/link'
     | '/app/payouts'
+    | '/app/products'
     | '/app/profile'
     | '/app/rules'
     | '/admin/'
@@ -318,11 +354,14 @@ export interface RootRouteChildren {
   AdminLeadsRoute: typeof AdminLeadsRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminPayoutsRoute: typeof AdminPayoutsRoute
+  AdminProductsRoute: typeof AdminProductsRoute
+  AdminRequestsRoute: typeof AdminRequestsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AppCommissionsRoute: typeof AppCommissionsRoute
   AppLeadsRoute: typeof AppLeadsRoute
   AppLinkRoute: typeof AppLinkRoute
   AppPayoutsRoute: typeof AppPayoutsRoute
+  AppProductsRoute: typeof AppProductsRoute
   AppProfileRoute: typeof AppProfileRoute
   AppRulesRoute: typeof AppRulesRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -408,6 +447,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/products': {
+      id: '/app/products'
+      path: '/app/products'
+      fullPath: '/app/products'
+      preLoaderRoute: typeof AppProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/payouts': {
       id: '/app/payouts'
       path: '/app/payouts'
@@ -441,6 +487,20 @@ declare module '@tanstack/react-router' {
       path: '/admin/settings'
       fullPath: '/admin/settings'
       preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/requests': {
+      id: '/admin/requests'
+      path: '/admin/requests'
+      fullPath: '/admin/requests'
+      preLoaderRoute: typeof AdminRequestsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/products': {
+      id: '/admin/products'
+      path: '/admin/products'
+      fullPath: '/admin/products'
+      preLoaderRoute: typeof AdminProductsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/payouts': {
@@ -510,11 +570,14 @@ const rootRouteChildren: RootRouteChildren = {
   AdminLeadsRoute: AdminLeadsRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminPayoutsRoute: AdminPayoutsRoute,
+  AdminProductsRoute: AdminProductsRoute,
+  AdminRequestsRoute: AdminRequestsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AppCommissionsRoute: AppCommissionsRoute,
   AppLeadsRoute: AppLeadsRoute,
   AppLinkRoute: AppLinkRoute,
   AppPayoutsRoute: AppPayoutsRoute,
+  AppProductsRoute: AppProductsRoute,
   AppProfileRoute: AppProfileRoute,
   AppRulesRoute: AppRulesRoute,
   AdminIndexRoute: AdminIndexRoute,

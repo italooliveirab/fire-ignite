@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      affiliate_products: {
+        Row: {
+          affiliate_id: string
+          decided_at: string | null
+          decided_by: string | null
+          id: string
+          notes: string | null
+          product_id: string
+          requested_at: string
+          status: Database["public"]["Enums"]["affiliation_status"]
+          updated_at: string
+        }
+        Insert: {
+          affiliate_id: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          notes?: string | null
+          product_id: string
+          requested_at?: string
+          status?: Database["public"]["Enums"]["affiliation_status"]
+          updated_at?: string
+        }
+        Update: {
+          affiliate_id?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          id?: string
+          notes?: string | null
+          product_id?: string
+          requested_at?: string
+          status?: Database["public"]["Enums"]["affiliation_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_products_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       affiliates: {
         Row: {
           commission_type: Database["public"]["Enums"]["commission_type"]
@@ -106,6 +157,7 @@ export type Database = {
           created_at: string
           id: string
           lead_id: string
+          product_id: string | null
           status: Database["public"]["Enums"]["commission_status"]
           updated_at: string
         }
@@ -116,6 +168,7 @@ export type Database = {
           created_at?: string
           id?: string
           lead_id: string
+          product_id?: string | null
           status?: Database["public"]["Enums"]["commission_status"]
           updated_at?: string
         }
@@ -126,6 +179,7 @@ export type Database = {
           created_at?: string
           id?: string
           lead_id?: string
+          product_id?: string | null
           status?: Database["public"]["Enums"]["commission_status"]
           updated_at?: string
         }
@@ -144,6 +198,13 @@ export type Database = {
             referencedRelation: "leads"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "commissions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
         ]
       }
       leads: {
@@ -156,6 +217,7 @@ export type Database = {
           paid_at: string | null
           payment_amount: number | null
           payment_generated_at: string | null
+          product_id: string | null
           status: Database["public"]["Enums"]["lead_status"]
           trial_generated_at: string | null
           updated_at: string
@@ -171,6 +233,7 @@ export type Database = {
           paid_at?: string | null
           payment_amount?: number | null
           payment_generated_at?: string | null
+          product_id?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
           trial_generated_at?: string | null
           updated_at?: string
@@ -186,6 +249,7 @@ export type Database = {
           paid_at?: string | null
           payment_amount?: number | null
           payment_generated_at?: string | null
+          product_id?: string | null
           status?: Database["public"]["Enums"]["lead_status"]
           trial_generated_at?: string | null
           updated_at?: string
@@ -198,6 +262,13 @@ export type Database = {
             columns: ["affiliate_id"]
             isOneToOne: false
             referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -245,6 +316,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      products: {
+        Row: {
+          commission_type: Database["public"]["Enums"]["commission_type"]
+          commission_value: number
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          media_kit_url: string | null
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          commission_type?: Database["public"]["Enums"]["commission_type"]
+          commission_value?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          media_kit_url?: string | null
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          commission_type?: Database["public"]["Enums"]["commission_type"]
+          commission_value?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          media_kit_url?: string | null
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -361,6 +471,7 @@ export type Database = {
     }
     Enums: {
       affiliate_status: "active" | "paused" | "blocked"
+      affiliation_status: "pending" | "approved" | "rejected"
       app_role: "admin" | "affiliate"
       commission_status: "pending" | "released" | "paid"
       commission_type: "percentage" | "fixed"
@@ -500,6 +611,7 @@ export const Constants = {
   public: {
     Enums: {
       affiliate_status: ["active", "paused", "blocked"],
+      affiliation_status: ["pending", "approved", "rejected"],
       app_role: ["admin", "affiliate"],
       commission_status: ["pending", "released", "paid"],
       commission_type: ["percentage", "fixed"],
