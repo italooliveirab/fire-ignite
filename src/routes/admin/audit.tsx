@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, Download, ShieldCheck } from "lucide-react";
+import { Search, Download, ShieldCheck, Mail } from "lucide-react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDateTime } from "@/lib/format";
 import { exportCSV } from "@/lib/csv";
@@ -143,19 +144,30 @@ function AuditPage() {
 
   return (
     <DashboardLayout variant="admin" title="Auditoria">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+      <div className="mb-6">
+        <h1 className="font-display text-3xl font-bold flex items-center gap-2">
+          <ShieldCheck className="h-7 w-7 text-primary" /> Auditoria
+        </h1>
+        <p className="text-muted-foreground text-sm mt-1">Rastreabilidade de credenciais e emails enviados</p>
+      </div>
+
+      <Tabs defaultValue="credentials" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="credentials"><ShieldCheck className="h-4 w-4 mr-1.5" /> Credenciais</TabsTrigger>
+          <TabsTrigger value="emails"><Mail className="h-4 w-4 mr-1.5" /> Emails enviados</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="credentials" className="space-y-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl font-bold flex items-center gap-2">
-            <ShieldCheck className="h-7 w-7 text-primary" /> Auditoria de credenciais
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">{total} alteração(ões) registradas no total</p>
+          <p className="text-sm text-muted-foreground">{total} alteração(ões) registradas no total</p>
         </div>
         <Button onClick={exportRows} variant="outline" disabled={filtered.length === 0}>
           <Download className="h-4 w-4 mr-1" /> Exportar CSV
         </Button>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-2 mb-4">
+      <div className="flex flex-col md:flex-row gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar afiliado, admin ou email..." className="pl-10 bg-card" />
