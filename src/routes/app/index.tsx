@@ -14,6 +14,55 @@ import { TopAffiliatesRanking } from "@/components/TopAffiliatesRanking";
 
 export const Route = createFileRoute("/app/")({ component: AffiliateDashboard });
 
+function ApprovedLinksCard({ affiliateId, affiliateSlug, domain }: { affiliateId: string; affiliateSlug: string; domain: string }) {
+  const { data: links } = useQuery({
+    queryKey: ["my-approved-links", affiliateId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("affiliate_products")
+        .select("id, products(name, slug, is_active)")
+        .eq("affiliate_id", affiliateId)
+        .eq("status", "approved");
+      return (data ?? []).filter((r: any) => r.products?.is_active);
+    },
+  });
+
+  const copy = (url: string) => {
+    navigator.clipboard.writeText(url);
+    toast.success("Link copiado!");
+  };
+
+  if (!links || links.length === 0) {
+    return (
+      <div className="rounded-2xl border border-border bg-card p-6 mb-6 shadow-card-premium">
+        <h3 className="font-display font-semibold mb-2 flex items-center gap-2"><Package className="h-5 w-5 text-fire" /> Seus links de divulgação</h3>
+        <p className="text-sm text-muted-foreground mb-3">Você ainda não tem produtos aprovados. Solicite afiliação a um produto para gerar seus links.</p>
+        <Button asChild size="sm" variant="outline"><Link to="/app/products">Ver produtos</Link></Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-6 mb-6 shadow-card-premium">
+      <h3 className="font-display font-semibold mb-4 flex items-center gap-2"><Package className="h-5 w-5 text-fire" /> Seus links de divulgação</h3>
+      <div className="space-y-2">
+        {links.map((row: any) => {
+          const url = `https://${domain}/p/${row.products.slug}/${affiliateSlug}`;
+          return (
+            <div key={row.id} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background/50 p-3">
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-semibold truncate">{row.products.name}</div>
+                <div className="text-xs text-muted-foreground truncate font-mono">{url}</div>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => copy(url)}><Copy className="h-3.5 w-3.5 mr-1" /> Copiar</Button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function AffiliateDashboard() {
   const { user } = useAuth();
   const [domain, setDomain] = useState("fire.com");
