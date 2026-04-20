@@ -27,6 +27,7 @@ import { Route as AppNetworkRouteImport } from './routes/app/network'
 import { Route as AppLinkRouteImport } from './routes/app/link'
 import { Route as AppLeadsRouteImport } from './routes/app/leads'
 import { Route as AppCommissionsRouteImport } from './routes/app/commissions'
+import { Route as ApiTrackEventRouteImport } from './routes/api.track-event'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminRequestsRouteImport } from './routes/admin/requests'
 import { Route as AdminProductsRouteImport } from './routes/admin/products'
@@ -134,6 +135,11 @@ const AppCommissionsRoute = AppCommissionsRouteImport.update({
   path: '/app/commissions',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTrackEventRoute = ApiTrackEventRouteImport.update({
+  id: '/api/track-event',
+  path: '/api/track-event',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/admin/settings',
   path: '/admin/settings',
@@ -233,6 +239,7 @@ export interface FileRoutesByFullPath {
   '/admin/products': typeof AdminProductsRoute
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/api/track-event': typeof ApiTrackEventRoute
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
   '/app/link': typeof AppLinkRoute
@@ -268,6 +275,7 @@ export interface FileRoutesByTo {
   '/admin/products': typeof AdminProductsRoute
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/api/track-event': typeof ApiTrackEventRoute
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
   '/app/link': typeof AppLinkRoute
@@ -304,6 +312,7 @@ export interface FileRoutesById {
   '/admin/products': typeof AdminProductsRoute
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/api/track-event': typeof ApiTrackEventRoute
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
   '/app/link': typeof AppLinkRoute
@@ -341,6 +350,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/requests'
     | '/admin/settings'
+    | '/api/track-event'
     | '/app/commissions'
     | '/app/leads'
     | '/app/link'
@@ -376,6 +386,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/requests'
     | '/admin/settings'
+    | '/api/track-event'
     | '/app/commissions'
     | '/app/leads'
     | '/app/link'
@@ -411,6 +422,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/requests'
     | '/admin/settings'
+    | '/api/track-event'
     | '/app/commissions'
     | '/app/leads'
     | '/app/link'
@@ -447,6 +459,7 @@ export interface RootRouteChildren {
   AdminProductsRoute: typeof AdminProductsRoute
   AdminRequestsRoute: typeof AdminRequestsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  ApiTrackEventRoute: typeof ApiTrackEventRoute
   AppCommissionsRoute: typeof AppCommissionsRoute
   AppLeadsRoute: typeof AppLeadsRoute
   AppLinkRoute: typeof AppLinkRoute
@@ -589,6 +602,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCommissionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/track-event': {
+      id: '/api/track-event'
+      path: '/api/track-event'
+      fullPath: '/api/track-event'
+      preLoaderRoute: typeof ApiTrackEventRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/admin/settings'
@@ -719,6 +739,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminProductsRoute: AdminProductsRoute,
   AdminRequestsRoute: AdminRequestsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  ApiTrackEventRoute: ApiTrackEventRoute,
   AppCommissionsRoute: AppCommissionsRoute,
   AppLeadsRoute: AppLeadsRoute,
   AppLinkRoute: AppLinkRoute,
