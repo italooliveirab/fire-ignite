@@ -175,6 +175,7 @@ function SpotlightChart({ children }: { children: React.ReactNode }) {
       onMouseLeave={onMouseLeave}
       className="spotlight-card lg:col-span-2 rounded-2xl border border-border bg-card p-5 shadow-card-premium"
     >
+      <span className="spotlight-shine" aria-hidden />
       {children}
     </div>
   );
