@@ -61,13 +61,13 @@ function AdminDashboard() {
   return (
     <DashboardLayout variant="admin" title="Dashboard">
       <div className="mb-8">
-        <h1 className="font-display text-3xl font-bold">Visão geral</h1>
-        <p className="text-muted-foreground text-sm mt-1">Acompanhe a performance da sua operação em tempo real.</p>
+        <h1 className="font-display text-3xl md:text-4xl font-semibold tracking-tight">Visão geral</h1>
+        <p className="text-muted-foreground text-sm mt-2">Acompanhe a performance da sua operação em tempo real.</p>
       </div>
 
       {isLoading || !stats ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-32 bg-card border border-border animate-pulse" />)}
+          {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-32 card-premium animate-pulse" />)}
         </div>
       ) : (
         <>
@@ -124,12 +124,12 @@ function AdminDashboard() {
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="border border-border bg-card">
-      <div className="px-5 py-3 border-b border-border flex items-center gap-3">
-        <span className="h-1 w-1 bg-primary" />
-        <h3 className="font-display uppercase text-sm tracking-wider">{title}</h3>
+    <div className="card-premium">
+      <div className="px-6 py-4 flex items-center gap-3 border-b border-border/40">
+        <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+        <h3 className="font-display text-sm font-semibold tracking-tight">{title}</h3>
       </div>
-      <div className="p-5">{children}</div>
+      <div className="p-6">{children}</div>
     </div>
   );
 }
