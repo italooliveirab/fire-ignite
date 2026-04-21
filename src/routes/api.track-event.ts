@@ -7,7 +7,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import crypto from "crypto";
 import { notifyAdminLeadPaid, notifyAffiliateLeadPaid } from "@/server/lead-notifications";
 import { dispatchWebhook } from "@/server/webhooks";
-import { sendPushToUsers } from "@/server/push";
+import { sendPushToUsers } from "@/server/push.server";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
