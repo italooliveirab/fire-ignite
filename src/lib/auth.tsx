@@ -7,26 +7,67 @@ export type Role = "admin" | "affiliate" | null;
 const roleCache = new Map<string, Role>();
 const roleInflight = new Map<string, Promise<Role>>();
 
+const ROLE_STORAGE_PREFIX = "fire:role:";
+
+function readPersistedRole(uid: string): Role | undefined {
+  if (typeof window === "undefined") return undefined;
+  try {
+    const raw = window.sessionStorage.getItem(ROLE_STORAGE_PREFIX + uid);
+    if (raw === "admin" || raw === "affiliate") return raw;
+    if (raw === "null") return null;
+    return undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function persistRole(uid: string, role: Role) {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(ROLE_STORAGE_PREFIX + uid, role === null ? "null" : role);
+  } catch {
+    /* ignore quota errors */
+  }
+}
+
 export async function resolveRoleForUser(uid: string): Promise<Role> {
   if (roleCache.has(uid)) return roleCache.get(uid) ?? null;
+
+  const persisted = readPersistedRole(uid);
+  if (persisted !== undefined) {
+    roleCache.set(uid, persisted);
+    // refresh in background so a stale role is corrected on next call
+    if (!roleInflight.has(uid)) void fetchAndStoreRole(uid);
+    return persisted;
+  }
+
   const inflight = roleInflight.get(uid);
   if (inflight) return inflight;
 
+  return fetchAndStoreRole(uid);
+}
+
+function fetchAndStoreRole(uid: string): Promise<Role> {
+  const t0 = typeof performance !== "undefined" ? performance.now() : 0;
   const request = (async () => {
     const { data, error } = await supabase
       .from("user_roles")
       .select("role")
       .eq("user_id", uid);
-      if (error) throw error;
-      const roles = data?.map((row) => row.role) ?? [];
-      const nextRole: Role = roles.includes("admin" as never)
-        ? "admin"
-        : roles.includes("affiliate" as never)
-          ? "affiliate"
-          : null;
-      roleCache.set(uid, nextRole);
-      return nextRole;
-    })()
+    if (error) throw error;
+    const roles = data?.map((row) => row.role) ?? [];
+    const nextRole: Role = roles.includes("admin" as never)
+      ? "admin"
+      : roles.includes("affiliate" as never)
+        ? "affiliate"
+        : null;
+    roleCache.set(uid, nextRole);
+    persistRole(uid, nextRole);
+    if (typeof performance !== "undefined") {
+      console.log(`[auth] resolveRoleForUser fetched in ${(performance.now() - t0).toFixed(0)}ms (role=${nextRole})`);
+    }
+    return nextRole;
+  })()
     .catch(() => null)
     .finally(() => {
       roleInflight.delete(uid);
