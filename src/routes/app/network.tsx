@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { formatBRL, formatNumber, formatDate } from "@/lib/format";
-import { Network, Users, Banknote, Copy, Share2, UserCheck } from "lucide-react";
+import { Network, Users, Banknote, Copy, Share2, UserCheck, TrendingUp, Trophy, Target } from "lucide-react";
 
 export const Route = createFileRoute("/app/network")({ component: MyNetwork });
 
@@ -83,6 +83,35 @@ function MyNetwork() {
   const totalEarnings = networkComm.reduce((a, c) => a + Number(c.referrer_amount), 0);
   const totalSold = networkComm.reduce((a, c) => a + Number(c.payment_amount), 0);
 
+  // Leads de toda a minha rede (indicados) — para métricas de desempenho/funil
+  const memberIds = members.map((m) => m.affiliate_id);
+  const { data: networkLeads = [] } = useQuery({
+    queryKey: ["my-network-leads", affiliate?.id, memberIds.join(",")],
+    enabled: !!affiliate?.id && memberIds.length > 0,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("leads")
+        .select("id, affiliate_id, status, payment_amount, created_at, paid_at")
+        .in("affiliate_id", memberIds)
+        .order("created_at", { ascending: false });
+      return data ?? [];
+    },
+  });
+
+  const totalLeads = networkLeads.length;
+  const totalPaidLeads = networkLeads.filter((l) => l.status === "paid").length;
+  const conversionRate = totalLeads > 0 ? (totalPaidLeads / totalLeads) * 100 : 0;
+
+  // Métricas por indicado (ranking)
+  const memberStats = members.map((m) => {
+    const leads = networkLeads.filter((l) => l.affiliate_id === m.affiliate_id);
+    const paidLeads = leads.filter((l) => l.status === "paid");
+    const sold = paidLeads.reduce((a, l) => a + Number(l.payment_amount ?? 0), 0);
+    const myCommission = networkComm.filter((c) => c.seller_affiliate_id === m.affiliate_id).reduce((a, c) => a + Number(c.referrer_amount), 0);
+    const conv = leads.length > 0 ? (paidLeads.length / leads.length) * 100 : 0;
+    return { ...m, leadsCount: leads.length, paidCount: paidLeads.length, sold, myCommission, conv };
+  }).sort((a, b) => b.myCommission - a.myCommission);
+
   // Realtime: atualiza ao vivo quando alguém entra na minha rede ou gera comissão
   useEffect(() => {
     if (!affiliate?.id) return;
@@ -93,6 +122,8 @@ function MyNetwork() {
         () => { qc.invalidateQueries({ queryKey: ["my-referrer", affiliate.id] }); })
       .on("postgres_changes", { event: "*", schema: "public", table: "network_commissions", filter: `referrer_affiliate_id=eq.${affiliate.id}` },
         () => { qc.invalidateQueries({ queryKey: ["my-network-comm", affiliate.id] }); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "leads" },
+        () => { qc.invalidateQueries({ queryKey: ["my-network-leads", affiliate.id] }); })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [affiliate?.id, qc]);
@@ -140,11 +171,46 @@ function MyNetwork() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         <StatCard label="Indicados ativos" value={formatNumber(members.filter((m) => m.status === "active").length)} icon={Users} accent="fire" />
+        <StatCard label="Leads da rede" value={formatNumber(totalLeads)} icon={Target} accent="gold" />
+        <StatCard label="Vendas pagas" value={formatNumber(totalPaidLeads)} icon={TrendingUp} accent="success" />
         <StatCard label="Vendido pela rede" value={formatBRL(totalSold)} icon={Banknote} accent="neon" />
         <StatCard label="Meus ganhos da rede" value={formatBRL(totalEarnings)} icon={Banknote} accent="success" />
       </div>
+
+      {/* Pódio top 3 indicados */}
+      {memberStats.length > 0 && (
+        <div className="rounded-2xl border border-border bg-card p-5 mb-6 shadow-card-premium">
+          <h3 className="font-display font-semibold mb-4 flex items-center gap-2"><Trophy className="h-5 w-5 text-fire" /> Top indicados (por comissão gerada para você)</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {memberStats.slice(0, 3).map((m, i) => (
+              <div key={m.id} className="rounded-xl border border-border bg-background/40 p-4">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="text-xs uppercase tracking-wider text-muted-foreground">#{i + 1}</div>
+                  <div className="text-xs text-muted-foreground">{m.paidCount} pagos / {m.leadsCount} leads</div>
+                </div>
+                <div className="font-display font-semibold truncate">{m.aff?.full_name ?? "—"}</div>
+                <div className="text-xs text-muted-foreground truncate mb-2">{m.aff?.email}</div>
+                <div className="flex items-end justify-between">
+                  <div>
+                    <div className="text-[10px] uppercase text-muted-foreground">Vendido</div>
+                    <div className="font-mono text-sm">{formatBRL(m.sold)}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[10px] uppercase text-muted-foreground">Sua comissão</div>
+                    <div className="font-mono text-primary font-semibold">{formatBRL(m.myCommission)}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 pt-4 border-t border-border text-xs text-muted-foreground flex items-center justify-between">
+            <span>Conversão da rede</span>
+            <span className="font-mono text-foreground">{conversionRate.toFixed(1)}%</span>
+          </div>
+        </div>
+      )}
 
       {/* Lista de indicados */}
       <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-card-premium mb-6">
@@ -155,15 +221,17 @@ function MyNetwork() {
               <tr>
                 <th className="text-left px-5 py-3">Afiliado</th>
                 <th className="text-left px-5 py-3 hidden md:table-cell">Status</th>
-                <th className="text-right px-5 py-3 hidden md:table-cell">Vinculado em</th>
-                <th className="text-right px-5 py-3">Ganhos gerados</th>
+                <th className="text-right px-5 py-3 hidden lg:table-cell">Vinculado</th>
+                <th className="text-center px-5 py-3 hidden md:table-cell">Leads</th>
+                <th className="text-center px-5 py-3 hidden md:table-cell">Pagos</th>
+                <th className="text-right px-5 py-3 hidden lg:table-cell">Vendido</th>
+                <th className="text-right px-5 py-3 hidden md:table-cell">Conv.</th>
+                <th className="text-right px-5 py-3">Sua comissão</th>
               </tr>
             </thead>
             <tbody>
-              {members.length === 0 ? <tr><td colSpan={4} className="py-10 text-center text-muted-foreground">Você ainda não tem indicados. Compartilhe seu link!</td></tr>
-              : members.map((m) => {
-                const earned = networkComm.filter((c) => c.seller_affiliate_id === m.affiliate_id).reduce((a, c) => a + Number(c.referrer_amount), 0);
-                return (
+              {memberStats.length === 0 ? <tr><td colSpan={8} className="py-10 text-center text-muted-foreground">Você ainda não tem indicados. Compartilhe seu link!</td></tr>
+              : memberStats.map((m) => (
                   <tr key={m.id} className="border-b border-border/50 hover:bg-background/40">
                     <td className="px-5 py-3">
                       <div className="font-medium">{m.aff?.full_name ?? "—"}</div>
@@ -172,11 +240,14 @@ function MyNetwork() {
                     <td className="px-5 py-3 hidden md:table-cell text-xs">
                       <span className={m.status === "active" ? "text-emerald-400" : "text-muted-foreground"}>{m.status}</span>
                     </td>
-                    <td className="px-5 py-3 hidden md:table-cell text-right text-xs text-muted-foreground">{formatDate(m.linked_at)}</td>
-                    <td className="px-5 py-3 text-right font-mono text-primary">{formatBRL(earned)}</td>
+                    <td className="px-5 py-3 hidden lg:table-cell text-right text-xs text-muted-foreground">{formatDate(m.linked_at)}</td>
+                    <td className="px-5 py-3 hidden md:table-cell text-center font-mono text-xs">{m.leadsCount}</td>
+                    <td className="px-5 py-3 hidden md:table-cell text-center font-mono text-xs text-emerald-400">{m.paidCount}</td>
+                    <td className="px-5 py-3 hidden lg:table-cell text-right font-mono text-xs">{formatBRL(m.sold)}</td>
+                    <td className="px-5 py-3 hidden md:table-cell text-right font-mono text-xs text-muted-foreground">{m.conv.toFixed(0)}%</td>
+                    <td className="px-5 py-3 text-right font-mono text-primary">{formatBRL(m.myCommission)}</td>
                   </tr>
-                );
-              })}
+                ))}
             </tbody>
           </table>
         </div>
