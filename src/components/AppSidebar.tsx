@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { BrandMark } from "@/components/BrandMark";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -82,19 +83,13 @@ export function AppSidebar({ variant }: { variant: "admin" | "affiliate" }) {
 
   return (
     <aside className="hidden md:flex w-64 flex-col bg-sidebar border-r border-sidebar-border h-screen sticky top-0">
-      <div className="px-5 py-5">
+      <div className="px-6 py-6 border-b border-sidebar-border">
         <Link to="/">
           <BrandMark size="sm" subtitle={variant === "admin" ? "Admin" : "Afiliado"} />
         </Link>
       </div>
 
-      <div className="px-5 pb-2">
-        <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70 font-medium">
-          Menu
-        </div>
-      </div>
-
-      <nav className="flex-1 px-3 py-2 overflow-y-auto space-y-0.5">
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {items.map((item) => {
           const active = item.exact ? loc.pathname === item.to : loc.pathname.startsWith(item.to);
           const Icon = item.icon;
@@ -105,16 +100,16 @@ export function AppSidebar({ variant }: { variant: "admin" | "affiliate" }) {
               to={item.to}
               preload="intent"
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] transition-all group relative",
+                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all group",
                 active
-                  ? "bg-gradient-to-r from-primary/15 via-primary/5 to-transparent text-foreground border border-primary/20"
-                  : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground border border-transparent",
+                  ? "bg-gradient-to-r from-primary/15 to-transparent text-foreground border-l-2 border-primary"
+                  : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground",
               )}
             >
-              <Icon className={cn("h-[18px] w-[18px] transition-colors", active ? "text-primary" : "group-hover:text-foreground")} strokeWidth={1.8} />
-              <span className="flex-1 font-medium">{item.label}</span>
+              <Icon className={cn("h-4 w-4 transition-colors", active && "text-primary")} />
+              <span className="flex-1">{item.label}</span>
               {badge > 0 && (
-                <span className="ml-auto inline-flex items-center justify-center min-w-[20px] h-[20px] px-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-semibold shadow-glow-soft">
+                <span className="ml-auto inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold animate-pulse">
                   {badge > 99 ? "99+" : badge}
                 </span>
               )}
@@ -123,19 +118,13 @@ export function AppSidebar({ variant }: { variant: "admin" | "affiliate" }) {
         })}
       </nav>
 
-      <div className="border-t border-sidebar-border mx-3">
-        <div className="px-2 py-3">
-          <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70 mb-1 font-medium">
-            Sessão
-          </div>
-          <div className="text-xs text-foreground truncate">{user?.email}</div>
+      <div className="p-3 border-t border-sidebar-border">
+        <div className="px-3 py-2 mb-2">
+          <div className="text-xs text-muted-foreground truncate">{user?.email}</div>
         </div>
-        <button
-          onClick={signOut}
-          className="w-full flex items-center gap-3 px-3 py-2.5 mb-3 rounded-lg text-xs font-medium text-muted-foreground hover:text-primary hover:bg-sidebar-accent transition-colors"
-        >
-          <LogOut className="h-4 w-4" strokeWidth={1.8} /> Sair
-        </button>
+        <Button onClick={signOut} variant="ghost" className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground">
+          <LogOut className="h-4 w-4" /> Sair
+        </Button>
       </div>
     </aside>
   );

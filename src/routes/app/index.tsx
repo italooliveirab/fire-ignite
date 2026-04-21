@@ -34,8 +34,8 @@ function ApprovedLinksCard({ affiliateId, affiliateSlug, domain }: { affiliateId
 
   if (!links || links.length === 0) {
     return (
-      <div className="card-premium p-6 mb-6">
-        <h3 className="font-display font-semibold mb-2 flex items-center gap-2"><Package className="h-5 w-5 text-primary" /> Seus links de divulgação</h3>
+      <div className="rounded-2xl border border-border bg-card p-6 mb-6 shadow-card-premium">
+        <h3 className="font-display font-semibold mb-2 flex items-center gap-2"><Package className="h-5 w-5 text-fire" /> Seus links de divulgação</h3>
         <p className="text-sm text-muted-foreground mb-3">Você ainda não tem produtos aprovados. Solicite afiliação a um produto para gerar seus links.</p>
         <Button asChild size="sm" variant="outline"><Link to="/app/products">Ver produtos</Link></Button>
       </div>
@@ -43,13 +43,13 @@ function ApprovedLinksCard({ affiliateId, affiliateSlug, domain }: { affiliateId
   }
 
   return (
-    <div className="card-premium p-6 mb-6">
-      <h3 className="font-display font-semibold mb-4 flex items-center gap-2"><Package className="h-5 w-5 text-primary" /> Seus links de divulgação</h3>
+    <div className="rounded-2xl border border-border bg-card p-6 mb-6 shadow-card-premium">
+      <h3 className="font-display font-semibold mb-4 flex items-center gap-2"><Package className="h-5 w-5 text-fire" /> Seus links de divulgação</h3>
       <div className="space-y-2">
         {links.map((row: any) => {
           const url = `https://${domain}/p/${row.products.slug}/${affiliateSlug}`;
           return (
-            <div key={row.id} className="flex items-center justify-between gap-3 rounded-lg border border-border/60 bg-background/50 p-3 hover:border-primary/30 transition-colors">
+            <div key={row.id} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-background/50 p-3">
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-semibold truncate">{row.products.name}</div>
                 <div className="text-xs text-muted-foreground truncate font-mono">{url}</div>
@@ -111,8 +111,8 @@ function AffiliateDashboard() {
   if (!affiliate) {
     return (
       <DashboardLayout variant="affiliate">
-        <div className="card-premium p-10 text-center">
-          <h2 className="font-display text-xl font-semibold mb-2">Conta não vinculada</h2>
+        <div className="rounded-2xl border border-border bg-card p-10 text-center">
+          <h2 className="font-display text-xl font-bold mb-2">Conta não vinculada</h2>
           <p className="text-muted-foreground text-sm">Sua conta ainda não está vinculada a um perfil de afiliado. Contate o admin FIRE.</p>
         </div>
       </DashboardLayout>
@@ -122,8 +122,8 @@ function AffiliateDashboard() {
   return (
     <DashboardLayout variant="affiliate">
       <div className="mb-6">
-        <h1 className="font-display text-3xl md:text-4xl font-semibold tracking-tight">Olá, <span className="text-gradient-fire">{affiliate.full_name.split(" ")[0]}</span> 🔥</h1>
-        <p className="text-muted-foreground text-sm mt-2">Sua máquina de vendas, em tempo real.</p>
+        <h1 className="font-display text-3xl font-bold">Olá, <span className="text-gradient-fire">{affiliate.full_name.split(" ")[0]}</span> 🔥</h1>
+        <p className="text-muted-foreground text-sm mt-1">Sua máquina de vendas, em tempo real.</p>
       </div>
 
       <ApprovedLinksCard affiliateId={affiliate.id} affiliateSlug={affiliate.slug} domain={domain} />
@@ -145,12 +145,8 @@ function AffiliateDashboard() {
           </div>
 
           <div className="grid lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2 card-premium">
-              <div className="px-6 py-4 border-b border-border/40 flex items-center gap-3">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                <h3 className="font-display text-sm font-semibold tracking-tight">Desempenho — últimos 30 dias</h3>
-              </div>
-              <div className="p-6">
+            <div className="lg:col-span-2 rounded-2xl border border-border bg-card p-5 shadow-card-premium">
+              <h3 className="font-display font-semibold mb-4">Desempenho — últimos 30 dias</h3>
               <ResponsiveContainer width="100%" height={260}>
                 <LineChart data={stats.days}>
                   <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.25 0 0)" />
@@ -160,7 +156,6 @@ function AffiliateDashboard() {
                   <Line type="monotone" dataKey="leads" stroke="#FF5A00" strokeWidth={2.5} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
-              </div>
             </div>
             <TopAffiliatesRanking currentAffiliateId={affiliate.id} />
           </div>

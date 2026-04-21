@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowUpRight } from "lucide-react";
-import { AuthShell } from "@/components/AuthShell";
+import { Mail, Lock, User, ArrowRight, Phone } from "lucide-react";
+import { BrandMark } from "@/components/BrandMark";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -38,6 +38,7 @@ function SignupPage() {
     if (form.password.length < 6) return toast.error("Senha deve ter pelo menos 6 caracteres");
     setLoading(true);
     try {
+      // 1. Create auth user
       const { data: authData, error: authErr } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
@@ -50,6 +51,7 @@ function SignupPage() {
       if (!authData.user) throw new Error("Falha ao criar usuário");
       const uid = authData.user.id;
 
+      // 2. Build unique slug/username
       const baseSlug = slugify(form.full_name);
       let slug = baseSlug;
       let username = baseSlug;
@@ -60,15 +62,23 @@ function SignupPage() {
         while (taken.has(slug)) { n += 1; slug = `${baseSlug}${n}`; username = slug; }
       }
 
+      // 3. Create affiliate record
       const { error: affErr } = await supabase.from("affiliates").insert({
-        user_id: uid, full_name: form.full_name, email: form.email,
-        phone: form.phone || null, username, slug, status: "active",
+        user_id: uid,
+        full_name: form.full_name,
+        email: form.email,
+        phone: form.phone || null,
+        username,
+        slug,
+        status: "active",
       });
       if (affErr) throw affErr;
 
+      // 4. Assign role
       const { error: roleErr } = await supabase.from("user_roles").insert({ user_id: uid, role: "affiliate" });
       if (roleErr) throw roleErr;
 
+      // 5. Vincular ao afiliador (se veio via link de indicação)
       const refCode = (() => {
         try { return sessionStorage.getItem("fire_ref"); } catch { return null; }
       })();
@@ -84,6 +94,7 @@ function SignupPage() {
       }
 
       toast.success("Conta criada!", { description: "Você já pode escolher os produtos para revender." });
+      // dispara email de boas-vindas (não bloqueia o fluxo)
       sendWelcome({ data: { email: form.email, full_name: form.full_name } }).catch(() => {});
       nav({ to: "/app" });
     } catch (e) {
@@ -94,60 +105,62 @@ function SignupPage() {
   };
 
   return (
-    <AuthShell
-      step="02 / Cadastro"
-      title={"CRIE\nSUA CONTA"}
-      tagline="Cadastro grátis. Sem mensalidade. Comece a revender os produtos da FIRE em minutos."
-    >
-      <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-muted-foreground mb-3">
-        Novo afiliado
+    <div className="min-h-screen relative flex items-center justify-center px-4 py-10 overflow-hidden">
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-primary/25 rounded-full blur-[160px]" />
       </div>
-      <h2 className="font-display text-3xl uppercase mb-1">Cadastrar</h2>
-      <p className="text-sm text-muted-foreground mb-8">Em 30 segundos você está dentro.</p>
 
-      {referrerInfo && (
-        <div className="mb-6 border border-primary bg-primary/10 px-4 py-3 text-sm">
-          <span className="text-[10px] font-mono uppercase tracking-wider text-primary">Indicação</span>
-          <div className="mt-1">
-            Indicado por <span className="font-bold text-primary">{referrerInfo.full_name}</span>
+      <div className="w-full max-w-md">
+        <Link to="/" className="flex justify-center mb-8">
+          <BrandMark size="lg" subtitle="Afiliados" />
+        </Link>
+
+        <div className="rounded-2xl border border-border bg-card/80 backdrop-blur-xl p-8 shadow-card-premium">
+          <h1 className="font-display text-2xl font-bold mb-1">Crie sua conta de afiliado</h1>
+          <p className="text-sm text-muted-foreground mb-6">Cadastro grátis. Comece a revender os produtos da FIRE em minutos.</p>
+
+          {referrerInfo && (
+            <div className="mb-5 rounded-lg border border-primary/40 bg-primary/10 p-3 text-sm">
+              Indicado por <span className="font-semibold text-primary">{referrerInfo.full_name}</span>
+            </div>
+          )}
+
+          <form onSubmit={onSubmit} className="space-y-4">
+            <Field icon={User} label="Nome completo" id="name">
+              <Input id="name" required value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} placeholder="Seu nome" className="pl-10 h-11 bg-background/50" />
+            </Field>
+            <Field icon={Mail} label="Email" id="email">
+              <Input id="email" type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="seu@email.com" className="pl-10 h-11 bg-background/50" />
+            </Field>
+            <Field icon={Phone} label="WhatsApp (opcional)" id="phone">
+              <Input id="phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="(11) 99999-9999" className="pl-10 h-11 bg-background/50" />
+            </Field>
+            <Field icon={Lock} label="Senha" id="pwd">
+              <Input id="pwd" type="password" required minLength={6} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Mínimo 6 caracteres" className="pl-10 h-11 bg-background/50" />
+            </Field>
+
+            <Button type="submit" disabled={loading} className="w-full h-11 bg-gradient-fire shadow-fire hover:opacity-90 text-white font-semibold">
+              {loading ? "Criando conta..." : <>Criar conta de afiliado <ArrowRight className="ml-2 h-4 w-4" /></>}
+            </Button>
+          </form>
+
+          <div className="mt-6 pt-6 border-t border-border text-center text-xs text-muted-foreground">
+            Já tem conta? <Link to="/login" className="text-primary hover:underline">Entrar</Link>
           </div>
         </div>
-      )}
-
-      <form onSubmit={onSubmit} className="space-y-5">
-        <FormField id="name" label="Nome completo">
-          <Input id="name" required value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} placeholder="Seu nome" />
-        </FormField>
-        <FormField id="email" label="Email">
-          <Input id="email" type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="seu@email.com" />
-        </FormField>
-        <FormField id="phone" label="WhatsApp · opcional">
-          <Input id="phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="(11) 99999-9999" />
-        </FormField>
-        <FormField id="pwd" label="Senha · mínimo 6 caracteres">
-          <Input id="pwd" type="password" required minLength={6} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="••••••••" />
-        </FormField>
-
-        <Button type="submit" disabled={loading} size="lg" className="w-full">
-          {loading ? "Criando..." : <>Criar conta <ArrowUpRight className="ml-1" strokeWidth={2.5} /></>}
-        </Button>
-      </form>
-
-      <div className="mt-8 pt-6 border-t border-border flex items-center justify-between text-xs">
-        <span className="text-muted-foreground">Já tem conta?</span>
-        <Link to="/login" className="font-display uppercase tracking-wider text-primary hover:underline text-[11px]">
-          Entrar →
-        </Link>
       </div>
-    </AuthShell>
+    </div>
   );
 }
 
-function FormField({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
+function Field({ icon: Icon, label, id, children }: { icon: React.ComponentType<{ className?: string }>; label: string; id: string; children: React.ReactNode }) {
   return (
     <div className="space-y-2">
-      <Label htmlFor={id} className="text-[10px] font-display uppercase tracking-wider text-muted-foreground">{label}</Label>
-      {children}
+      <Label htmlFor={id}>{label}</Label>
+      <div className="relative">
+        <Icon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        {children}
+      </div>
     </div>
   );
 }

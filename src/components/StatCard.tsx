@@ -10,41 +10,33 @@ interface Props {
   className?: string;
 }
 
-const accentMap: Record<NonNullable<Props["accent"]>, { icon: string; ring: string; glow: string }> = {
-  fire:    { icon: "text-primary", ring: "bg-primary/10 border-primary/30", glow: "from-primary/20" },
-  neon:    { icon: "text-info",    ring: "bg-info/10 border-info/30",       glow: "from-info/20" },
-  gold:    { icon: "text-gold",    ring: "bg-gold/10 border-gold/30",       glow: "from-gold/20" },
-  success: { icon: "text-success", ring: "bg-success/10 border-success/30", glow: "from-success/20" },
-  warning: { icon: "text-warning", ring: "bg-warning/10 border-warning/30", glow: "from-warning/20" },
+const accentMap = {
+  fire: "from-primary/20 to-transparent border-primary/30 text-primary",
+  neon: "from-info/20 to-transparent border-info/30 text-info",
+  gold: "from-gold/20 to-transparent border-gold/30 text-gold",
+  success: "from-success/20 to-transparent border-success/30 text-success",
+  warning: "from-warning/20 to-transparent border-warning/30 text-warning",
 };
 
 export function StatCard({ label, value, icon: Icon, trend, accent = "fire", className }: Props) {
-  const a = accentMap[accent];
   return (
     <div className={cn(
-      "group relative card-premium p-5 overflow-hidden transition-all hover:-translate-y-0.5 hover:shadow-card-hover",
+      "relative overflow-hidden rounded-2xl bg-card border border-border p-5 shadow-card-premium transition-all hover:border-primary/40 hover:-translate-y-0.5",
       className,
     )}>
-      {/* glow corner */}
-      <div className={cn("pointer-events-none absolute -top-12 -right-12 h-40 w-40 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-br to-transparent", a.glow)} />
-      <div className="relative flex items-start justify-between mb-5">
-        <span className="text-[11px] uppercase tracking-[0.12em] text-muted-foreground font-medium">
-          {label}
-        </span>
-        {Icon && (
-          <div className={cn("h-9 w-9 rounded-lg border flex items-center justify-center", a.ring)}>
-            <Icon className={cn("h-4 w-4", a.icon)} strokeWidth={2} />
-          </div>
-        )}
-      </div>
-      <div className="relative font-display text-3xl md:text-[32px] font-semibold text-foreground leading-tight tracking-tight">
-        {value}
-      </div>
-      {trend && (
-        <div className="relative text-xs text-muted-foreground mt-2">
-          {trend}
+      <div className={cn("absolute inset-0 bg-gradient-to-br opacity-60 pointer-events-none", accentMap[accent].split(" ").slice(0, 2).join(" "))} />
+      <div className="relative">
+        <div className="flex items-start justify-between mb-3">
+          <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{label}</span>
+          {Icon && (
+            <div className={cn("h-9 w-9 rounded-lg border flex items-center justify-center bg-background/40", accentMap[accent].split(" ").slice(2).join(" "))}>
+              <Icon className="h-4 w-4" />
+            </div>
+          )}
         </div>
-      )}
+        <div className="font-display text-3xl font-bold text-foreground">{value}</div>
+        {trend && <div className="text-xs text-muted-foreground mt-1.5">{trend}</div>}
+      </div>
     </div>
   );
 }
