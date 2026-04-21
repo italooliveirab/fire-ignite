@@ -289,10 +289,27 @@ html { color-scheme: dark; }
 .spotlight-card {
   --mx: 50%;
   --my: 50%;
+  --rx: 0deg;
+  --ry: 0deg;
+  --tilt-scale: 1;
   --spot-color: 255, 90, 0;
   position: relative;
   isolation: isolate;
+  transform-style: preserve-3d;
+  perspective: 900px;
+  transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) scale(var(--tilt-scale));
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
 }
+
+/* Lift inner content slightly on Z when hovered for parallax depth */
+.spotlight-card > * { transform: translateZ(0); }
+.spotlight-card:hover > .relative,
+.spotlight-card:hover > h3 {
+  transform: translateZ(18px);
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 .spotlight-card::before {
   content: "";
   position: absolute;
@@ -340,7 +357,9 @@ html { color-scheme: dark; }
 .spotlight-card[data-spot="fire"]    { --spot-color: 255, 90, 0; }
 
 @media (prefers-reduced-motion: reduce) {
+  .spotlight-card { transform: none !important; transition: none !important; }
   .spotlight-card::before, .spotlight-card::after { display: none; }
+  .spotlight-card:hover > * { transform: none !important; }
 }
 
 /* Google Fonts */
