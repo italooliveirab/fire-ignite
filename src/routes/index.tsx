@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Flame, Zap, ShieldCheck, ArrowRight, Wallet, Rocket, PackageCheck, BarChart3 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { FireLoader } from "@/components/FireLoader";
 
 export const Route = createFileRoute("/")({
   head: () => ({
