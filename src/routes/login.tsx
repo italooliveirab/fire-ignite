@@ -27,7 +27,7 @@ function LoginPage() {
   useEffect(() => {
     if (user && role) {
       const target = search.redirect || (role === "admin" ? "/admin" : "/app");
-      window.location.href = target;
+      nav({ to: target });
     }
   }, [user, role, nav, search.redirect]);
 
