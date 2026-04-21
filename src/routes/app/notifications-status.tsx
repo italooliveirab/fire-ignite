@@ -167,9 +167,13 @@ function StatusPage() {
           ? `${serverSubs} dispositivo(s) registrado(s)`
           : serverSubError
             ? `Erro ao consultar: ${serverSubError}`
-            : "Nenhum registro encontrado",
+            : lastApiResponse
+              ? `API /api/push/subscribe → HTTP ${lastApiResponse.status}${lastApiResponse.error ? ` · ${lastApiResponse.error}` : ""}${lastApiResponse.detail ? ` · ${lastApiResponse.detail}` : ""}`
+              : "Nenhum registro encontrado",
       fix: serverSubs === 0 && push.subscribed
-        ? "Desative e ative novamente. Se persistir, abra o console do navegador e verifique a chamada para /api/push/subscribe"
+        ? (lastApiResponse && !lastApiResponse.ok
+            ? `A API respondeu HTTP ${lastApiResponse.status}. Detalhe: ${lastApiResponse.detail || lastApiResponse.error || "(sem detalhe)"}`
+            : "Toque em 'Re-sincronizar com servidor' abaixo para ver o erro exato da API")
         : undefined,
     },
   ];
