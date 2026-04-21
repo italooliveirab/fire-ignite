@@ -50,6 +50,7 @@ import { Route as AdminAuditRouteImport } from './routes/admin/audit'
 import { Route as AdminApiRouteImport } from './routes/admin/api'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin/analytics'
 import { Route as AdminAffiliatesRouteImport } from './routes/admin/affiliates'
+import { Route as AdminDebugRouteImport } from './routes/admin/_debug'
 import { Route as PProductSlugAffiliateSlugRouteImport } from './routes/p.$productSlug.$affiliateSlug'
 import { Route as ApiWebhooksTestRouteImport } from './routes/api.webhooks.test'
 import { Route as ApiLeadsWhatsappIdRouteImport } from './routes/api.leads.$whatsappId'
@@ -261,6 +262,11 @@ const AdminAffiliatesRoute = AdminAffiliatesRouteImport.update({
   path: '/admin/affiliates',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminDebugRoute = AdminDebugRouteImport.update({
+  id: '/admin/_debug',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PProductSlugAffiliateSlugRoute =
   PProductSlugAffiliateSlugRouteImport.update({
     id: '/p/$productSlug/$affiliateSlug',
@@ -291,6 +297,7 @@ export interface FileRoutesByFullPath {
   '/ranking': typeof RankingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/admin': typeof AdminDebugRoute
   '/admin/affiliates': typeof AdminAffiliatesRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/api': typeof AdminApiRoute
@@ -338,6 +345,7 @@ export interface FileRoutesByTo {
   '/ranking': typeof RankingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/admin': typeof AdminIndexRoute
   '/admin/affiliates': typeof AdminAffiliatesRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/api': typeof AdminApiRoute
@@ -370,7 +378,6 @@ export interface FileRoutesByTo {
   '/app/rules': typeof AppRulesRoute
   '/convite/$referralCode': typeof ConviteReferralCodeRoute
   '/hooks/weekly-payout-summary': typeof HooksWeeklyPayoutSummaryRoute
-  '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/api/affiliates/$slug': typeof ApiAffiliatesSlugRoute
   '/api/leads/$whatsappId': typeof ApiLeadsWhatsappIdRoute
@@ -386,6 +393,7 @@ export interface FileRoutesById {
   '/ranking': typeof RankingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/admin/_debug': typeof AdminDebugRoute
   '/admin/affiliates': typeof AdminAffiliatesRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/api': typeof AdminApiRoute
@@ -435,6 +443,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/reset-password'
     | '/signup'
+    | '/admin'
     | '/admin/affiliates'
     | '/admin/analytics'
     | '/admin/api'
@@ -482,6 +491,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/reset-password'
     | '/signup'
+    | '/admin'
     | '/admin/affiliates'
     | '/admin/analytics'
     | '/admin/api'
@@ -514,7 +524,6 @@ export interface FileRouteTypes {
     | '/app/rules'
     | '/convite/$referralCode'
     | '/hooks/weekly-payout-summary'
-    | '/admin'
     | '/app'
     | '/api/affiliates/$slug'
     | '/api/leads/$whatsappId'
@@ -529,6 +538,7 @@ export interface FileRouteTypes {
     | '/ranking'
     | '/reset-password'
     | '/signup'
+    | '/admin/_debug'
     | '/admin/affiliates'
     | '/admin/analytics'
     | '/admin/api'
@@ -577,6 +587,7 @@ export interface RootRouteChildren {
   RankingRoute: typeof RankingRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
+  AdminDebugRoute: typeof AdminDebugRoute
   AdminAffiliatesRoute: typeof AdminAffiliatesRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminApiRoute: typeof AdminApiRoute
@@ -904,6 +915,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAffiliatesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/_debug': {
+      id: '/admin/_debug'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminDebugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/p/$productSlug/$affiliateSlug': {
       id: '/p/$productSlug/$affiliateSlug'
       path: '/p/$productSlug/$affiliateSlug'
@@ -967,6 +985,7 @@ const rootRouteChildren: RootRouteChildren = {
   RankingRoute: RankingRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
+  AdminDebugRoute: AdminDebugRoute,
   AdminAffiliatesRoute: AdminAffiliatesRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminApiRoute: AdminApiRoute,
