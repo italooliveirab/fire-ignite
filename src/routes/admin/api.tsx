@@ -54,6 +54,36 @@ function ApiPage() {
 
   const copy = (text: string) => { navigator.clipboard.writeText(text); toast.success("Copiado!"); };
 
+  const runTest = async () => {
+    if (!testKey) return toast.error("Cole uma chave de API para testar");
+    if (!testWhatsappId) return toast.error("Informe um whatsapp_id");
+    setTestLoading(true);
+    setTestResponse(null);
+    try {
+      const res = await fetch(TRACK_EVENT_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-api-key": testKey },
+        body: JSON.stringify({
+          whatsapp_id: testWhatsappId,
+          event: testEvent,
+          affiliate_slug: testAffiliateSlug || undefined,
+          customer_name: "Cliente Teste Bot",
+          whatsapp_number: "+5511999999999",
+          payment_amount: testEvent === "paid" ? 197 : undefined,
+        }),
+      });
+      const body = await res.json().catch(() => ({}));
+      setTestResponse({ status: res.status, body });
+      if (res.ok) toast.success("Bot simulado com sucesso!");
+      else toast.error(`Erro ${res.status}`);
+    } catch (e) {
+      toast.error((e as Error).message);
+      setTestResponse({ status: 0, body: { error: (e as Error).message } });
+    } finally {
+      setTestLoading(false);
+    }
+  };
+
   return (
     <DashboardLayout variant="admin" title="API & Documentação">
       <div className="mb-6">
