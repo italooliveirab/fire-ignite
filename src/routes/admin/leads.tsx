@@ -28,18 +28,33 @@ function LeadsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [affiliateFilter, setAffiliateFilter] = useState<string>("all");
   const [productFilter, setProductFilter] = useState<string>("all");
+  const [referrerFilter, setReferrerFilter] = useState<string>("all");
+  const [trialFilter, setTrialFilter] = useState<string>("all");
+  const [linkSlug, setLinkSlug] = useState<string>("");
   const [dateFrom, setDateFrom] = useState<string>("");
   const [dateTo, setDateTo] = useState<string>("");
 
   const { data: affiliates = [] } = useQuery({
     queryKey: ["aff-list"],
-    queryFn: async () => (await supabase.from("affiliates").select("id, full_name").order("full_name")).data ?? [],
+    queryFn: async () => (await supabase.from("affiliates").select("id, full_name, slug").order("full_name")).data ?? [],
   });
 
   const { data: products = [] } = useQuery({
     queryKey: ["prod-list"],
     queryFn: async () => (await supabase.from("products").select("id, name").order("name")).data ?? [],
   });
+
+  // Mapa afiliado -> referrer (afiliador) ativo
+  const { data: networkLinks = [] } = useQuery({
+    queryKey: ["network-links"],
+    queryFn: async () =>
+      (await supabase.from("affiliate_network").select("affiliate_id, referrer_id").eq("status", "active")).data ?? [],
+  });
+  const referrerByAffiliate = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const n of networkLinks) m.set(n.affiliate_id, n.referrer_id);
+    return m;
+  }, [networkLinks]);
 
   const { data: leads = [], isLoading } = useQuery({
     queryKey: ["leads"],
@@ -53,6 +68,13 @@ function LeadsPage() {
     if (statusFilter !== "all" && l.status !== statusFilter) return false;
     if (affiliateFilter !== "all" && l.affiliate_id !== affiliateFilter) return false;
     if (productFilter !== "all" && l.product_id !== productFilter) return false;
+    if (referrerFilter !== "all" && referrerByAffiliate.get(l.affiliate_id) !== referrerFilter) return false;
+    if (trialFilter === "yes" && !l.trial_generated_at) return false;
+    if (trialFilter === "no" && l.trial_generated_at) return false;
+    if (linkSlug) {
+      const slug = (l as { affiliates?: { slug: string } }).affiliates?.slug?.toLowerCase() ?? "";
+      if (!slug.includes(linkSlug.toLowerCase())) return false;
+    }
     if (dateFrom && new Date(l.created_at) < new Date(dateFrom)) return false;
     if (dateTo && new Date(l.created_at) > new Date(dateTo + "T23:59:59")) return false;
     if (search && ![l.customer_name, l.whatsapp_number].some((f) => f?.toLowerCase().includes(search.toLowerCase()))) return false;
@@ -106,17 +128,31 @@ function LeadsPage() {
             cliente: l.customer_name ?? "",
             whatsapp: l.whatsapp_number ?? "",
             afiliado: (l as { affiliates?: { full_name: string } }).affiliates?.full_name ?? "",
+            link_slug: (l as { affiliates?: { slug: string } }).affiliates?.slug ?? "",
+            afiliador: (() => {
+              const refId = referrerByAffiliate.get(l.affiliate_id);
+              return refId ? (affiliates.find((a) => a.id === refId)?.full_name ?? "") : "";
+            })(),
             produto: (l as { products?: { name: string } }).products?.name ?? "",
             status: STATUS_LABEL[l.status] ?? l.status,
+            teste_solicitado: l.trial_generated_at ? "sim" : "não",
+            cobranca_gerada: l.payment_generated_at ? "sim" : "não",
             valor: l.payment_amount ? Number(l.payment_amount).toFixed(2).replace(".", ",") : "",
+            criado_em: formatDateTime(l.created_at),
+            pago_em: l.paid_at ? formatDateTime(l.paid_at) : "",
           })), [
             { key: "data", label: "Data" },
             { key: "cliente", label: "Cliente" },
             { key: "whatsapp", label: "WhatsApp" },
             { key: "afiliado", label: "Afiliado" },
+            { key: "link_slug", label: "Link/Slug" },
+            { key: "afiliador", label: "Afiliador (rede)" },
             { key: "produto", label: "Produto" },
             { key: "status", label: "Status" },
+            { key: "teste_solicitado", label: "Teste solicitado" },
+            { key: "cobranca_gerada", label: "Cobrança gerada" },
             { key: "valor", label: "Valor (R$)" },
+            { key: "pago_em", label: "Pago em" },
           ]);
           toast.success(`${filtered.length} leads exportados`);
         }} className="border-border">
@@ -180,7 +216,7 @@ function LeadsPage() {
         </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar..." className="pl-10 bg-card" />
@@ -210,7 +246,30 @@ function LeadsPage() {
             {products.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
           </SelectContent>
         </Select>
-        <div className="flex gap-2">
+        <Select value={referrerFilter} onValueChange={setReferrerFilter}>
+          <SelectTrigger className="bg-card"><SelectValue placeholder="Afiliador (rede)" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos afiliadores</SelectItem>
+            {affiliates
+              .filter((a) => Array.from(referrerByAffiliate.values()).includes(a.id))
+              .map((a) => <SelectItem key={a.id} value={a.id}>{a.full_name}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={trialFilter} onValueChange={setTrialFilter}>
+          <SelectTrigger className="bg-card"><SelectValue placeholder="Teste solicitado" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Teste: todos</SelectItem>
+            <SelectItem value="yes">Teste solicitado</SelectItem>
+            <SelectItem value="no">Sem teste</SelectItem>
+          </SelectContent>
+        </Select>
+        <Input
+          value={linkSlug}
+          onChange={(e) => setLinkSlug(e.target.value)}
+          placeholder="Origem do link (slug)..."
+          className="bg-card"
+        />
+        <div className="flex gap-2 sm:col-span-2 lg:col-span-1">
           <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="bg-card" />
           <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="bg-card" />
         </div>
