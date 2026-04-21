@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Smartphone, Download, Share, PlusSquare, CheckCircle2, Apple, Chrome } from "lucide-react";
+import { Smartphone, Download, Share, PlusSquare, CheckCircle2, Apple, Chrome, AlertTriangle, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
 
 type BIPEvent = Event & {
@@ -9,13 +9,48 @@ type BIPEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
-function detectPlatform(): "ios" | "android" | "desktop" | "unknown" {
-  if (typeof navigator === "undefined") return "unknown";
+type Device = {
+  os: "ios" | "android" | "desktop" | "unknown";
+  browser: "safari" | "chrome" | "firefox" | "edge" | "samsung" | "opera" | "other";
+  isInAppBrowser: boolean; // Instagram, Facebook, TikTok, etc.
+  canAutoInstall: boolean; // supports beforeinstallprompt
+  needsSafari: boolean;    // iOS but not Safari
+};
+
+function detectDevice(): Device {
+  if (typeof navigator === "undefined") {
+    return { os: "unknown", browser: "other", isInAppBrowser: false, canAutoInstall: false, needsSafari: false };
+  }
   const ua = navigator.userAgent || "";
-  if (/iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream) return "ios";
-  if (/Android/i.test(ua)) return "android";
-  if (/Mac|Win|Linux/i.test(ua)) return "desktop";
-  return "unknown";
+
+  const isIOS = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
+  const isAndroid = /Android/i.test(ua);
+  const os: Device["os"] = isIOS ? "ios" : isAndroid ? "android" : /Mac|Win|Linux/i.test(ua) ? "desktop" : "unknown";
+
+  const isInApp =
+    /(FBAN|FBAV|Instagram|Line|TikTok|Twitter|Pinterest|MicroMessenger|WhatsApp|Snapchat)/i.test(ua);
+
+  let browser: Device["browser"] = "other";
+  if (/CriOS|Chrome\//.test(ua) && !/EdgiOS|EdgA|Edg\//.test(ua) && !/SamsungBrowser/.test(ua) && !/OPR\/|Opera/.test(ua)) {
+    browser = "chrome";
+  } else if (/EdgiOS|EdgA|Edg\//.test(ua)) {
+    browser = "edge";
+  } else if (/SamsungBrowser/.test(ua)) {
+    browser = "samsung";
+  } else if (/FxiOS|Firefox/.test(ua)) {
+    browser = "firefox";
+  } else if (/OPR\/|Opera/.test(ua)) {
+    browser = "opera";
+  } else if (isIOS && /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua)) {
+    browser = "safari";
+  } else if (!isIOS && /Safari/.test(ua) && !/Chrome|Chromium/.test(ua)) {
+    browser = "safari";
+  }
+
+  const canAutoInstall = !isIOS && (browser === "chrome" || browser === "edge" || browser === "samsung" || browser === "opera");
+  const needsSafari = isIOS && browser !== "safari";
+
+  return { os, browser, isInAppBrowser: isInApp, canAutoInstall, needsSafari };
 }
 
 function isStandalone() {
@@ -36,10 +71,12 @@ export function InstallAppGuide({ variant = "button", className = "" }: Props) {
   const [open, setOpen] = useState(false);
   const [deferred, setDeferred] = useState<BIPEvent | null>(null);
   const [installed, setInstalled] = useState(false);
-  const [platform, setPlatform] = useState<ReturnType<typeof detectPlatform>>("unknown");
+  const [device, setDevice] = useState<Device>({
+    os: "unknown", browser: "other", isInAppBrowser: false, canAutoInstall: false, needsSafari: false,
+  });
 
   useEffect(() => {
-    setPlatform(detectPlatform());
+    setDevice(detectDevice());
     setInstalled(isStandalone());
 
     const onPrompt = (e: Event) => {
