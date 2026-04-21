@@ -38,8 +38,8 @@ export function BrandMark({
           </>
         )}
         {logoUrl ? (
-          <div className={cn(s.box, "bg-card border border-border flex items-center justify-center overflow-hidden shrink-0", animated && "fire-logo-flicker")}>
-            <img src={logoUrl} alt={`${companyName} logo`} className="h-full w-full object-contain p-1" />
+          <div className={cn(s.box, "flex items-center justify-center overflow-hidden shrink-0", animated && "fire-logo-flicker")}>
+            <img src={logoUrl} alt={`${companyName} logo`} className="h-full w-full object-cover" />
           </div>
         ) : (
           <div className={cn(s.box, "bg-gradient-fire flex items-center justify-center shadow-fire shrink-0", animated && "fire-logo-flicker")}>
