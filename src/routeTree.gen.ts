@@ -24,6 +24,7 @@ import { Route as AppRulesRouteImport } from './routes/app/rules'
 import { Route as AppProfileRouteImport } from './routes/app/profile'
 import { Route as AppProductsRouteImport } from './routes/app/products'
 import { Route as AppPayoutsRouteImport } from './routes/app/payouts'
+import { Route as AppNotificationsStatusRouteImport } from './routes/app/notifications-status'
 import { Route as AppNetworkRouteImport } from './routes/app/network'
 import { Route as AppLinkRouteImport } from './routes/app/link'
 import { Route as AppLeadsRouteImport } from './routes/app/leads'
@@ -130,6 +131,11 @@ const AppProductsRoute = AppProductsRouteImport.update({
 const AppPayoutsRoute = AppPayoutsRouteImport.update({
   id: '/app/payouts',
   path: '/app/payouts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppNotificationsStatusRoute = AppNotificationsStatusRouteImport.update({
+  id: '/app/notifications-status',
+  path: '/app/notifications-status',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppNetworkRoute = AppNetworkRouteImport.update({
@@ -324,6 +330,7 @@ export interface FileRoutesByFullPath {
   '/app/leads': typeof AppLeadsRoute
   '/app/link': typeof AppLinkRoute
   '/app/network': typeof AppNetworkRoute
+  '/app/notifications-status': typeof AppNotificationsStatusRoute
   '/app/payouts': typeof AppPayoutsRoute
   '/app/products': typeof AppProductsRoute
   '/app/profile': typeof AppProfileRoute
@@ -372,6 +379,7 @@ export interface FileRoutesByTo {
   '/app/leads': typeof AppLeadsRoute
   '/app/link': typeof AppLinkRoute
   '/app/network': typeof AppNetworkRoute
+  '/app/notifications-status': typeof AppNotificationsStatusRoute
   '/app/payouts': typeof AppPayoutsRoute
   '/app/products': typeof AppProductsRoute
   '/app/profile': typeof AppProfileRoute
@@ -420,6 +428,7 @@ export interface FileRoutesById {
   '/app/leads': typeof AppLeadsRoute
   '/app/link': typeof AppLinkRoute
   '/app/network': typeof AppNetworkRoute
+  '/app/notifications-status': typeof AppNotificationsStatusRoute
   '/app/payouts': typeof AppPayoutsRoute
   '/app/products': typeof AppProductsRoute
   '/app/profile': typeof AppProfileRoute
@@ -470,6 +479,7 @@ export interface FileRouteTypes {
     | '/app/leads'
     | '/app/link'
     | '/app/network'
+    | '/app/notifications-status'
     | '/app/payouts'
     | '/app/products'
     | '/app/profile'
@@ -518,6 +528,7 @@ export interface FileRouteTypes {
     | '/app/leads'
     | '/app/link'
     | '/app/network'
+    | '/app/notifications-status'
     | '/app/payouts'
     | '/app/products'
     | '/app/profile'
@@ -565,6 +576,7 @@ export interface FileRouteTypes {
     | '/app/leads'
     | '/app/link'
     | '/app/network'
+    | '/app/notifications-status'
     | '/app/payouts'
     | '/app/products'
     | '/app/profile'
@@ -614,6 +626,7 @@ export interface RootRouteChildren {
   AppLeadsRoute: typeof AppLeadsRoute
   AppLinkRoute: typeof AppLinkRoute
   AppNetworkRoute: typeof AppNetworkRoute
+  AppNotificationsStatusRoute: typeof AppNotificationsStatusRoute
   AppPayoutsRoute: typeof AppPayoutsRoute
   AppProductsRoute: typeof AppProductsRoute
   AppProfileRoute: typeof AppProfileRoute
@@ -731,6 +744,13 @@ declare module '@tanstack/react-router' {
       path: '/app/payouts'
       fullPath: '/app/payouts'
       preLoaderRoute: typeof AppPayoutsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/notifications-status': {
+      id: '/app/notifications-status'
+      path: '/app/notifications-status'
+      fullPath: '/app/notifications-status'
+      preLoaderRoute: typeof AppNotificationsStatusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/network': {
@@ -1012,6 +1032,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppLeadsRoute: AppLeadsRoute,
   AppLinkRoute: AppLinkRoute,
   AppNetworkRoute: AppNetworkRoute,
+  AppNotificationsStatusRoute: AppNotificationsStatusRoute,
   AppPayoutsRoute: AppPayoutsRoute,
   AppProductsRoute: AppProductsRoute,
   AppProfileRoute: AppProfileRoute,
