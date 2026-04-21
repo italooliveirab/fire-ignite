@@ -399,6 +399,57 @@ export type Database = {
           },
         ]
       }
+      link_clicks: {
+        Row: {
+          affiliate_id: string | null
+          affiliate_slug: string | null
+          created_at: string
+          id: string
+          ip_hash: string | null
+          product_id: string | null
+          product_slug: string | null
+          referrer: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          affiliate_id?: string | null
+          affiliate_slug?: string | null
+          created_at?: string
+          id?: string
+          ip_hash?: string | null
+          product_id?: string | null
+          product_slug?: string | null
+          referrer?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          affiliate_id?: string | null
+          affiliate_slug?: string | null
+          created_at?: string
+          id?: string
+          ip_hash?: string | null
+          product_id?: string | null
+          product_slug?: string | null
+          referrer?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "link_clicks_affiliate_id_fkey"
+            columns: ["affiliate_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "link_clicks_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       network_commission_rules: {
         Row: {
           created_at: string

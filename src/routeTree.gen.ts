@@ -41,6 +41,7 @@ import { Route as AdminCommissionsRouteImport } from './routes/admin/commissions
 import { Route as AdminBuyersRouteImport } from './routes/admin/buyers'
 import { Route as AdminAuditRouteImport } from './routes/admin/audit'
 import { Route as AdminApiRouteImport } from './routes/admin/api'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin/analytics'
 import { Route as AdminAffiliatesRouteImport } from './routes/admin/affiliates'
 import { Route as PProductSlugAffiliateSlugRouteImport } from './routes/p.$productSlug.$affiliateSlug'
 
@@ -205,6 +206,11 @@ const AdminApiRoute = AdminApiRouteImport.update({
   path: '/admin/api',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/admin/analytics',
+  path: '/admin/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminAffiliatesRoute = AdminAffiliatesRouteImport.update({
   id: '/admin/affiliates',
   path: '/admin/affiliates',
@@ -226,6 +232,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/admin/affiliates': typeof AdminAffiliatesRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/api': typeof AdminApiRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/buyers': typeof AdminBuyersRoute
@@ -262,6 +269,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/admin/affiliates': typeof AdminAffiliatesRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/api': typeof AdminApiRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/buyers': typeof AdminBuyersRoute
@@ -299,6 +307,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/admin/affiliates': typeof AdminAffiliatesRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/api': typeof AdminApiRoute
   '/admin/audit': typeof AdminAuditRoute
   '/admin/buyers': typeof AdminBuyersRoute
@@ -337,6 +346,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/admin/affiliates'
+    | '/admin/analytics'
     | '/admin/api'
     | '/admin/audit'
     | '/admin/buyers'
@@ -373,6 +383,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/admin/affiliates'
+    | '/admin/analytics'
     | '/admin/api'
     | '/admin/audit'
     | '/admin/buyers'
@@ -409,6 +420,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/admin/affiliates'
+    | '/admin/analytics'
     | '/admin/api'
     | '/admin/audit'
     | '/admin/buyers'
@@ -446,6 +458,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   AdminAffiliatesRoute: typeof AdminAffiliatesRoute
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminApiRoute: typeof AdminApiRoute
   AdminAuditRoute: typeof AdminAuditRoute
   AdminBuyersRoute: typeof AdminBuyersRoute
@@ -700,6 +713,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminApiRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/admin/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/affiliates': {
       id: '/admin/affiliates'
       path: '/admin/affiliates'
@@ -726,6 +746,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   AdminAffiliatesRoute: AdminAffiliatesRoute,
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminApiRoute: AdminApiRoute,
   AdminAuditRoute: AdminAuditRoute,
   AdminBuyersRoute: AdminBuyersRoute,

@@ -20,10 +20,28 @@ export const Route = createFileRoute("/p/$productSlug/$affiliateSlug")({
             return new Response(JSON.stringify({ ok: false }), { status: 400 });
           }
 
+          const ua = request.headers.get("user-agent") ?? null;
+          const referrer = request.headers.get("referer") ?? null;
+          const ipRaw = request.headers.get("cf-connecting-ip")
+            ?? request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+            ?? null;
+          let ipHash: string | null = null;
+          if (ipRaw) {
+            try {
+              const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(ipRaw));
+              ipHash = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 32);
+            } catch { /* noop */ }
+          }
+
           const { data: product } = await supabaseAdmin
             .from("products").select("id, is_active").eq("slug", productSlug).maybeSingle();
 
           if (!product || !product.is_active) {
+            // log click anyway with null product
+            await supabaseAdmin.from("link_clicks").insert({
+              product_slug: productSlug, affiliate_slug: affiliateSlug,
+              ip_hash: ipHash, user_agent: ua, referrer,
+            });
             return new Response(JSON.stringify({ ok: false }), { status: 404 });
           }
 
@@ -57,6 +75,17 @@ export const Route = createFileRoute("/p/$productSlug/$affiliateSlug")({
             }
             affiliateId = affiliate.id;
           }
+
+          // Always log the click first (even if lead insert fails)
+          await supabaseAdmin.from("link_clicks").insert({
+            product_id: product.id,
+            affiliate_id: affiliateId,
+            product_slug: productSlug,
+            affiliate_slug: affiliateSlug,
+            ip_hash: ipHash,
+            user_agent: ua,
+            referrer,
+          });
 
           await supabaseAdmin.from("leads").insert({
             affiliate_id: affiliateId,
