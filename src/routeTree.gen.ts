@@ -54,6 +54,10 @@ import { Route as AdminAffiliatesRouteImport } from './routes/admin/affiliates'
 import { Route as AdminDebugRouteImport } from './routes/admin/_debug'
 import { Route as PProductSlugAffiliateSlugRouteImport } from './routes/p.$productSlug.$affiliateSlug'
 import { Route as ApiWebhooksTestRouteImport } from './routes/api.webhooks.test'
+import { Route as ApiPushVapidKeyRouteImport } from './routes/api.push.vapid-key'
+import { Route as ApiPushUnsubscribeRouteImport } from './routes/api.push.unsubscribe'
+import { Route as ApiPushTestRouteImport } from './routes/api.push.test'
+import { Route as ApiPushSubscribeRouteImport } from './routes/api.push.subscribe'
 import { Route as ApiLeadsWhatsappIdRouteImport } from './routes/api.leads.$whatsappId'
 import { Route as ApiAffiliatesSlugRouteImport } from './routes/api.affiliates.$slug'
 
@@ -284,6 +288,26 @@ const ApiWebhooksTestRoute = ApiWebhooksTestRouteImport.update({
   path: '/api/webhooks/test',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPushVapidKeyRoute = ApiPushVapidKeyRouteImport.update({
+  id: '/api/push/vapid-key',
+  path: '/api/push/vapid-key',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPushUnsubscribeRoute = ApiPushUnsubscribeRouteImport.update({
+  id: '/api/push/unsubscribe',
+  path: '/api/push/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPushTestRoute = ApiPushTestRouteImport.update({
+  id: '/api/push/test',
+  path: '/api/push/test',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPushSubscribeRoute = ApiPushSubscribeRouteImport.update({
+  id: '/api/push/subscribe',
+  path: '/api/push/subscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiLeadsWhatsappIdRoute = ApiLeadsWhatsappIdRouteImport.update({
   id: '/$whatsappId',
   path: '/$whatsappId',
@@ -341,6 +365,10 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AppIndexRoute
   '/api/affiliates/$slug': typeof ApiAffiliatesSlugRoute
   '/api/leads/$whatsappId': typeof ApiLeadsWhatsappIdRoute
+  '/api/push/subscribe': typeof ApiPushSubscribeRoute
+  '/api/push/test': typeof ApiPushTestRoute
+  '/api/push/unsubscribe': typeof ApiPushUnsubscribeRoute
+  '/api/push/vapid-key': typeof ApiPushVapidKeyRoute
   '/api/webhooks/test': typeof ApiWebhooksTestRoute
   '/p/$productSlug/$affiliateSlug': typeof PProductSlugAffiliateSlugRoute
 }
@@ -389,6 +417,10 @@ export interface FileRoutesByTo {
   '/app': typeof AppIndexRoute
   '/api/affiliates/$slug': typeof ApiAffiliatesSlugRoute
   '/api/leads/$whatsappId': typeof ApiLeadsWhatsappIdRoute
+  '/api/push/subscribe': typeof ApiPushSubscribeRoute
+  '/api/push/test': typeof ApiPushTestRoute
+  '/api/push/unsubscribe': typeof ApiPushUnsubscribeRoute
+  '/api/push/vapid-key': typeof ApiPushVapidKeyRoute
   '/api/webhooks/test': typeof ApiWebhooksTestRoute
   '/p/$productSlug/$affiliateSlug': typeof PProductSlugAffiliateSlugRoute
 }
@@ -439,6 +471,10 @@ export interface FileRoutesById {
   '/app/': typeof AppIndexRoute
   '/api/affiliates/$slug': typeof ApiAffiliatesSlugRoute
   '/api/leads/$whatsappId': typeof ApiLeadsWhatsappIdRoute
+  '/api/push/subscribe': typeof ApiPushSubscribeRoute
+  '/api/push/test': typeof ApiPushTestRoute
+  '/api/push/unsubscribe': typeof ApiPushUnsubscribeRoute
+  '/api/push/vapid-key': typeof ApiPushVapidKeyRoute
   '/api/webhooks/test': typeof ApiWebhooksTestRoute
   '/p/$productSlug/$affiliateSlug': typeof PProductSlugAffiliateSlugRoute
 }
@@ -490,6 +526,10 @@ export interface FileRouteTypes {
     | '/app/'
     | '/api/affiliates/$slug'
     | '/api/leads/$whatsappId'
+    | '/api/push/subscribe'
+    | '/api/push/test'
+    | '/api/push/unsubscribe'
+    | '/api/push/vapid-key'
     | '/api/webhooks/test'
     | '/p/$productSlug/$affiliateSlug'
   fileRoutesByTo: FileRoutesByTo
@@ -538,6 +578,10 @@ export interface FileRouteTypes {
     | '/app'
     | '/api/affiliates/$slug'
     | '/api/leads/$whatsappId'
+    | '/api/push/subscribe'
+    | '/api/push/test'
+    | '/api/push/unsubscribe'
+    | '/api/push/vapid-key'
     | '/api/webhooks/test'
     | '/p/$productSlug/$affiliateSlug'
   id:
@@ -587,6 +631,10 @@ export interface FileRouteTypes {
     | '/app/'
     | '/api/affiliates/$slug'
     | '/api/leads/$whatsappId'
+    | '/api/push/subscribe'
+    | '/api/push/test'
+    | '/api/push/unsubscribe'
+    | '/api/push/vapid-key'
     | '/api/webhooks/test'
     | '/p/$productSlug/$affiliateSlug'
   fileRoutesById: FileRoutesById
@@ -635,6 +683,10 @@ export interface RootRouteChildren {
   HooksWeeklyPayoutSummaryRoute: typeof HooksWeeklyPayoutSummaryRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AppIndexRoute: typeof AppIndexRoute
+  ApiPushSubscribeRoute: typeof ApiPushSubscribeRoute
+  ApiPushTestRoute: typeof ApiPushTestRoute
+  ApiPushUnsubscribeRoute: typeof ApiPushUnsubscribeRoute
+  ApiPushVapidKeyRoute: typeof ApiPushVapidKeyRoute
   ApiWebhooksTestRoute: typeof ApiWebhooksTestRoute
   PProductSlugAffiliateSlugRoute: typeof PProductSlugAffiliateSlugRoute
 }
@@ -956,6 +1008,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWebhooksTestRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/push/vapid-key': {
+      id: '/api/push/vapid-key'
+      path: '/api/push/vapid-key'
+      fullPath: '/api/push/vapid-key'
+      preLoaderRoute: typeof ApiPushVapidKeyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/push/unsubscribe': {
+      id: '/api/push/unsubscribe'
+      path: '/api/push/unsubscribe'
+      fullPath: '/api/push/unsubscribe'
+      preLoaderRoute: typeof ApiPushUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/push/test': {
+      id: '/api/push/test'
+      path: '/api/push/test'
+      fullPath: '/api/push/test'
+      preLoaderRoute: typeof ApiPushTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/push/subscribe': {
+      id: '/api/push/subscribe'
+      path: '/api/push/subscribe'
+      fullPath: '/api/push/subscribe'
+      preLoaderRoute: typeof ApiPushSubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/leads/$whatsappId': {
       id: '/api/leads/$whatsappId'
       path: '/$whatsappId'
@@ -1041,6 +1121,10 @@ const rootRouteChildren: RootRouteChildren = {
   HooksWeeklyPayoutSummaryRoute: HooksWeeklyPayoutSummaryRoute,
   AdminIndexRoute: AdminIndexRoute,
   AppIndexRoute: AppIndexRoute,
+  ApiPushSubscribeRoute: ApiPushSubscribeRoute,
+  ApiPushTestRoute: ApiPushTestRoute,
+  ApiPushUnsubscribeRoute: ApiPushUnsubscribeRoute,
+  ApiPushVapidKeyRoute: ApiPushVapidKeyRoute,
   ApiWebhooksTestRoute: ApiWebhooksTestRoute,
   PProductSlugAffiliateSlugRoute: PProductSlugAffiliateSlugRoute,
 }
