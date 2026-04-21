@@ -13,7 +13,7 @@ async function fetchBrand(): Promise<Brand> {
   inflight = (async () => {
   const { data } = await supabase.from("settings").select("company_name").limit(1).maybeSingle();
   const brand: Brand = {
-    logoUrl: null,
+    logoUrl: "/brand-logo.jpg",
     companyName: data?.company_name ?? "FIRE",
   };
   cached = brand;
@@ -25,7 +25,7 @@ async function fetchBrand(): Promise<Brand> {
 }
 
 export function useBrand(): Brand {
-  const [brand, setBrand] = useState<Brand>(cached ?? { logoUrl: null, companyName: "FIRE" });
+  const [brand, setBrand] = useState<Brand>(cached ?? { logoUrl: "/brand-logo.jpg", companyName: "FIRE" });
 
   useEffect(() => {
     listeners.add(setBrand);
