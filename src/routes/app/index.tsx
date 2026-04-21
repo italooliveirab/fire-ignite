@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { StatCard } from "@/components/StatCard";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,9 +9,13 @@ import { formatBRL, formatNumber } from "@/lib/format";
 import { Target, MessageCircle, Beaker, FileText, CheckCircle, XCircle, Clock, Banknote, Copy, Package, Network } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
 import { TopAffiliatesRanking } from "@/components/TopAffiliatesRanking";
 import { useSpotlight } from "@/hooks/useSpotlight";
+
+// recharts is ~150KB gzipped — lazy load so the dashboard renders instantly
+const PerformanceChart = lazy(() =>
+  import("@/components/PerformanceChart").then((m) => ({ default: m.PerformanceChart })),
+);
 
 export const Route = createFileRoute("/app/")({ component: AffiliateDashboard });
 
@@ -148,15 +152,9 @@ function AffiliateDashboard() {
           <div className="grid lg:grid-cols-3 gap-4">
             <SpotlightChart>
               <h3 className="font-display font-semibold mb-4">Desempenho — últimos 30 dias</h3>
-              <ResponsiveContainer width="100%" height={260}>
-                <LineChart data={stats.days}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.25 0 0)" />
-                  <XAxis dataKey="date" stroke="oklch(0.6 0 0)" fontSize={11} />
-                  <YAxis stroke="oklch(0.6 0 0)" fontSize={11} />
-                  <Tooltip contentStyle={{ background: "oklch(0.16 0 0)", border: "1px solid oklch(0.25 0 0)", borderRadius: 8 }} />
-                  <Line type="monotone" dataKey="leads" stroke="#FF5A00" strokeWidth={2.5} dot={false} />
-                </LineChart>
-              </ResponsiveContainer>
+              <Suspense fallback={<div className="h-[260px] rounded-lg bg-muted/20 animate-pulse" />}>
+                <PerformanceChart data={stats.days} />
+              </Suspense>
             </SpotlightChart>
             <TopAffiliatesRanking currentAffiliateId={affiliate.id} />
           </div>
