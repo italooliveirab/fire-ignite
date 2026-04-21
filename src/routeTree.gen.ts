@@ -29,6 +29,7 @@ import { Route as AppLinkRouteImport } from './routes/app/link'
 import { Route as AppLeadsRouteImport } from './routes/app/leads'
 import { Route as AppCommissionsRouteImport } from './routes/app/commissions'
 import { Route as ApiTrackEventRouteImport } from './routes/api.track-event'
+import { Route as ApiAffiliatesRouteImport } from './routes/api.affiliates'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminRequestsRouteImport } from './routes/admin/requests'
 import { Route as AdminProductsRouteImport } from './routes/admin/products'
@@ -45,6 +46,7 @@ import { Route as AdminApiRouteImport } from './routes/admin/api'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin/analytics'
 import { Route as AdminAffiliatesRouteImport } from './routes/admin/affiliates'
 import { Route as PProductSlugAffiliateSlugRouteImport } from './routes/p.$productSlug.$affiliateSlug'
+import { Route as ApiAffiliatesSlugRouteImport } from './routes/api.affiliates.$slug'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -147,6 +149,11 @@ const ApiTrackEventRoute = ApiTrackEventRouteImport.update({
   path: '/api/track-event',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAffiliatesRoute = ApiAffiliatesRouteImport.update({
+  id: '/api/affiliates',
+  path: '/api/affiliates',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/admin/settings',
   path: '/admin/settings',
@@ -228,6 +235,11 @@ const PProductSlugAffiliateSlugRoute =
     path: '/p/$productSlug/$affiliateSlug',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiAffiliatesSlugRoute = ApiAffiliatesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ApiAffiliatesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -252,6 +264,7 @@ export interface FileRoutesByFullPath {
   '/admin/products': typeof AdminProductsRoute
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
   '/api/track-event': typeof ApiTrackEventRoute
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
@@ -265,6 +278,7 @@ export interface FileRoutesByFullPath {
   '/hooks/weekly-payout-summary': typeof HooksWeeklyPayoutSummaryRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/api/affiliates/$slug': typeof ApiAffiliatesSlugRoute
   '/p/$productSlug/$affiliateSlug': typeof PProductSlugAffiliateSlugRoute
 }
 export interface FileRoutesByTo {
@@ -290,6 +304,7 @@ export interface FileRoutesByTo {
   '/admin/products': typeof AdminProductsRoute
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
   '/api/track-event': typeof ApiTrackEventRoute
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
@@ -303,6 +318,7 @@ export interface FileRoutesByTo {
   '/hooks/weekly-payout-summary': typeof HooksWeeklyPayoutSummaryRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
+  '/api/affiliates/$slug': typeof ApiAffiliatesSlugRoute
   '/p/$productSlug/$affiliateSlug': typeof PProductSlugAffiliateSlugRoute
 }
 export interface FileRoutesById {
@@ -329,6 +345,7 @@ export interface FileRoutesById {
   '/admin/products': typeof AdminProductsRoute
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
   '/api/track-event': typeof ApiTrackEventRoute
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
@@ -342,6 +359,7 @@ export interface FileRoutesById {
   '/hooks/weekly-payout-summary': typeof HooksWeeklyPayoutSummaryRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/api/affiliates/$slug': typeof ApiAffiliatesSlugRoute
   '/p/$productSlug/$affiliateSlug': typeof PProductSlugAffiliateSlugRoute
 }
 export interface FileRouteTypes {
@@ -369,6 +387,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/requests'
     | '/admin/settings'
+    | '/api/affiliates'
     | '/api/track-event'
     | '/app/commissions'
     | '/app/leads'
@@ -382,6 +401,7 @@ export interface FileRouteTypes {
     | '/hooks/weekly-payout-summary'
     | '/admin/'
     | '/app/'
+    | '/api/affiliates/$slug'
     | '/p/$productSlug/$affiliateSlug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -407,6 +427,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/requests'
     | '/admin/settings'
+    | '/api/affiliates'
     | '/api/track-event'
     | '/app/commissions'
     | '/app/leads'
@@ -420,6 +441,7 @@ export interface FileRouteTypes {
     | '/hooks/weekly-payout-summary'
     | '/admin'
     | '/app'
+    | '/api/affiliates/$slug'
     | '/p/$productSlug/$affiliateSlug'
   id:
     | '__root__'
@@ -445,6 +467,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/requests'
     | '/admin/settings'
+    | '/api/affiliates'
     | '/api/track-event'
     | '/app/commissions'
     | '/app/leads'
@@ -458,6 +481,7 @@ export interface FileRouteTypes {
     | '/hooks/weekly-payout-summary'
     | '/admin/'
     | '/app/'
+    | '/api/affiliates/$slug'
     | '/p/$productSlug/$affiliateSlug'
   fileRoutesById: FileRoutesById
 }
@@ -484,6 +508,7 @@ export interface RootRouteChildren {
   AdminProductsRoute: typeof AdminProductsRoute
   AdminRequestsRoute: typeof AdminRequestsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  ApiAffiliatesRoute: typeof ApiAffiliatesRouteWithChildren
   ApiTrackEventRoute: typeof ApiTrackEventRoute
   AppCommissionsRoute: typeof AppCommissionsRoute
   AppLeadsRoute: typeof AppLeadsRoute
@@ -642,6 +667,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTrackEventRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/affiliates': {
+      id: '/api/affiliates'
+      path: '/api/affiliates'
+      fullPath: '/api/affiliates'
+      preLoaderRoute: typeof ApiAffiliatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/admin/settings'
@@ -754,8 +786,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PProductSlugAffiliateSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/affiliates/$slug': {
+      id: '/api/affiliates/$slug'
+      path: '/$slug'
+      fullPath: '/api/affiliates/$slug'
+      preLoaderRoute: typeof ApiAffiliatesSlugRouteImport
+      parentRoute: typeof ApiAffiliatesRoute
+    }
   }
 }
+
+interface ApiAffiliatesRouteChildren {
+  ApiAffiliatesSlugRoute: typeof ApiAffiliatesSlugRoute
+}
+
+const ApiAffiliatesRouteChildren: ApiAffiliatesRouteChildren = {
+  ApiAffiliatesSlugRoute: ApiAffiliatesSlugRoute,
+}
+
+const ApiAffiliatesRouteWithChildren = ApiAffiliatesRoute._addFileChildren(
+  ApiAffiliatesRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -780,6 +831,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminProductsRoute: AdminProductsRoute,
   AdminRequestsRoute: AdminRequestsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  ApiAffiliatesRoute: ApiAffiliatesRouteWithChildren,
   ApiTrackEventRoute: ApiTrackEventRoute,
   AppCommissionsRoute: AppCommissionsRoute,
   AppLeadsRoute: AppLeadsRoute,
@@ -798,3 +850,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
