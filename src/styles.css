@@ -283,6 +283,70 @@ html { color-scheme: dark; }
 .fire-pulse-ring { animation: pulse-ring 1.8s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
 
 /* ============================================
+   FIRE — Premium StatCard (animated conic border)
+   ============================================ */
+@property --conic-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes conic-spin {
+  to { --conic-angle: 360deg; }
+}
+@keyframes conic-spin-fallback {
+  to { transform: rotate(360deg); }
+}
+
+.statcard-premium {
+  position: relative;
+  isolation: isolate;
+}
+.statcard-premium::before {
+  content: "";
+  position: absolute;
+  inset: -1.5px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--conic-angle, 0deg),
+    #FF2A00,
+    #FF8A00,
+    #FFD580,
+    #00BFFF,
+    #FF2A00
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  animation: conic-spin 6s linear infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+.statcard-premium::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--conic-angle, 0deg),
+    rgba(255, 42, 0, 0.35),
+    rgba(255, 138, 0, 0.35),
+    rgba(0, 191, 255, 0.25),
+    rgba(255, 42, 0, 0.35)
+  );
+  filter: blur(18px);
+  opacity: 0.55;
+  animation: conic-spin 6s linear infinite;
+  z-index: -1;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .statcard-premium::before, .statcard-premium::after { animation: none; }
+}
+
+/* ============================================
    FIRE — Spotlight glow (cursor-tracking)
    Use: <div class="spotlight-card">...</div>
    ============================================ */
