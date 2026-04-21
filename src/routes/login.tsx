@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { resolveRoleForUser } from "@/lib/auth";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
+import { InstallAppGuide } from "@/components/InstallAppGuide";
 
 export const Route = createFileRoute("/login")({
   validateSearch: (s: Record<string, unknown>): { redirect?: string } => ({
@@ -145,6 +146,10 @@ function LoginPage() {
         <p className="text-center text-xs text-muted-foreground mt-6">
           🔒 Conexão segura · Plataforma FIRE
         </p>
+
+        <div className="mt-4">
+          <InstallAppGuide variant="card" />
+        </div>
       </div>
     </div>
   );
