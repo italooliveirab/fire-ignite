@@ -30,8 +30,8 @@ interface CommissionRow { id: string; lead_id: string; commission_value: number;
 function maskPhone(phone: string | null) {
   if (!phone) return "—";
   const d = phone.replace(/\D/g, "");
-  if (d.length < 6) return phone;
-  return `${d.slice(0, 4)}•••${d.slice(-2)}`;
+  if (d.length < 4) return "••••";
+  return `••••••${d.slice(-4)}`;
 }
 
 function MyLeads() {
