@@ -34,8 +34,8 @@ export function DashboardLayout({ variant, title, children }: Props) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <div className="h-1 w-24 bg-primary mx-auto mb-4 animate-pulse" />
-          <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-muted-foreground">
+          <div className="h-1 w-24 rounded-full bg-gradient-fire mx-auto mb-4 animate-pulse" />
+          <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground font-medium">
             Carregando
           </div>
         </div>
@@ -49,7 +49,7 @@ export function DashboardLayout({ variant, title, children }: Props) {
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Topbar */}
-        <header className="sticky top-0 z-20 h-14 border-b border-border bg-background/95 backdrop-blur flex items-center justify-between px-4 md:px-6">
+        <header className="sticky top-0 z-20 h-16 border-b border-border/60 bg-background/80 backdrop-blur-xl flex items-center justify-between px-4 md:px-8">
           <div className="flex items-center gap-3">
             <Sheet>
               <SheetTrigger asChild>
@@ -57,29 +57,28 @@ export function DashboardLayout({ variant, title, children }: Props) {
                   <Menu className="h-5 w-5" strokeWidth={2} />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-60 bg-sidebar border-sidebar-border">
+              <SheetContent side="left" className="p-0 w-64 bg-sidebar border-sidebar-border">
                 <AppSidebar variant={variant} />
               </SheetContent>
             </Sheet>
             <Link to="/" className="md:hidden flex items-center gap-2">
-              <div className="h-7 w-7 bg-primary flex items-center justify-center">
+              <div className="h-7 w-7 rounded-lg bg-gradient-fire flex items-center justify-center shadow-glow-soft">
                 <Flame className="h-4 w-4 text-primary-foreground" strokeWidth={2.5} />
               </div>
-              <span className="font-display text-lg">FIRE</span>
+              <span className="font-display text-lg font-semibold">FIRE</span>
             </Link>
             {title && (
-              <div className="hidden md:flex items-center gap-3">
-                <span className="h-1 w-1 bg-primary" />
-                <h1 className="text-[11px] font-mono uppercase tracking-[0.25em] text-muted-foreground">
-                  {variant} / {title}
-                </h1>
+              <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground">
+                <span className="capitalize">{variant}</span>
+                <span className="text-muted-foreground/40">/</span>
+                <span className="text-foreground font-medium">{title}</span>
               </div>
             )}
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="hidden sm:inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-wider px-2 py-1 border border-success/40 bg-success/10 text-success">
-              <span className="h-1.5 w-1.5 bg-success animate-pulse" /> ONLINE
+            <span className="hidden sm:inline-flex items-center gap-2 text-[11px] font-medium px-2.5 py-1 rounded-full border border-success/30 bg-success/10 text-success">
+              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" /> Online
             </span>
             <Button variant="ghost" size="icon" className="md:hidden" onClick={signOut}>
               <LogOut className="h-4 w-4" strokeWidth={2} />
@@ -87,7 +86,7 @@ export function DashboardLayout({ variant, title, children }: Props) {
           </div>
         </header>
 
-        <main className="flex-1 p-4 md:p-8 max-w-[1600px] w-full mx-auto">{children}</main>
+        <main className="flex-1 p-4 md:p-8 lg:p-10 max-w-[1600px] w-full mx-auto">{children}</main>
       </div>
     </div>
   );
