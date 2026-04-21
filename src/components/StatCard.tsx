@@ -20,7 +20,7 @@ const accentMap = {
 };
 
 export function StatCard({ label, value, icon: Icon, trend, accent = "fire", className }: Props) {
-  const { ref, onMouseMove } = useSpotlight();
+  const { ref, onMouseMove, onMouseLeave } = useSpotlight();
   return (
     <div className={cn(
       "spotlight-card relative overflow-hidden rounded-2xl bg-card border border-border p-5 shadow-card-premium transition-all hover:border-primary/40 hover:-translate-y-0.5",
@@ -29,6 +29,7 @@ export function StatCard({ label, value, icon: Icon, trend, accent = "fire", cla
     data-spot={accent}
     ref={ref}
     onMouseMove={onMouseMove}
+    onMouseLeave={onMouseLeave}
     >
       <div className={cn("absolute inset-0 bg-gradient-to-br opacity-60 pointer-events-none", accentMap[accent].split(" ").slice(0, 2).join(" "))} />
       <div className="relative z-10">
