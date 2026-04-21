@@ -17,8 +17,11 @@ const STATUS_LABEL: Record<string, string> = {
   initiated_conversation: "Iniciou conversa",
   generated_trial: "Gerou teste",
   generated_payment: "Gerou pagamento",
+  support_received: "Suporte recebido",
   paid: "Pagou",
+  renewed: "Renovou",
   not_paid: "Não pagou",
+  lost: "Perdido",
 };
 
 export const Route = createFileRoute("/admin/leads")({ component: LeadsPage });
@@ -228,8 +231,11 @@ function LeadsPage() {
             <SelectItem value="initiated_conversation">Iniciou conversa</SelectItem>
             <SelectItem value="generated_trial">Gerou teste</SelectItem>
             <SelectItem value="generated_payment">Gerou pagamento</SelectItem>
+            <SelectItem value="support_received">Suporte recebido</SelectItem>
             <SelectItem value="paid">Pagou</SelectItem>
+            <SelectItem value="renewed">Renovou</SelectItem>
             <SelectItem value="not_paid">Não pagou</SelectItem>
+            <SelectItem value="lost">Perdido</SelectItem>
           </SelectContent>
         </Select>
         <Select value={affiliateFilter} onValueChange={setAffiliateFilter}>
