@@ -12,6 +12,7 @@ import { Upload, Image as ImageIcon, Save, Loader2, Mail } from "lucide-react";
 import { refreshBrand } from "@/hooks/useBrand";
 import { useServerFn } from "@tanstack/react-start";
 import { sendTestEmailFn } from "@/server/notifications";
+import { NotificationSettings } from "@/components/NotificationSettings";
 
 export const Route = createFileRoute("/admin/settings")({ component: SettingsPage });
 
@@ -176,6 +177,12 @@ function SettingsPage() {
             {testing ? "Enviando..." : "Enviar email de teste"}
           </Button>
         </Section>
+      </div>
+
+      <div className="mt-10">
+        <h2 className="font-display text-2xl font-bold mb-1">Minhas notificações</h2>
+        <p className="text-sm text-muted-foreground mb-4">Configure quais alertas você (admin) recebe no celular, com som e por email.</p>
+        <NotificationSettings />
       </div>
     </DashboardLayout>
   );
