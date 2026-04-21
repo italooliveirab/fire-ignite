@@ -59,9 +59,9 @@ export const getRouter = () => {
     routeTree,
     context: {},
     scrollRestoration: true,
-    // No aggressive hover-preload — saturates mobile networks. Routes still
-    // code-split and load on click.
-    defaultPreload: false,
+    // Preload on hover/touch for snappy navigation. Routes are code-split.
+    defaultPreload: "intent",
+    defaultPreloadStaleTime: 0,
     defaultErrorComponent: DefaultErrorComponent,
   });
 

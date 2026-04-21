@@ -12,6 +12,10 @@ const EmberCanvas = lazy(() =>
   import("./EmberCanvas").then((m) => ({ default: m.EmberCanvas })),
 );
 
+// Detect mobile once at module load to avoid render-time matchMedia calls
+const isMobileDevice = typeof window !== "undefined"
+  && window.matchMedia?.("(max-width: 768px)").matches;
+
 interface Props {
   variant: "admin" | "affiliate";
   title?: string;
@@ -45,9 +49,11 @@ export function DashboardLayout({ variant, title, children }: Props) {
 
   return (
     <div className="min-h-screen flex">
-      <Suspense fallback={null}>
-        <EmberCanvas density={20} />
-      </Suspense>
+      {!isMobileDevice && (
+        <Suspense fallback={null}>
+          <EmberCanvas density={20} />
+        </Suspense>
+      )}
       <AppSidebar variant={variant} />
 
       <div className="flex-1 flex flex-col min-w-0">
