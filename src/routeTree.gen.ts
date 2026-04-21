@@ -34,6 +34,7 @@ import { Route as ApiProductsRouteImport } from './routes/api.products'
 import { Route as ApiLeadsRouteImport } from './routes/api.leads'
 import { Route as ApiCommissionsRouteImport } from './routes/api.commissions'
 import { Route as ApiAffiliatesRouteImport } from './routes/api.affiliates'
+import { Route as AdminWebhooksRouteImport } from './routes/admin/webhooks'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminRequestsRouteImport } from './routes/admin/requests'
 import { Route as AdminProductsRouteImport } from './routes/admin/products'
@@ -180,6 +181,11 @@ const ApiAffiliatesRoute = ApiAffiliatesRouteImport.update({
   path: '/api/affiliates',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminWebhooksRoute = AdminWebhooksRouteImport.update({
+  id: '/admin/webhooks',
+  path: '/admin/webhooks',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/admin/settings',
   path: '/admin/settings',
@@ -300,6 +306,7 @@ export interface FileRoutesByFullPath {
   '/admin/products': typeof AdminProductsRoute
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/webhooks': typeof AdminWebhooksRoute
   '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
   '/api/commissions': typeof ApiCommissionsRoute
   '/api/leads': typeof ApiLeadsRouteWithChildren
@@ -346,6 +353,7 @@ export interface FileRoutesByTo {
   '/admin/products': typeof AdminProductsRoute
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/webhooks': typeof AdminWebhooksRoute
   '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
   '/api/commissions': typeof ApiCommissionsRoute
   '/api/leads': typeof ApiLeadsRouteWithChildren
@@ -393,6 +401,7 @@ export interface FileRoutesById {
   '/admin/products': typeof AdminProductsRoute
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/webhooks': typeof AdminWebhooksRoute
   '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
   '/api/commissions': typeof ApiCommissionsRoute
   '/api/leads': typeof ApiLeadsRouteWithChildren
@@ -441,6 +450,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/requests'
     | '/admin/settings'
+    | '/admin/webhooks'
     | '/api/affiliates'
     | '/api/commissions'
     | '/api/leads'
@@ -487,6 +497,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/requests'
     | '/admin/settings'
+    | '/admin/webhooks'
     | '/api/affiliates'
     | '/api/commissions'
     | '/api/leads'
@@ -533,6 +544,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/requests'
     | '/admin/settings'
+    | '/admin/webhooks'
     | '/api/affiliates'
     | '/api/commissions'
     | '/api/leads'
@@ -580,6 +592,7 @@ export interface RootRouteChildren {
   AdminProductsRoute: typeof AdminProductsRoute
   AdminRequestsRoute: typeof AdminRequestsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminWebhooksRoute: typeof AdminWebhooksRoute
   ApiAffiliatesRoute: typeof ApiAffiliatesRouteWithChildren
   ApiCommissionsRoute: typeof ApiCommissionsRoute
   ApiLeadsRoute: typeof ApiLeadsRouteWithChildren
@@ -779,6 +792,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAffiliatesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/webhooks': {
+      id: '/admin/webhooks'
+      path: '/admin/webhooks'
+      fullPath: '/admin/webhooks'
+      preLoaderRoute: typeof AdminWebhooksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/admin/settings'
@@ -962,6 +982,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminProductsRoute: AdminProductsRoute,
   AdminRequestsRoute: AdminRequestsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminWebhooksRoute: AdminWebhooksRoute,
   ApiAffiliatesRoute: ApiAffiliatesRouteWithChildren,
   ApiCommissionsRoute: ApiCommissionsRoute,
   ApiLeadsRoute: ApiLeadsRouteWithChildren,
