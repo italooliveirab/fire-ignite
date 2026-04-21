@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { FireLoader } from "./FireLoader";
 import { lazy, Suspense, useEffect, useState } from "react";
+import { InstallAppGuide } from "./InstallAppGuide";
 
 const EmberCanvas = lazy(() =>
   import("./EmberCanvas").then((m) => ({ default: m.EmberCanvas })),
@@ -83,6 +84,7 @@ export function DashboardLayout({ variant, title, children }: Props) {
             <span className="hidden sm:inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-success/15 text-success border border-success/30">
               <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" /> online
             </span>
+            <InstallAppGuide variant="button" className="hidden sm:inline-flex" />
             <Button variant="ghost" size="icon" className="md:hidden" onClick={signOut}>
               <LogOut className="h-4 w-4" />
             </Button>

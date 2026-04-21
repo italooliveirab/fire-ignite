@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Flame, Zap, ShieldCheck, ArrowRight, Wallet, Rocket, PackageCheck, BarChart3 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { InstallAppGuide } from "@/components/InstallAppGuide";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -63,6 +64,9 @@ function Landing() {
           </Link>
         </div>
         <p className="mt-4 text-xs text-muted-foreground">Já é afiliado? <Link to="/login" className="text-primary hover:underline">Entrar no painel</Link></p>
+        <div className="mt-6 flex justify-center">
+          <InstallAppGuide variant="inline" />
+        </div>
       </section>
 
       <section className="max-w-7xl mx-auto px-6 pb-24 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -96,6 +100,10 @@ function Landing() {
           <Link to="/signup" className="inline-flex items-center justify-center gap-2 mt-8 px-6 py-3.5 rounded-xl bg-gradient-fire text-white font-semibold shadow-fire">
             Começar agora <ArrowRight className="h-4 w-4" />
           </Link>
+        </div>
+
+        <div className="mt-8">
+          <InstallAppGuide variant="card" />
         </div>
       </section>
 

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { TopAffiliatesRanking } from "@/components/TopAffiliatesRanking";
 import { useSpotlight } from "@/hooks/useSpotlight";
+import { InstallAppGuide } from "@/components/InstallAppGuide";
 
 // recharts is ~150KB gzipped — lazy load so the dashboard renders instantly
 const PerformanceChart = lazy(() =>
@@ -139,6 +140,10 @@ function AffiliateDashboard() {
       </div>
 
       <ApprovedLinksCard affiliateId={affiliate.id} affiliateSlug={affiliate.slug} domain={domain} />
+
+      <div className="mb-6">
+        <InstallAppGuide variant="card" />
+      </div>
 
       {stats && (
         <>
