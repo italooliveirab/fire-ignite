@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { Lock, ArrowRight } from "lucide-react";
-import { BrandMark } from "@/components/BrandMark";
+import { ArrowUpRight } from "lucide-react";
+import { AuthShell } from "@/components/AuthShell";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -18,7 +18,6 @@ function ResetPasswordPage() {
   const nav = useNavigate();
 
   useEffect(() => {
-    // Supabase parses the recovery token from URL hash automatically and creates a session
     supabase.auth.getSession().then(({ data }) => {
       setHasSession(!!data.session);
     });
@@ -51,56 +50,41 @@ function ResetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center px-4 overflow-hidden">
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-primary/25 rounded-full blur-[160px]" />
+    <AuthShell
+      step="04 / Nova senha"
+      title={"DEFINIR\nNOVA SENHA"}
+      tagline="Escolha uma senha forte. Você só faz isso uma vez."
+    >
+      <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-muted-foreground mb-3">
+        Redefinição
       </div>
+      <h2 className="font-display text-3xl uppercase mb-1">Nova senha</h2>
+      <p className="text-sm text-muted-foreground mb-8">
+        {hasSession ? "Escolha uma senha forte." : "Validando link de recuperação..."}
+      </p>
 
-      <div className="w-full max-w-md">
-        <Link to="/" className="flex justify-center mb-8">
-          <BrandMark size="lg" subtitle="Nova senha" />
-        </Link>
-
-        <div className="rounded-2xl border border-border bg-card/80 backdrop-blur-xl p-8 shadow-card-premium">
-          <h1 className="font-display text-2xl font-bold mb-1">Definir nova senha</h1>
-          <p className="text-sm text-muted-foreground mb-6">
-            {hasSession ? "Escolha uma senha forte para sua conta." : "Validando link de recuperação..."}
-          </p>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="password">Nova senha</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password" type="password" required minLength={6} value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••" className="pl-10 h-11 bg-background/50"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirm">Confirmar senha</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="confirm" type="password" required minLength={6} value={confirm}
-                  onChange={(e) => setConfirm(e.target.value)}
-                  placeholder="••••••••" className="pl-10 h-11 bg-background/50"
-                />
-              </div>
-            </div>
-
-            <Button type="submit" disabled={loading || !hasSession} className="w-full h-11 bg-gradient-fire shadow-fire hover:opacity-90 text-white font-semibold">
-              {loading ? "Salvando..." : <>Atualizar senha <ArrowRight className="ml-2 h-4 w-4" /></>}
-            </Button>
-          </form>
-
-          <div className="mt-6 pt-6 border-t border-border text-center text-xs text-muted-foreground">
-            <Link to="/login" className="text-primary hover:underline font-medium">Voltar ao login</Link>
-          </div>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="password" className="text-[10px] font-display uppercase tracking-wider text-muted-foreground">Nova senha</Label>
+          <Input id="password" type="password" required minLength={6} value={password}
+            onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
         </div>
+        <div className="space-y-2">
+          <Label htmlFor="confirm" className="text-[10px] font-display uppercase tracking-wider text-muted-foreground">Confirmar senha</Label>
+          <Input id="confirm" type="password" required minLength={6} value={confirm}
+            onChange={(e) => setConfirm(e.target.value)} placeholder="••••••••" />
+        </div>
+
+        <Button type="submit" disabled={loading || !hasSession} size="lg" className="w-full">
+          {loading ? "Salvando..." : <>Atualizar <ArrowUpRight className="ml-1" strokeWidth={2.5} /></>}
+        </Button>
+      </form>
+
+      <div className="mt-8 pt-6 border-t border-border text-center">
+        <Link to="/login" className="font-display uppercase tracking-wider text-muted-foreground hover:text-primary text-[11px]">
+          ← Voltar ao login
+        </Link>
       </div>
-    </div>
+    </AuthShell>
   );
 }
