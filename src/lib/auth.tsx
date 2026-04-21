@@ -165,6 +165,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    try {
+      Object.keys(window.sessionStorage)
+        .filter((k) => k.startsWith("fire:role:"))
+        .forEach((k) => window.sessionStorage.removeItem(k));
+    } catch { /* ignore */ }
+    roleCache.clear();
     window.location.href = "/login";
   };
 
