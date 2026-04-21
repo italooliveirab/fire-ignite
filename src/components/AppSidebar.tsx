@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   LayoutDashboard, Users, Target, DollarSign, Banknote, Settings, FileCode2,
-  LogOut, Link2, User, ScrollText, ShoppingCart, Package, Inbox, ShieldCheck, Network, Settings2, BarChart3,
+  LogOut, Link2, User, ScrollText, ShoppingCart, Package, Inbox, ShieldCheck, Network, Settings2, BarChart3, Webhook,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -26,6 +26,7 @@ const adminNav = [
   { to: "/admin/payouts", label: "Pagamentos", icon: Banknote },
   { to: "/admin/audit", label: "Auditoria", icon: ShieldCheck },
   { to: "/admin/api", label: "API & Docs", icon: FileCode2 },
+  { to: "/admin/webhooks", label: "Webhooks", icon: Webhook },
   { to: "/admin/settings", label: "Configurações", icon: Settings },
 ];
 
