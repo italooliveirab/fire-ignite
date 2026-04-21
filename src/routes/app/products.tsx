@@ -5,7 +5,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Copy, Clock, CheckCircle2, XCircle, Package, Sparkles } from "lucide-react";
+import { ExternalLink, Copy, Clock, CheckCircle2, XCircle, Package, Sparkles, Network } from "lucide-react";
 import { toast } from "sonner";
 import { formatBRL } from "@/lib/format";
 
@@ -13,6 +13,7 @@ export const Route = createFileRoute("/app/products")({ component: AffiliateProd
 
 interface Product {
   id: string; name: string; slug: string; description: string | null; media_kit_url: string | null;
+  product_type: "normal" | "network";
 }
 interface Affiliation {
   id: string;
@@ -37,13 +38,34 @@ function AffiliateProducts() {
     queryFn: async () => (await supabase.from("affiliates").select("id, slug").eq("user_id", user!.id).maybeSingle()).data,
   });
 
-  const { data: products = [], isLoading: loadingProducts } = useQuery({
-    queryKey: ["public-products"],
+  // Sou membro de rede? (indicado)
+  const { data: networkLink } = useQuery({
+    queryKey: ["my-network-link", aff?.id], enabled: !!aff?.id,
     queryFn: async () => {
-      const { data, error } = await supabase.from("products").select("id, name, slug, description, media_kit_url").eq("is_active", true).order("name");
+      const { data } = await supabase
+        .from("affiliate_network")
+        .select("referrer_id, status, referrer:affiliates!affiliate_network_referrer_id_fkey(full_name)")
+        .eq("affiliate_id", aff!.id)
+        .eq("status", "active")
+        .maybeSingle();
+      return data ?? null;
+    },
+  });
+  const isNetworkMember = !!networkLink;
+
+  const { data: products = [], isLoading: loadingProducts } = useQuery({
+    queryKey: ["public-products", isNetworkMember],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id, name, slug, description, media_kit_url, product_type")
+        .eq("is_active", true)
+        .eq("product_type", isNetworkMember ? "network" : "normal")
+        .order("name");
       if (error) throw error;
       return data as Product[];
     },
+    enabled: !!aff?.id,
   });
 
   const { data: affiliations = [] } = useQuery({
@@ -76,8 +98,19 @@ function AffiliateProducts() {
     <DashboardLayout variant="affiliate" title="Produtos">
       <div className="mb-6">
         <h1 className="font-display text-3xl font-bold">Catálogo de produtos</h1>
-        <p className="text-muted-foreground text-sm mt-1">Escolha quais produtos da FIRE você quer revender. Sua comissão é definida por produto na aprovação.</p>
+        <p className="text-muted-foreground text-sm mt-1">
+          {isNetworkMember
+            ? "Você faz parte de uma rede. Veja abaixo os produtos exclusivos de rede (FIRENET B)."
+            : "Escolha quais produtos da FIRE você quer revender. Sua comissão é definida por produto na aprovação."}
+        </p>
       </div>
+
+      {isNetworkMember && (
+        <div className="rounded-2xl border border-primary/40 bg-primary/10 p-4 mb-6 text-sm flex items-center gap-2">
+          <Network className="h-4 w-4 text-primary shrink-0" />
+          Você é indicado e participa de uma rede — toda venda é dividida entre você, seu afiliador e a FIRE.
+        </div>
+      )}
 
       {!aff && (
         <div className="rounded-2xl border border-warning/30 bg-warning/10 text-warning-foreground p-4 mb-6 text-sm">
