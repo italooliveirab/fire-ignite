@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Settings2, Plus, Trash2, Save } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Trophy } from "lucide-react";
 
 export const Route = createFileRoute("/admin/network-rules")({ component: AdminNetworkRules });
 
@@ -50,6 +51,27 @@ function AdminNetworkRules() {
 
   const productMap = new Map(products.map((p) => [p.id, p.name]));
 
+  // Resolve qual regra vence para cada produto (mesma lógica do trigger SQL):
+  // produto específico ativo > regra global ativa, maior prioridade, mais recente
+  const winningRulePerProduct = new Map<string, string>(); // productId -> ruleId
+  for (const p of products) {
+    const candidates = rules.filter((r) => r.is_active && (r.product_id === p.id || r.product_id === null));
+    candidates.sort((a, b) => {
+      const aSpec = a.product_id === p.id ? 1 : 0;
+      const bSpec = b.product_id === p.id ? 1 : 0;
+      if (aSpec !== bSpec) return bSpec - aSpec;
+      return b.priority - a.priority;
+    });
+    if (candidates[0]) winningRulePerProduct.set(p.id, candidates[0].id);
+  }
+  const winningRuleIds = new Set(winningRulePerProduct.values());
+  const productsByWinningRule = new Map<string, string[]>();
+  for (const [pid, rid] of winningRulePerProduct.entries()) {
+    const list = productsByWinningRule.get(rid) ?? [];
+    list.push(productMap.get(pid) ?? "");
+    productsByWinningRule.set(rid, list);
+  }
+
   const remove = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("network_commission_rules").delete().eq("id", id);
@@ -78,6 +100,35 @@ function AdminNetworkRules() {
         <RuleDialog products={products} mode="create" />
       </div>
 
+      {products.length > 0 && rules.length > 0 && (
+        <div className="mb-6 rounded-xl border border-border bg-card/50 p-4">
+          <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+            <Trophy className="h-3.5 w-3.5" /> Regra aplicada por produto
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {products.map((p) => {
+              const winId = winningRulePerProduct.get(p.id);
+              const winRule = rules.find((r) => r.id === winId);
+              return (
+                <div key={p.id} className="flex items-center justify-between rounded-lg border border-border/60 bg-background/40 px-3 py-2 text-sm">
+                  <span className="font-medium truncate">{p.name}</span>
+                  {winRule ? (
+                    <span className="ml-2 text-xs text-muted-foreground flex items-center gap-1.5">
+                      →
+                      <span className={`font-mono px-2 py-0.5 rounded-full border ${winRule.product_id ? "border-orange-500/30 bg-orange-500/10 text-orange-300" : "border-blue-500/30 bg-blue-500/10 text-blue-300"}`}>
+                        {winRule.name}
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="text-xs italic text-muted-foreground">sem regra</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-card-premium">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -97,7 +148,16 @@ function AdminNetworkRules() {
               : rules.length === 0 ? <tr><td colSpan={7} className="py-12 text-center text-muted-foreground">Nenhuma regra criada. Crie uma para o sistema começar a calcular comissões da rede.</td></tr>
               : rules.map((r) => (
                 <tr key={r.id} className="border-b border-border/50 hover:bg-background/40">
-                  <td className="px-5 py-3.5 font-medium">{r.name}</td>
+                  <td className="px-5 py-3.5 font-medium">
+                    <div className="flex items-center gap-2">
+                      {r.name}
+                      {winningRuleIds.has(r.id) && (
+                        <span title={`Aplicada em: ${productsByWinningRule.get(r.id)?.join(", ")}`} className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-300">
+                          <Trophy className="h-2.5 w-2.5" /> vence
+                        </span>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-5 py-3.5 text-xs">
                     {r.product_id ? (
                       <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-500/30 bg-orange-500/10 px-2 py-0.5 font-medium text-orange-300">
