@@ -12,6 +12,7 @@ import { formatDateTime } from "@/lib/format";
 export const Route = createFileRoute("/admin/api")({ component: ApiPage });
 
 const ENDPOINT = "https://jaajatugxxhwfgthmtia.supabase.co/functions/v1/integration-leads";
+const TRACK_EVENT_ENDPOINT = "/api/track-event";
 
 async function sha256(input: string) {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(input));
@@ -22,6 +23,12 @@ function ApiPage() {
   const [keys, setKeys] = useState<{ id: string; name: string; key_prefix: string; last_used_at: string | null; created_at: string }[]>([]);
   const [name, setName] = useState("");
   const [newKey, setNewKey] = useState<string | null>(null);
+  const [testKey, setTestKey] = useState("");
+  const [testEvent, setTestEvent] = useState("conversation_started");
+  const [testWhatsappId, setTestWhatsappId] = useState("5511999999999@c.us");
+  const [testAffiliateSlug, setTestAffiliateSlug] = useState("");
+  const [testLoading, setTestLoading] = useState(false);
+  const [testResponse, setTestResponse] = useState<{ status: number; body: unknown } | null>(null);
 
   const load = async () => {
     const { data } = await supabase.from("api_keys").select("*").order("created_at", { ascending: false });
@@ -46,6 +53,36 @@ function ApiPage() {
   };
 
   const copy = (text: string) => { navigator.clipboard.writeText(text); toast.success("Copiado!"); };
+
+  const runTest = async () => {
+    if (!testKey) return toast.error("Cole uma chave de API para testar");
+    if (!testWhatsappId) return toast.error("Informe um whatsapp_id");
+    setTestLoading(true);
+    setTestResponse(null);
+    try {
+      const res = await fetch(TRACK_EVENT_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-api-key": testKey },
+        body: JSON.stringify({
+          whatsapp_id: testWhatsappId,
+          event: testEvent,
+          affiliate_slug: testAffiliateSlug || undefined,
+          customer_name: "Cliente Teste Bot",
+          whatsapp_number: "+5511999999999",
+          payment_amount: testEvent === "paid" ? 197 : undefined,
+        }),
+      });
+      const body = await res.json().catch(() => ({}));
+      setTestResponse({ status: res.status, body });
+      if (res.ok) toast.success("Bot simulado com sucesso!");
+      else toast.error(`Erro ${res.status}`);
+    } catch (e) {
+      toast.error((e as Error).message);
+      setTestResponse({ status: 0, body: { error: (e as Error).message } });
+    } finally {
+      setTestLoading(false);
+    }
+  };
 
   return (
     <DashboardLayout variant="admin" title="API & Documentação">
@@ -99,6 +136,62 @@ function ApiPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+      </section>
+
+      {/* Simulador de bot */}
+      <section className="rounded-2xl border border-border bg-card p-6 shadow-card-premium mb-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-10 w-10 rounded-lg bg-success/15 border border-success/30 flex items-center justify-center text-success">🤖</div>
+          <div>
+            <h3 className="font-display font-bold text-lg">Testar bot (simulador)</h3>
+            <p className="text-xs text-muted-foreground">Envia um POST de exemplo para <code className="text-primary">/api/track-event</code> sem precisar do bot externo.</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+          <div>
+            <Label className="text-xs">Chave de API</Label>
+            <Input placeholder="fire_..." value={testKey} onChange={(e) => setTestKey(e.target.value)} />
+          </div>
+          <div>
+            <Label className="text-xs">Evento</Label>
+            <select
+              className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm"
+              value={testEvent}
+              onChange={(e) => setTestEvent(e.target.value)}
+            >
+              <option value="conversation_started">conversation_started</option>
+              <option value="trial_requested">trial_requested</option>
+              <option value="payment_generated">payment_generated</option>
+              <option value="paid">paid</option>
+              <option value="not_paid">not_paid</option>
+              <option value="abandoned">abandoned</option>
+            </select>
+          </div>
+          <div>
+            <Label className="text-xs">whatsapp_id</Label>
+            <Input placeholder="5511999999999@c.us" value={testWhatsappId} onChange={(e) => setTestWhatsappId(e.target.value)} />
+          </div>
+          <div>
+            <Label className="text-xs">affiliate_slug (necessário se o lead não existir)</Label>
+            <Input placeholder="joao" value={testAffiliateSlug} onChange={(e) => setTestAffiliateSlug(e.target.value)} />
+          </div>
+        </div>
+
+        <Button onClick={runTest} disabled={testLoading} className="bg-gradient-fire text-white shadow-fire">
+          {testLoading ? "Enviando..." : "▶ Disparar evento"}
+        </Button>
+
+        {testResponse && (
+          <div className={`mt-4 rounded-xl border p-4 ${testResponse.status >= 200 && testResponse.status < 300 ? "border-success/40 bg-success/10" : "border-destructive/40 bg-destructive/10"}`}>
+            <div className="text-xs font-semibold mb-2">
+              Status: <span className="font-mono">{testResponse.status || "network error"}</span>
+            </div>
+            <pre className="font-mono text-xs bg-background/60 border border-border rounded-lg p-3 overflow-x-auto whitespace-pre-wrap break-all max-h-64">
+{JSON.stringify(testResponse.body, null, 2)}
+            </pre>
           </div>
         )}
       </section>
