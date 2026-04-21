@@ -29,6 +29,11 @@ import { Route as AppLinkRouteImport } from './routes/app/link'
 import { Route as AppLeadsRouteImport } from './routes/app/leads'
 import { Route as AppCommissionsRouteImport } from './routes/app/commissions'
 import { Route as ApiTrackEventRouteImport } from './routes/api.track-event'
+import { Route as ApiStatsRouteImport } from './routes/api.stats'
+import { Route as ApiProductsRouteImport } from './routes/api.products'
+import { Route as ApiLeadsRouteImport } from './routes/api.leads'
+import { Route as ApiCommissionsRouteImport } from './routes/api.commissions'
+import { Route as ApiAffiliatesRouteImport } from './routes/api.affiliates'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminRequestsRouteImport } from './routes/admin/requests'
 import { Route as AdminProductsRouteImport } from './routes/admin/products'
@@ -45,6 +50,8 @@ import { Route as AdminApiRouteImport } from './routes/admin/api'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin/analytics'
 import { Route as AdminAffiliatesRouteImport } from './routes/admin/affiliates'
 import { Route as PProductSlugAffiliateSlugRouteImport } from './routes/p.$productSlug.$affiliateSlug'
+import { Route as ApiLeadsWhatsappIdRouteImport } from './routes/api.leads.$whatsappId'
+import { Route as ApiAffiliatesSlugRouteImport } from './routes/api.affiliates.$slug'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -147,6 +154,31 @@ const ApiTrackEventRoute = ApiTrackEventRouteImport.update({
   path: '/api/track-event',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiStatsRoute = ApiStatsRouteImport.update({
+  id: '/api/stats',
+  path: '/api/stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiProductsRoute = ApiProductsRouteImport.update({
+  id: '/api/products',
+  path: '/api/products',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiLeadsRoute = ApiLeadsRouteImport.update({
+  id: '/api/leads',
+  path: '/api/leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCommissionsRoute = ApiCommissionsRouteImport.update({
+  id: '/api/commissions',
+  path: '/api/commissions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAffiliatesRoute = ApiAffiliatesRouteImport.update({
+  id: '/api/affiliates',
+  path: '/api/affiliates',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/admin/settings',
   path: '/admin/settings',
@@ -228,6 +260,16 @@ const PProductSlugAffiliateSlugRoute =
     path: '/p/$productSlug/$affiliateSlug',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiLeadsWhatsappIdRoute = ApiLeadsWhatsappIdRouteImport.update({
+  id: '/$whatsappId',
+  path: '/$whatsappId',
+  getParentRoute: () => ApiLeadsRoute,
+} as any)
+const ApiAffiliatesSlugRoute = ApiAffiliatesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ApiAffiliatesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -252,6 +294,11 @@ export interface FileRoutesByFullPath {
   '/admin/products': typeof AdminProductsRoute
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
+  '/api/commissions': typeof ApiCommissionsRoute
+  '/api/leads': typeof ApiLeadsRouteWithChildren
+  '/api/products': typeof ApiProductsRoute
+  '/api/stats': typeof ApiStatsRoute
   '/api/track-event': typeof ApiTrackEventRoute
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
@@ -265,6 +312,8 @@ export interface FileRoutesByFullPath {
   '/hooks/weekly-payout-summary': typeof HooksWeeklyPayoutSummaryRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/api/affiliates/$slug': typeof ApiAffiliatesSlugRoute
+  '/api/leads/$whatsappId': typeof ApiLeadsWhatsappIdRoute
   '/p/$productSlug/$affiliateSlug': typeof PProductSlugAffiliateSlugRoute
 }
 export interface FileRoutesByTo {
@@ -290,6 +339,11 @@ export interface FileRoutesByTo {
   '/admin/products': typeof AdminProductsRoute
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
+  '/api/commissions': typeof ApiCommissionsRoute
+  '/api/leads': typeof ApiLeadsRouteWithChildren
+  '/api/products': typeof ApiProductsRoute
+  '/api/stats': typeof ApiStatsRoute
   '/api/track-event': typeof ApiTrackEventRoute
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
@@ -303,6 +357,8 @@ export interface FileRoutesByTo {
   '/hooks/weekly-payout-summary': typeof HooksWeeklyPayoutSummaryRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
+  '/api/affiliates/$slug': typeof ApiAffiliatesSlugRoute
+  '/api/leads/$whatsappId': typeof ApiLeadsWhatsappIdRoute
   '/p/$productSlug/$affiliateSlug': typeof PProductSlugAffiliateSlugRoute
 }
 export interface FileRoutesById {
@@ -329,6 +385,11 @@ export interface FileRoutesById {
   '/admin/products': typeof AdminProductsRoute
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
+  '/api/commissions': typeof ApiCommissionsRoute
+  '/api/leads': typeof ApiLeadsRouteWithChildren
+  '/api/products': typeof ApiProductsRoute
+  '/api/stats': typeof ApiStatsRoute
   '/api/track-event': typeof ApiTrackEventRoute
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
@@ -342,6 +403,8 @@ export interface FileRoutesById {
   '/hooks/weekly-payout-summary': typeof HooksWeeklyPayoutSummaryRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
+  '/api/affiliates/$slug': typeof ApiAffiliatesSlugRoute
+  '/api/leads/$whatsappId': typeof ApiLeadsWhatsappIdRoute
   '/p/$productSlug/$affiliateSlug': typeof PProductSlugAffiliateSlugRoute
 }
 export interface FileRouteTypes {
@@ -369,6 +432,11 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/requests'
     | '/admin/settings'
+    | '/api/affiliates'
+    | '/api/commissions'
+    | '/api/leads'
+    | '/api/products'
+    | '/api/stats'
     | '/api/track-event'
     | '/app/commissions'
     | '/app/leads'
@@ -382,6 +450,8 @@ export interface FileRouteTypes {
     | '/hooks/weekly-payout-summary'
     | '/admin/'
     | '/app/'
+    | '/api/affiliates/$slug'
+    | '/api/leads/$whatsappId'
     | '/p/$productSlug/$affiliateSlug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -407,6 +477,11 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/requests'
     | '/admin/settings'
+    | '/api/affiliates'
+    | '/api/commissions'
+    | '/api/leads'
+    | '/api/products'
+    | '/api/stats'
     | '/api/track-event'
     | '/app/commissions'
     | '/app/leads'
@@ -420,6 +495,8 @@ export interface FileRouteTypes {
     | '/hooks/weekly-payout-summary'
     | '/admin'
     | '/app'
+    | '/api/affiliates/$slug'
+    | '/api/leads/$whatsappId'
     | '/p/$productSlug/$affiliateSlug'
   id:
     | '__root__'
@@ -445,6 +522,11 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/requests'
     | '/admin/settings'
+    | '/api/affiliates'
+    | '/api/commissions'
+    | '/api/leads'
+    | '/api/products'
+    | '/api/stats'
     | '/api/track-event'
     | '/app/commissions'
     | '/app/leads'
@@ -458,6 +540,8 @@ export interface FileRouteTypes {
     | '/hooks/weekly-payout-summary'
     | '/admin/'
     | '/app/'
+    | '/api/affiliates/$slug'
+    | '/api/leads/$whatsappId'
     | '/p/$productSlug/$affiliateSlug'
   fileRoutesById: FileRoutesById
 }
@@ -484,6 +568,11 @@ export interface RootRouteChildren {
   AdminProductsRoute: typeof AdminProductsRoute
   AdminRequestsRoute: typeof AdminRequestsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  ApiAffiliatesRoute: typeof ApiAffiliatesRouteWithChildren
+  ApiCommissionsRoute: typeof ApiCommissionsRoute
+  ApiLeadsRoute: typeof ApiLeadsRouteWithChildren
+  ApiProductsRoute: typeof ApiProductsRoute
+  ApiStatsRoute: typeof ApiStatsRoute
   ApiTrackEventRoute: typeof ApiTrackEventRoute
   AppCommissionsRoute: typeof AppCommissionsRoute
   AppLeadsRoute: typeof AppLeadsRoute
@@ -642,6 +731,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTrackEventRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/stats': {
+      id: '/api/stats'
+      path: '/api/stats'
+      fullPath: '/api/stats'
+      preLoaderRoute: typeof ApiStatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/products': {
+      id: '/api/products'
+      path: '/api/products'
+      fullPath: '/api/products'
+      preLoaderRoute: typeof ApiProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/leads': {
+      id: '/api/leads'
+      path: '/api/leads'
+      fullPath: '/api/leads'
+      preLoaderRoute: typeof ApiLeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/commissions': {
+      id: '/api/commissions'
+      path: '/api/commissions'
+      fullPath: '/api/commissions'
+      preLoaderRoute: typeof ApiCommissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/affiliates': {
+      id: '/api/affiliates'
+      path: '/api/affiliates'
+      fullPath: '/api/affiliates'
+      preLoaderRoute: typeof ApiAffiliatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/admin/settings'
@@ -754,8 +878,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PProductSlugAffiliateSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/leads/$whatsappId': {
+      id: '/api/leads/$whatsappId'
+      path: '/$whatsappId'
+      fullPath: '/api/leads/$whatsappId'
+      preLoaderRoute: typeof ApiLeadsWhatsappIdRouteImport
+      parentRoute: typeof ApiLeadsRoute
+    }
+    '/api/affiliates/$slug': {
+      id: '/api/affiliates/$slug'
+      path: '/$slug'
+      fullPath: '/api/affiliates/$slug'
+      preLoaderRoute: typeof ApiAffiliatesSlugRouteImport
+      parentRoute: typeof ApiAffiliatesRoute
+    }
   }
 }
+
+interface ApiAffiliatesRouteChildren {
+  ApiAffiliatesSlugRoute: typeof ApiAffiliatesSlugRoute
+}
+
+const ApiAffiliatesRouteChildren: ApiAffiliatesRouteChildren = {
+  ApiAffiliatesSlugRoute: ApiAffiliatesSlugRoute,
+}
+
+const ApiAffiliatesRouteWithChildren = ApiAffiliatesRoute._addFileChildren(
+  ApiAffiliatesRouteChildren,
+)
+
+interface ApiLeadsRouteChildren {
+  ApiLeadsWhatsappIdRoute: typeof ApiLeadsWhatsappIdRoute
+}
+
+const ApiLeadsRouteChildren: ApiLeadsRouteChildren = {
+  ApiLeadsWhatsappIdRoute: ApiLeadsWhatsappIdRoute,
+}
+
+const ApiLeadsRouteWithChildren = ApiLeadsRoute._addFileChildren(
+  ApiLeadsRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -780,6 +942,11 @@ const rootRouteChildren: RootRouteChildren = {
   AdminProductsRoute: AdminProductsRoute,
   AdminRequestsRoute: AdminRequestsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  ApiAffiliatesRoute: ApiAffiliatesRouteWithChildren,
+  ApiCommissionsRoute: ApiCommissionsRoute,
+  ApiLeadsRoute: ApiLeadsRouteWithChildren,
+  ApiProductsRoute: ApiProductsRoute,
+  ApiStatsRoute: ApiStatsRoute,
   ApiTrackEventRoute: ApiTrackEventRoute,
   AppCommissionsRoute: AppCommissionsRoute,
   AppLeadsRoute: AppLeadsRoute,
