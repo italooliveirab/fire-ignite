@@ -350,6 +350,43 @@ html { color-scheme: dark; }
 .spotlight-card:hover::before,
 .spotlight-card:hover::after { opacity: 1; }
 
+/* Diagonal shine that sweeps across on hover, anchored to cursor X */
+.spotlight-card > .spotlight-shine {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 220ms ease;
+  mix-blend-mode: screen;
+}
+.spotlight-card:hover > .spotlight-shine { opacity: 1; }
+.spotlight-card > .spotlight-shine::before {
+  content: "";
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  left: var(--mx);
+  width: 22%;
+  transform: translateX(-50%) rotate(18deg);
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 35%,
+    rgba(255, 220, 160, 0.55) 50%,
+    rgba(255, 255, 255, 0.08) 65%,
+    transparent 100%
+  );
+  filter: blur(6px);
+  transition: left 180ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spotlight-card > .spotlight-shine { display: none; }
+}
+
 .spotlight-card[data-spot="neon"]    { --spot-color: 0, 191, 255; }
 .spotlight-card[data-spot="success"] { --spot-color: 40, 210, 120; }
 .spotlight-card[data-spot="gold"]    { --spot-color: 255, 180, 40; }
