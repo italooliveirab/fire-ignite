@@ -31,6 +31,8 @@ function StatusPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [resyncing, setResyncing] = useState(false);
   const [resyncMsg, setResyncMsg] = useState<string | null>(null);
+  const [swBusy, setSwBusy] = useState(false);
+  const [swReregisterMsg, setSwReregisterMsg] = useState<string | null>(null);
   const [vapid, setVapid] = useState<{
     status: "loading" | "ok" | "fail";
     httpStatus?: number;
