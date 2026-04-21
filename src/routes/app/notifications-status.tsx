@@ -445,6 +445,24 @@ function StatusPage() {
             <p className="text-xs text-muted-foreground">{resyncMsg}</p>
           )}
 
+          {/* Re-registrar Service Worker */}
+          <div className="pt-2 border-t border-border/50 space-y-2">
+            <Button
+              onClick={reregisterSW}
+              disabled={swBusy || !push.supported}
+              variant="outline"
+              className="w-full"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${swBusy ? "animate-spin" : ""}`} />
+              {swBusy ? "Re-registrando SW..." : swActive ? "Re-registrar Service Worker" : "Ativar Service Worker"}
+            </Button>
+            {swReregisterMsg && (
+              <p className={`text-xs ${swReregisterMsg.startsWith("✅") ? "text-green-600 dark:text-green-400" : swReregisterMsg.startsWith("❌") || swReregisterMsg.startsWith("⚠️") ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground"}`}>
+                {swReregisterMsg}
+              </p>
+            )}
+          </div>
+
           {lastApiResponse && (
             <div className={`rounded-lg border p-3 text-xs space-y-1 ${lastApiResponse.ok ? "border-green-500/40 bg-green-500/5" : "border-red-500/40 bg-red-500/5"}`}>
               <p className="font-semibold">
