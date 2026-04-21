@@ -40,7 +40,10 @@ function maskPhone(phone: string | null) {
 
 function MyLeads() {
   const { user } = useAuth();
+  const qc = useQueryClient();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [noteDraft, setNoteDraft] = useState("");
+  const [savingNote, setSavingNote] = useState(false);
 
   const { data: leads = [], isLoading } = useQuery({
     queryKey: ["my-leads", user?.id],
@@ -66,6 +69,20 @@ function MyLeads() {
   const commByLead = new Map(commissions.map((c) => [c.lead_id, c]));
   const selected = leads.find((l) => l.id === selectedId) ?? leads[0] ?? null;
   const selectedComm = selected ? commByLead.get(selected.id) : undefined;
+
+  useEffect(() => {
+    setNoteDraft(selected?.notes ?? "");
+  }, [selected?.id, selected?.notes]);
+
+  async function saveNote() {
+    if (!selected) return;
+    setSavingNote(true);
+    const { error } = await supabase.from("leads").update({ notes: noteDraft || null }).eq("id", selected.id);
+    setSavingNote(false);
+    if (error) { toast.error("Erro ao salvar: " + error.message); return; }
+    toast.success("Observação salva");
+    qc.invalidateQueries({ queryKey: ["my-leads"] });
+  }
 
   const stats = {
     total: leads.length,
