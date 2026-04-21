@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Smartphone, Download, Share, PlusSquare, CheckCircle2, Apple, Chrome } from "lucide-react";
+import { Smartphone, Download, Share, PlusSquare, CheckCircle2, Apple, Chrome, AlertTriangle, MoreVertical } from "lucide-react";
 import { toast } from "sonner";
 
 type BIPEvent = Event & {
@@ -9,13 +9,48 @@ type BIPEvent = Event & {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
-function detectPlatform(): "ios" | "android" | "desktop" | "unknown" {
-  if (typeof navigator === "undefined") return "unknown";
+type Device = {
+  os: "ios" | "android" | "desktop" | "unknown";
+  browser: "safari" | "chrome" | "firefox" | "edge" | "samsung" | "opera" | "other";
+  isInAppBrowser: boolean; // Instagram, Facebook, TikTok, etc.
+  canAutoInstall: boolean; // supports beforeinstallprompt
+  needsSafari: boolean;    // iOS but not Safari
+};
+
+function detectDevice(): Device {
+  if (typeof navigator === "undefined") {
+    return { os: "unknown", browser: "other", isInAppBrowser: false, canAutoInstall: false, needsSafari: false };
+  }
   const ua = navigator.userAgent || "";
-  if (/iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream) return "ios";
-  if (/Android/i.test(ua)) return "android";
-  if (/Mac|Win|Linux/i.test(ua)) return "desktop";
-  return "unknown";
+
+  const isIOS = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
+  const isAndroid = /Android/i.test(ua);
+  const os: Device["os"] = isIOS ? "ios" : isAndroid ? "android" : /Mac|Win|Linux/i.test(ua) ? "desktop" : "unknown";
+
+  const isInApp =
+    /(FBAN|FBAV|Instagram|Line|TikTok|Twitter|Pinterest|MicroMessenger|WhatsApp|Snapchat)/i.test(ua);
+
+  let browser: Device["browser"] = "other";
+  if (/CriOS|Chrome\//.test(ua) && !/EdgiOS|EdgA|Edg\//.test(ua) && !/SamsungBrowser/.test(ua) && !/OPR\/|Opera/.test(ua)) {
+    browser = "chrome";
+  } else if (/EdgiOS|EdgA|Edg\//.test(ua)) {
+    browser = "edge";
+  } else if (/SamsungBrowser/.test(ua)) {
+    browser = "samsung";
+  } else if (/FxiOS|Firefox/.test(ua)) {
+    browser = "firefox";
+  } else if (/OPR\/|Opera/.test(ua)) {
+    browser = "opera";
+  } else if (isIOS && /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua)) {
+    browser = "safari";
+  } else if (!isIOS && /Safari/.test(ua) && !/Chrome|Chromium/.test(ua)) {
+    browser = "safari";
+  }
+
+  const canAutoInstall = !isIOS && (browser === "chrome" || browser === "edge" || browser === "samsung" || browser === "opera");
+  const needsSafari = isIOS && browser !== "safari";
+
+  return { os, browser, isInAppBrowser: isInApp, canAutoInstall, needsSafari };
 }
 
 function isStandalone() {
@@ -36,10 +71,12 @@ export function InstallAppGuide({ variant = "button", className = "" }: Props) {
   const [open, setOpen] = useState(false);
   const [deferred, setDeferred] = useState<BIPEvent | null>(null);
   const [installed, setInstalled] = useState(false);
-  const [platform, setPlatform] = useState<ReturnType<typeof detectPlatform>>("unknown");
+  const [device, setDevice] = useState<Device>({
+    os: "unknown", browser: "other", isInAppBrowser: false, canAutoInstall: false, needsSafari: false,
+  });
 
   useEffect(() => {
-    setPlatform(detectPlatform());
+    setDevice(detectDevice());
     setInstalled(isStandalone());
 
     const onPrompt = (e: Event) => {
@@ -122,13 +159,16 @@ export function InstallAppGuide({ variant = "button", className = "" }: Props) {
     );
 
   // If we have the auto-install event AND user is on android/desktop, prefer direct prompt
-  if (deferred && (platform === "android" || platform === "desktop") && variant === "button") {
+  if (deferred && device.canAutoInstall && variant === "button") {
     return (
       <Button onClick={handleAutoInstall} className={`gap-2 bg-gradient-fire text-white shadow-fire ${className}`}>
         <Download className="h-4 w-4" /> Instalar app automaticamente
       </Button>
     );
   }
+
+  const showIOS = device.os === "ios" || device.os === "unknown";
+  const showAndroid = device.os === "android" || device.os === "desktop" || device.os === "unknown";
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -145,7 +185,34 @@ export function InstallAppGuide({ variant = "button", className = "" }: Props) {
           Tenha o painel FIRE como um app no seu celular: abre mais rápido, em tela cheia e recebe notificações de venda na hora.
         </p>
 
-        {deferred && (platform === "android" || platform === "desktop") && (
+        {/* In-app browser warning (Instagram/Facebook/etc) */}
+        {device.isInAppBrowser && (
+          <div className="rounded-xl border border-warning/40 bg-warning/10 p-4 flex gap-3">
+            <AlertTriangle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <div className="font-semibold mb-1">Abra no navegador para instalar</div>
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                Você está dentro de um app (Instagram, Facebook, TikTok…). Toque no menu <strong>⋯</strong> e escolha
+                <strong> "Abrir no {device.os === "ios" ? "Safari" : "Chrome"}"</strong> para conseguir instalar.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* iOS but not Safari */}
+        {device.needsSafari && !device.isInAppBrowser && (
+          <div className="rounded-xl border border-warning/40 bg-warning/10 p-4 flex gap-3">
+            <AlertTriangle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <div className="font-semibold mb-1">Use o Safari no iPhone</div>
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                No iPhone só dá pra instalar pelo <strong>Safari</strong>. Copie o link, abra no Safari e siga o passo a passo abaixo.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {deferred && device.canAutoInstall && (
           <div className="rounded-xl border border-primary/40 bg-primary/10 p-4">
             <div className="text-sm font-semibold mb-2 flex items-center gap-2">
               <Chrome className="h-4 w-4 text-primary" /> Instalação automática disponível
@@ -156,43 +223,53 @@ export function InstallAppGuide({ variant = "button", className = "" }: Props) {
           </div>
         )}
 
-        {/* iOS */}
-        <section className={platform === "ios" ? "" : "opacity-90"}>
-          <h3 className="font-display font-bold text-sm flex items-center gap-2 mb-3">
-            <Apple className="h-4 w-4" /> No iPhone / iPad (Safari)
-          </h3>
-          <ol className="space-y-3 text-sm">
-            <Step n={1} icon={<Share className="h-4 w-4 text-primary" />}>
-              Abra este site no <strong>Safari</strong> e toque no botão <strong>Compartilhar</strong> (ícone de quadrado com seta para cima) na barra inferior.
-            </Step>
-            <Step n={2} icon={<PlusSquare className="h-4 w-4 text-primary" />}>
-              Role para baixo e toque em <strong>"Adicionar à Tela de Início"</strong>.
-            </Step>
-            <Step n={3} icon={<CheckCircle2 className="h-4 w-4 text-success" />}>
-              Confirme tocando em <strong>"Adicionar"</strong>. Pronto: o ícone do FIRE aparece na sua tela inicial.
-            </Step>
-          </ol>
-        </section>
+        {/* iOS section */}
+        {showIOS && (
+          <section>
+            <h3 className="font-display font-bold text-sm flex items-center gap-2 mb-3">
+              <Apple className="h-4 w-4" /> No iPhone / iPad (Safari)
+              {device.os === "ios" && !device.needsSafari && (
+                <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30">Seu dispositivo</span>
+              )}
+            </h3>
+            <ol className="space-y-3 text-sm">
+              <Step n={1} icon={<Share className="h-4 w-4 text-primary" />}>
+                Toque no botão <strong>Compartilhar</strong> (quadrado com seta para cima) na barra inferior do Safari.
+              </Step>
+              <Step n={2} icon={<PlusSquare className="h-4 w-4 text-primary" />}>
+                Role para baixo e toque em <strong>"Adicionar à Tela de Início"</strong>.
+              </Step>
+              <Step n={3} icon={<CheckCircle2 className="h-4 w-4 text-success" />}>
+                Confirme tocando em <strong>"Adicionar"</strong>. O ícone do FIRE aparece na sua tela inicial.
+              </Step>
+            </ol>
+          </section>
+        )}
 
-        <div className="border-t border-border" />
+        {showIOS && showAndroid && <div className="border-t border-border" />}
 
-        {/* Android */}
-        <section className={platform === "android" ? "" : "opacity-90"}>
-          <h3 className="font-display font-bold text-sm flex items-center gap-2 mb-3">
-            <Chrome className="h-4 w-4" /> No Android (Chrome)
-          </h3>
-          <ol className="space-y-3 text-sm">
-            <Step n={1} icon={<Chrome className="h-4 w-4 text-primary" />}>
-              Abra este site no <strong>Chrome</strong>. Toque no menu <strong>⋮</strong> no canto superior direito.
-            </Step>
-            <Step n={2} icon={<Download className="h-4 w-4 text-primary" />}>
-              Toque em <strong>"Instalar app"</strong> ou <strong>"Adicionar à tela inicial"</strong>.
-            </Step>
-            <Step n={3} icon={<CheckCircle2 className="h-4 w-4 text-success" />}>
-              Confirme. O ícone do FIRE será adicionado à tela inicial e abrirá em tela cheia.
-            </Step>
-          </ol>
-        </section>
+        {/* Android / Desktop section */}
+        {showAndroid && (
+          <section>
+            <h3 className="font-display font-bold text-sm flex items-center gap-2 mb-3">
+              <Chrome className="h-4 w-4" /> {device.os === "desktop" ? "No computador (Chrome / Edge)" : "No Android (Chrome)"}
+              {(device.os === "android" || device.os === "desktop") && (
+                <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30">Seu dispositivo</span>
+              )}
+            </h3>
+            <ol className="space-y-3 text-sm">
+              <Step n={1} icon={<MoreVertical className="h-4 w-4 text-primary" />}>
+                Toque no menu <strong>⋮</strong> no canto superior direito do navegador.
+              </Step>
+              <Step n={2} icon={<Download className="h-4 w-4 text-primary" />}>
+                Escolha <strong>"Instalar app"</strong> ou <strong>"Adicionar à tela inicial"</strong>.
+              </Step>
+              <Step n={3} icon={<CheckCircle2 className="h-4 w-4 text-success" />}>
+                Confirme. O FIRE abrirá em tela cheia, igual a um app nativo.
+              </Step>
+            </ol>
+          </section>
+        )}
 
         <p className="text-xs text-muted-foreground text-center pt-2">
           Dúvidas? Fale com o suporte FIRE.
