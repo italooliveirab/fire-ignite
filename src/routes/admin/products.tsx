@@ -16,7 +16,7 @@ export const Route = createFileRoute("/admin/products")({ component: ProductsPag
 
 interface Product {
   id: string; name: string; slug: string; description: string | null; media_kit_url: string | null;
-  is_active: boolean; created_at: string;
+  is_active: boolean; created_at: string; product_type: "normal" | "network";
 }
 
 function ProductsPage() {
@@ -84,9 +84,14 @@ function ProductsPage() {
                   <h3 className="font-display font-bold text-lg leading-tight">{p.name}</h3>
                   <div className="font-mono text-xs text-muted-foreground mt-0.5">/p/{p.slug}</div>
                 </div>
-                <span className={`text-xs px-2 py-0.5 rounded-full border ${p.is_active ? "bg-success/15 text-success border-success/30" : "bg-muted/30 text-muted-foreground border-border"}`}>
-                  {p.is_active ? "Ativo" : "Pausado"}
-                </span>
+                <div className="flex flex-col items-end gap-1">
+                  <span className={`text-xs px-2 py-0.5 rounded-full border ${p.is_active ? "bg-success/15 text-success border-success/30" : "bg-muted/30 text-muted-foreground border-border"}`}>
+                    {p.is_active ? "Ativo" : "Pausado"}
+                  </span>
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold uppercase tracking-wider ${p.product_type === "network" ? "bg-primary/15 text-primary border-primary/30" : "bg-muted/30 text-muted-foreground border-border"}`}>
+                    {p.product_type === "network" ? "FIRENET B • Rede" : "FIRENET A • Comum"}
+                  </span>
+                </div>
               </div>
               {p.description && <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{p.description}</p>}
               <div className="text-xs text-muted-foreground mb-4">
@@ -132,6 +137,7 @@ function ProductForm({ initial, onClose }: { initial: Product | null; onClose: (
     description: initial?.description ?? "",
     media_kit_url: initial?.media_kit_url ?? "",
     is_active: initial?.is_active ?? true,
+    product_type: initial?.product_type ?? "normal",
   });
   const [saving, setSaving] = useState(false);
 
@@ -144,6 +150,7 @@ function ProductForm({ initial, onClose }: { initial: Product | null; onClose: (
       description: form.description || null,
       media_kit_url: form.media_kit_url || null,
       is_active: form.is_active,
+      product_type: form.product_type,
     };
     const { error } = initial
       ? await supabase.from("products").update(payload).eq("id", initial.id)
@@ -159,6 +166,21 @@ function ProductForm({ initial, onClose }: { initial: Product | null; onClose: (
       <div className="space-y-1.5">
         <Label className="text-xs">Nome do produto/serviço</Label>
         <Input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value, slug: form.slug || slugify(e.target.value) })} placeholder="Ex: FireNet — Internet Ilimitada" />
+      </div>
+      <div className="space-y-1.5">
+        <Label className="text-xs">Tipo de produto</Label>
+        <div className="grid grid-cols-2 gap-2">
+          <button type="button" onClick={() => setForm({ ...form, product_type: "normal" })}
+            className={`p-3 rounded-lg border text-left transition ${form.product_type === "normal" ? "border-primary bg-primary/10" : "border-border bg-background/40"}`}>
+            <div className="font-semibold text-sm">FIRENET A — Comum</div>
+            <div className="text-xs text-muted-foreground">Afiliados independentes. Comissão: afiliado + admin.</div>
+          </button>
+          <button type="button" onClick={() => setForm({ ...form, product_type: "network" })}
+            className={`p-3 rounded-lg border text-left transition ${form.product_type === "network" ? "border-primary bg-primary/10" : "border-border bg-background/40"}`}>
+            <div className="font-semibold text-sm">FIRENET B — Rede</div>
+            <div className="text-xs text-muted-foreground">Apenas indicados de rede. Divide entre afiliado, afiliador e admin.</div>
+          </button>
+        </div>
       </div>
       <div className="space-y-1.5">
         <Label className="text-xs">Slug (parte do link)</Label>
