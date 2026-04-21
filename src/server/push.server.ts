@@ -1,13 +1,13 @@
 // Server-only push helpers. Blocked from client bundles by `.server.ts` suffix.
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import webpush from "web-push";
+import { buildPushPayload, type PushSubscription as WPSub, type PushMessage, type VapidKeys } from "@block65/webcrypto-web-push";
 
-function configureVapid() {
-  const pub = process.env.VAPID_PUBLIC_KEY;
-  const priv = process.env.VAPID_PRIVATE_KEY;
+function getVapid(): VapidKeys | null {
+  const publicKey = process.env.VAPID_PUBLIC_KEY;
+  const privateKey = process.env.VAPID_PRIVATE_KEY;
   const subject = process.env.VAPID_SUBJECT || "mailto:admin@fire.com";
-  if (!pub || !priv) throw new Error("VAPID keys não configuradas");
-  webpush.setVapidDetails(subject, pub, priv);
+  if (!publicKey || !privateKey) return null;
+  return { subject, publicKey, privateKey };
 }
 
 export interface PushPayload {
@@ -52,7 +52,8 @@ export async function sendPushToUsers(
   options?: { event?: "lead_paid" | "lead_new" | "payment_generated" | "trial_generated" }
 ) {
   if (!userIds.length) return { sent: 0, failed: 0 };
-  try { configureVapid(); } catch (e) { console.warn("[push]", (e as Error).message); return { sent: 0, failed: 0 }; }
+  const vapid = getVapid();
+  if (!vapid) { console.warn("[push] VAPID keys não configuradas"); return { sent: 0, failed: 0 }; }
 
   const { data: prefs } = await supabaseAdmin.from("notification_preferences").select("*").in("user_id", userIds);
   const allowedIds = userIds.filter((uid) => {
@@ -75,17 +76,21 @@ export async function sendPushToUsers(
   const dead: string[] = [];
   await Promise.all(subs.map(async (s) => {
     try {
-      await webpush.sendNotification(
-        { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
-        JSON.stringify(payload),
-        { TTL: 60 * 60 * 24 }
-      );
-      sent++;
+      const sub: WPSub = { endpoint: s.endpoint, expirationTime: null, keys: { p256dh: s.p256dh, auth: s.auth } };
+      const message: PushMessage = { data: JSON.stringify(payload), options: { ttl: 60 * 60 * 24 } };
+      const init = await buildPushPayload(message, sub, vapid);
+      const res = await fetch(s.endpoint, init as unknown as RequestInit);
+      if (res.status >= 200 && res.status < 300) {
+        sent++;
+      } else {
+        failed++;
+        if (res.status === 404 || res.status === 410) dead.push(s.endpoint);
+        const txt = await res.text().catch(() => "");
+        console.warn("[push] fail", res.status, txt.slice(0, 200));
+      }
     } catch (e) {
-      const err = e as { statusCode?: number; message?: string };
-      if (err.statusCode === 404 || err.statusCode === 410) dead.push(s.endpoint);
       failed++;
-      console.warn("[push] fail", err.statusCode, err.message);
+      console.warn("[push] exception", (e as Error).message);
     }
   }));
   if (dead.length) await supabaseAdmin.from("push_subscriptions").delete().in("endpoint", dead);
