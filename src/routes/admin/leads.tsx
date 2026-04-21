@@ -28,18 +28,33 @@ function LeadsPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [affiliateFilter, setAffiliateFilter] = useState<string>("all");
   const [productFilter, setProductFilter] = useState<string>("all");
+  const [referrerFilter, setReferrerFilter] = useState<string>("all");
+  const [trialFilter, setTrialFilter] = useState<string>("all");
+  const [linkSlug, setLinkSlug] = useState<string>("");
   const [dateFrom, setDateFrom] = useState<string>("");
   const [dateTo, setDateTo] = useState<string>("");
 
   const { data: affiliates = [] } = useQuery({
     queryKey: ["aff-list"],
-    queryFn: async () => (await supabase.from("affiliates").select("id, full_name").order("full_name")).data ?? [],
+    queryFn: async () => (await supabase.from("affiliates").select("id, full_name, slug").order("full_name")).data ?? [],
   });
 
   const { data: products = [] } = useQuery({
     queryKey: ["prod-list"],
     queryFn: async () => (await supabase.from("products").select("id, name").order("name")).data ?? [],
   });
+
+  // Mapa afiliado -> referrer (afiliador) ativo
+  const { data: networkLinks = [] } = useQuery({
+    queryKey: ["network-links"],
+    queryFn: async () =>
+      (await supabase.from("affiliate_network").select("affiliate_id, referrer_id").eq("status", "active")).data ?? [],
+  });
+  const referrerByAffiliate = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const n of networkLinks) m.set(n.affiliate_id, n.referrer_id);
+    return m;
+  }, [networkLinks]);
 
   const { data: leads = [], isLoading } = useQuery({
     queryKey: ["leads"],
@@ -53,6 +68,13 @@ function LeadsPage() {
     if (statusFilter !== "all" && l.status !== statusFilter) return false;
     if (affiliateFilter !== "all" && l.affiliate_id !== affiliateFilter) return false;
     if (productFilter !== "all" && l.product_id !== productFilter) return false;
+    if (referrerFilter !== "all" && referrerByAffiliate.get(l.affiliate_id) !== referrerFilter) return false;
+    if (trialFilter === "yes" && !l.trial_generated_at) return false;
+    if (trialFilter === "no" && l.trial_generated_at) return false;
+    if (linkSlug) {
+      const slug = (l as { affiliates?: { slug: string } }).affiliates?.slug?.toLowerCase() ?? "";
+      if (!slug.includes(linkSlug.toLowerCase())) return false;
+    }
     if (dateFrom && new Date(l.created_at) < new Date(dateFrom)) return false;
     if (dateTo && new Date(l.created_at) > new Date(dateTo + "T23:59:59")) return false;
     if (search && ![l.customer_name, l.whatsapp_number].some((f) => f?.toLowerCase().includes(search.toLowerCase()))) return false;
