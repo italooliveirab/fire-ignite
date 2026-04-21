@@ -98,6 +98,24 @@ export function useWebPush() {
         throw new Error(saveJson.detail || saveJson.error || `HTTP ${saveRes.status}`);
       }
       console.log("[push] subscription salva no servidor", saveJson);
+      // Garante registro em notification_preferences (push habilitado por padrão)
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user?.id) {
+          await supabase.from("notification_preferences").upsert({
+            user_id: user.id,
+            push_enabled: true,
+            sound_enabled: true,
+            email_enabled: true,
+            notify_lead_paid: true,
+            notify_lead_new: true,
+            notify_payment_generated: true,
+            notify_trial_generated: true,
+          }, { onConflict: "user_id" });
+        }
+      } catch (e) {
+        console.warn("[push] falha ao salvar preferências", e);
+      }
       setSubscribed(true);
       toast.success("Notificações ativadas neste dispositivo!");
     } catch (e) {
