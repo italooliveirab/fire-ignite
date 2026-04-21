@@ -32,6 +32,18 @@ function InvitePage() {
           const { data: me } = await supabase
             .from("affiliates").select("id").eq("user_id", session.user.id).maybeSingle();
           if (me && me.id !== data.id) {
+            // Bloqueia: usuário com afiliações FIRENET A aprovadas não pode entrar em rede
+            const { data: normalAffiliations } = await supabase
+              .from("affiliate_products")
+              .select("id, products!inner(product_type)")
+              .eq("affiliate_id", me.id)
+              .eq("status", "approved")
+              .eq("products.product_type", "normal");
+            if (normalAffiliations && normalAffiliations.length > 0) {
+              setError("Você já possui afiliações ativas no FIRENET A e não pode aceitar convites de rede. Cancele suas afiliações comuns primeiro ou crie uma nova conta.");
+              setChecking(false);
+              return;
+            }
             await supabase.from("affiliate_network").insert({
               affiliate_id: me.id, referrer_id: data.id, status: "active",
             });
