@@ -327,6 +327,22 @@ function StatusPage() {
           </div>
         </div>
 
+        {/* Aviso destacado quando SW não está ativo */}
+        {!swActive && (
+          <div className="rounded-2xl border border-red-500/40 bg-red-500/5 p-4 shadow-card-premium flex items-start gap-3">
+            <XCircle className="h-5 w-5 text-red-500 mt-0.5 shrink-0" />
+            <div className="text-sm">
+              <p className="font-display font-semibold">Service Worker não está ativo</p>
+              <p className="text-muted-foreground mt-1">
+                Push notifications NÃO funcionam sem um Service Worker em estado <code className="px-1 rounded bg-background/60">activated</code>.
+                {swInfo.registered
+                  ? ` Estado atual: ${swInfo.state ?? "desconhecido"} (ready=${swInfo.ready ? "sim" : "não"}). Recarregue a página ou desative e ative novamente.`
+                  : " Toque em 'Ativar neste dispositivo' para registrar /sw.js."}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Checklist */}
         <div className="rounded-2xl border border-border bg-card p-5 shadow-card-premium space-y-3">
           <h2 className="font-display font-semibold text-lg flex items-center gap-2">
