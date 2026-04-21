@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts";
 import { TopAffiliatesRanking } from "@/components/TopAffiliatesRanking";
+import { useSpotlight } from "@/hooks/useSpotlight";
 
 export const Route = createFileRoute("/app/")({ component: AffiliateDashboard });
 
