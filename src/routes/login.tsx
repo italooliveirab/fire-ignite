@@ -94,10 +94,13 @@ function LoginPage() {
             </Link>
           </div>
 
-          <div className="mt-6 pt-6 border-t border-border text-center text-xs text-muted-foreground">
-            Ainda não é afiliado?{" "}
-            <Link to="/signup" className="text-primary font-semibold hover:underline">
-              Cadastre-se
+          <div className="mt-6 pt-6 border-t border-border text-center">
+            <p className="text-xs text-muted-foreground mb-3">Ainda não é afiliado?</p>
+            <Link
+              to="/signup"
+              className="inline-flex items-center justify-center w-full h-11 rounded-md border border-primary/40 text-primary font-semibold hover:bg-primary/10 transition-all active:scale-[0.96] hover:-translate-y-[1px]"
+            >
+              Criar conta de afiliado
             </Link>
           </div>
         </div>
