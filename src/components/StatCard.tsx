@@ -32,6 +32,7 @@ export function StatCard({ label, value, icon: Icon, trend, accent = "fire", cla
     onMouseLeave={onMouseLeave}
     >
       <div className={cn("absolute inset-0 bg-gradient-to-br opacity-60 pointer-events-none", accentMap[accent].split(" ").slice(0, 2).join(" "))} />
+      <span className="spotlight-shine" aria-hidden />
       <div className="relative z-10">
         <div className="flex items-start justify-between mb-3">
           <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{label}</span>
