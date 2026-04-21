@@ -25,7 +25,6 @@ export function DashboardLayout({ variant, title, children }: Props) {
       nav({ to: target, search: { redirect: loc.pathname } });
       return;
     }
-    // Wait until role is resolved before deciding to redirect
     if (role === null) return;
     if (variant === "admin" && role !== "admin") nav({ to: "/app" });
     if (variant === "affiliate" && role !== "affiliate" && role !== "admin") nav({ to: "/login" });
@@ -33,45 +32,57 @@ export function DashboardLayout({ variant, title, children }: Props) {
 
   if (loading || !user || role === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="h-10 w-10 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="h-1 w-24 bg-primary mx-auto mb-4 animate-pulse" />
+          <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-muted-foreground">
+            Carregando
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-background">
       <AppSidebar variant={variant} />
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Topbar */}
-        <header className="sticky top-0 z-20 h-16 border-b border-border bg-background/80 backdrop-blur-xl flex items-center justify-between px-4 md:px-8">
+        <header className="sticky top-0 z-20 h-14 border-b border-border bg-background/95 backdrop-blur flex items-center justify-between px-4 md:px-6">
           <div className="flex items-center gap-3">
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="md:hidden">
-                  <Menu className="h-5 w-5" />
+                  <Menu className="h-5 w-5" strokeWidth={2} />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-64 bg-sidebar border-sidebar-border">
+              <SheetContent side="left" className="p-0 w-60 bg-sidebar border-sidebar-border">
                 <AppSidebar variant={variant} />
               </SheetContent>
             </Sheet>
             <Link to="/" className="md:hidden flex items-center gap-2">
-              <div className="h-7 w-7 rounded-md bg-gradient-fire flex items-center justify-center">
-                <Flame className="h-4 w-4 text-white" />
+              <div className="h-7 w-7 bg-primary flex items-center justify-center">
+                <Flame className="h-4 w-4 text-primary-foreground" strokeWidth={2.5} />
               </div>
-              <span className="font-display font-bold">FIRE</span>
+              <span className="font-display text-lg">FIRE</span>
             </Link>
-            {title && <h1 className="hidden md:block text-sm text-muted-foreground">{title}</h1>}
+            {title && (
+              <div className="hidden md:flex items-center gap-3">
+                <span className="h-1 w-1 bg-primary" />
+                <h1 className="text-[11px] font-mono uppercase tracking-[0.25em] text-muted-foreground">
+                  {variant} / {title}
+                </h1>
+              </div>
+            )}
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="hidden sm:inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-success/15 text-success border border-success/30">
-              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" /> online
+          <div className="flex items-center gap-3">
+            <span className="hidden sm:inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-wider px-2 py-1 border border-success/40 bg-success/10 text-success">
+              <span className="h-1.5 w-1.5 bg-success animate-pulse" /> ONLINE
             </span>
             <Button variant="ghost" size="icon" className="md:hidden" onClick={signOut}>
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-4 w-4" strokeWidth={2} />
             </Button>
           </div>
         </header>

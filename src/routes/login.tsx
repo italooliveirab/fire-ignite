@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { Mail, Lock, ArrowRight } from "lucide-react";
-import { BrandMark } from "@/components/BrandMark";
+import { ArrowUpRight } from "lucide-react";
+import { AuthShell } from "@/components/AuthShell";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -44,68 +44,45 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center px-4 overflow-hidden">
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-primary/25 rounded-full blur-[160px]" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-info/10 rounded-full blur-[120px]" />
+    <AuthShell
+      step="01 / Acesso"
+      title={"ENTRE\nNO PAINEL"}
+      tagline="O painel do afiliado FIRE em tempo real. Veja seus leads, vendas e comissões assim que acontecem."
+    >
+      <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-muted-foreground mb-3">
+        Login do afiliado
       </div>
+      <h2 className="font-display text-3xl uppercase mb-1">Acessar conta</h2>
+      <p className="text-sm text-muted-foreground mb-8">Use seu email e senha cadastrados.</p>
 
-      <div className="w-full max-w-md">
-        <Link to="/" className="flex justify-center mb-8">
-          <BrandMark size="lg" subtitle="Afiliados" />
-        </Link>
-
-        <div className="rounded-2xl border border-border bg-card/80 backdrop-blur-xl p-8 shadow-card-premium">
-          <h1 className="font-display text-2xl font-bold mb-1">Painel do Afiliado</h1>
-          <p className="text-sm text-muted-foreground mb-6">Entre com seu email e senha.</p>
-
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email" type="email" required value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu@email.com" className="pl-10 h-11 bg-background/50"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="password" type="password" required value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••" className="pl-10 h-11 bg-background/50"
-                />
-              </div>
-            </div>
-
-            <Button type="submit" disabled={loading} className="w-full h-11 bg-gradient-fire shadow-fire hover:opacity-90 text-white font-semibold">
-              {loading ? "Entrando..." : <>Entrar <ArrowRight className="ml-2 h-4 w-4" /></>}
-            </Button>
-          </form>
-
-          <div className="mt-4 text-right">
-            <Link to="/forgot-password" className="text-xs text-muted-foreground hover:text-primary transition">
-              Esqueceu a senha?
+      <form onSubmit={handleLogin} className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-[10px] font-display uppercase tracking-wider text-muted-foreground">Email</Label>
+          <Input id="email" type="email" required value={email}
+            onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" />
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password" className="text-[10px] font-display uppercase tracking-wider text-muted-foreground">Senha</Label>
+            <Link to="/forgot-password" className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground hover:text-primary">
+              Esqueci
             </Link>
           </div>
-
-          <div className="mt-6 pt-6 border-t border-border text-center text-xs text-muted-foreground">
-            Ainda não é afiliado?{" "}
-            <Link to="/signup" className="text-primary font-semibold hover:underline">
-              Cadastre-se
-            </Link>
-          </div>
+          <Input id="password" type="password" required value={password}
+            onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
         </div>
 
-        <p className="text-center text-xs text-muted-foreground mt-6">
-          🔒 Conexão segura · Plataforma FIRE
-        </p>
+        <Button type="submit" disabled={loading} size="lg" className="w-full">
+          {loading ? "Entrando..." : <>Entrar <ArrowUpRight className="ml-1" strokeWidth={2.5} /></>}
+        </Button>
+      </form>
+
+      <div className="mt-8 pt-6 border-t border-border flex items-center justify-between text-xs">
+        <span className="text-muted-foreground">Ainda não é afiliado?</span>
+        <Link to="/signup" className="font-display uppercase tracking-wider text-primary hover:underline text-[11px]">
+          Cadastre-se →
+        </Link>
       </div>
-    </div>
+    </AuthShell>
   );
 }

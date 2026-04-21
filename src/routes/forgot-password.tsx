@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Mail, ArrowRight, ArrowLeft, CheckCircle2 } from "lucide-react";
-import { BrandMark } from "@/components/BrandMark";
+import { ArrowUpRight, CheckCircle2 } from "lucide-react";
+import { AuthShell } from "@/components/AuthShell";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -31,61 +31,50 @@ function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center px-4 overflow-hidden">
-      <div className="absolute inset-0 -z-10">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-primary/25 rounded-full blur-[160px]" />
-      </div>
+    <AuthShell
+      step="03 / Recuperar"
+      title={"RECUPERAR\nSENHA"}
+      tagline="Enviaremos um link para o email cadastrado."
+    >
+      {sent ? (
+        <>
+          <div className="border border-success bg-success/10 p-6 text-center">
+            <CheckCircle2 className="h-8 w-8 text-success mx-auto mb-3" strokeWidth={2} />
+            <h2 className="font-display text-2xl uppercase mb-2">Email enviado</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Link de recuperação enviado para <span className="text-foreground font-mono">{email}</span>.
+            </p>
+            <Link to="/login" className="font-display uppercase tracking-wider text-primary hover:underline text-[11px]">
+              ← Voltar ao login
+            </Link>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="text-[10px] font-mono uppercase tracking-[0.3em] text-muted-foreground mb-3">
+            Recuperação de senha
+          </div>
+          <h2 className="font-display text-3xl uppercase mb-1">Esqueceu?</h2>
+          <p className="text-sm text-muted-foreground mb-8">Enviaremos um link de redefinição.</p>
 
-      <div className="w-full max-w-md">
-        <Link to="/" className="flex justify-center mb-8">
-          <BrandMark size="lg" subtitle="Recuperar senha" />
-        </Link>
-
-        <div className="rounded-2xl border border-border bg-card/80 backdrop-blur-xl p-8 shadow-card-premium">
-          {sent ? (
-            <div className="text-center py-4">
-              <div className="h-14 w-14 rounded-full bg-success/15 border border-success/30 flex items-center justify-center mx-auto mb-4">
-                <CheckCircle2 className="h-7 w-7 text-success" />
-              </div>
-              <h1 className="font-display text-2xl font-bold mb-2">Email enviado</h1>
-              <p className="text-sm text-muted-foreground mb-6">
-                Enviamos um link de recuperação para <span className="text-foreground font-medium">{email}</span>. Verifique sua caixa de entrada (e spam).
-              </p>
-              <Link to="/login" className="inline-flex items-center gap-2 text-sm text-primary hover:underline font-medium">
-                <ArrowLeft className="h-4 w-4" /> Voltar ao login
-              </Link>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-[10px] font-display uppercase tracking-wider text-muted-foreground">Email</Label>
+              <Input id="email" type="email" required value={email}
+                onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" />
             </div>
-          ) : (
-            <>
-              <h1 className="font-display text-2xl font-bold mb-1">Esqueceu a senha?</h1>
-              <p className="text-sm text-muted-foreground mb-6">Enviaremos um link para você redefinir.</p>
+            <Button type="submit" disabled={loading} size="lg" className="w-full">
+              {loading ? "Enviando..." : <>Enviar link <ArrowUpRight className="ml-1" strokeWidth={2.5} /></>}
+            </Button>
+          </form>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="email" type="email" required value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="seu@email.com" className="pl-10 h-11 bg-background/50"
-                    />
-                  </div>
-                </div>
-
-                <Button type="submit" disabled={loading} className="w-full h-11 bg-gradient-fire shadow-fire hover:opacity-90 text-white font-semibold">
-                  {loading ? "Enviando..." : <>Enviar link <ArrowRight className="ml-2 h-4 w-4" /></>}
-                </Button>
-              </form>
-
-              <div className="mt-6 pt-6 border-t border-border text-center text-xs text-muted-foreground">
-                Lembrou a senha?{" "}
-                <Link to="/login" className="text-primary hover:underline font-medium">Voltar ao login</Link>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
+          <div className="mt-8 pt-6 border-t border-border text-center">
+            <Link to="/login" className="font-display uppercase tracking-wider text-muted-foreground hover:text-primary text-[11px]">
+              ← Voltar ao login
+            </Link>
+          </div>
+        </>
+      )}
+    </AuthShell>
   );
 }
