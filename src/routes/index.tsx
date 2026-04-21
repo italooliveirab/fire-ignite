@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Flame, Zap, ShieldCheck, ArrowRight, Wallet, Rocket, PackageCheck, BarChart3 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { InstallPWA, InstallBanner } from "@/components/InstallPWA";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -20,7 +19,6 @@ function Landing() {
   useAuth();
   return (
     <div className="min-h-screen relative overflow-hidden">
-      <InstallBanner />
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary/20 rounded-full blur-[140px]" />
         <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-info/10 rounded-full blur-[120px]" />
@@ -102,9 +100,6 @@ function Landing() {
       </section>
 
       <footer className="border-t border-border/50 py-8 text-center text-xs text-muted-foreground">
-        <div className="max-w-4xl mx-auto px-6 mb-8">
-          <InstallPWA variant="card" />
-        </div>
         © {new Date().getFullYear()} FIRE — Programa oficial de afiliados.
       </footer>
     </div>

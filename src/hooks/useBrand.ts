@@ -11,9 +11,9 @@ async function fetchBrand(): Promise<Brand> {
   if (cached) return cached;
   if (inflight) return inflight;
   inflight = (async () => {
-  const { data } = await supabase.from("settings").select("company_name, logo_url").limit(1).maybeSingle();
+  const { data } = await supabase.from("settings").select("company_name").limit(1).maybeSingle();
   const brand: Brand = {
-    logoUrl: data?.logo_url ?? null,
+    logoUrl: null,
     companyName: data?.company_name ?? "FIRE",
   };
   cached = brand;
@@ -36,4 +36,4 @@ export function useBrand(): Brand {
   return brand;
 }
 
-export function refreshBrand() { cached = null; void fetchBrand(); }
+export function refreshBrand() { void fetchBrand(); }

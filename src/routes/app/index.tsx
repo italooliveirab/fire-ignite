@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { TopAffiliatesRanking } from "@/components/TopAffiliatesRanking";
 import { useSpotlight } from "@/hooks/useSpotlight";
-import { InstallPWA } from "@/components/InstallPWA";
 
 // recharts is ~150KB gzipped — lazy load so the dashboard renders instantly
 const PerformanceChart = lazy(() =>
@@ -137,10 +136,6 @@ function AffiliateDashboard() {
       <div className="mb-6">
         <h1 className="font-display text-3xl font-bold">Olá, <span className="text-gradient-fire">{affiliate.full_name.split(" ")[0]}</span> 🔥</h1>
         <p className="text-muted-foreground text-sm mt-1">Sua máquina de vendas, em tempo real.</p>
-      </div>
-
-      <div className="mb-6">
-        <InstallPWA variant="card" />
       </div>
 
       <ApprovedLinksCard affiliateId={affiliate.id} affiliateSlug={affiliate.slug} domain={domain} />

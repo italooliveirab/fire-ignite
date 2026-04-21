@@ -18,7 +18,6 @@ import { Route as DocsRouteImport } from './routes/docs'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
-import { Route as ManifestWebmanifestRouteImport } from './routes/manifest.webmanifest'
 import { Route as HooksWeeklyPayoutSummaryRouteImport } from './routes/hooks/weekly-payout-summary'
 import { Route as ConviteReferralCodeRouteImport } from './routes/convite.$referralCode'
 import { Route as AppRulesRouteImport } from './routes/app/rules'
@@ -105,11 +104,6 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ManifestWebmanifestRoute = ManifestWebmanifestRouteImport.update({
-  id: '/manifest/webmanifest',
-  path: '/manifest/webmanifest',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HooksWeeklyPayoutSummaryRoute =
@@ -367,7 +361,6 @@ export interface FileRoutesByFullPath {
   '/app/rules': typeof AppRulesRoute
   '/convite/$referralCode': typeof ConviteReferralCodeRoute
   '/hooks/weekly-payout-summary': typeof HooksWeeklyPayoutSummaryRoute
-  '/manifest/webmanifest': typeof ManifestWebmanifestRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/api/affiliates/$slug': typeof ApiAffiliatesSlugRoute
@@ -421,7 +414,6 @@ export interface FileRoutesByTo {
   '/app/rules': typeof AppRulesRoute
   '/convite/$referralCode': typeof ConviteReferralCodeRoute
   '/hooks/weekly-payout-summary': typeof HooksWeeklyPayoutSummaryRoute
-  '/manifest/webmanifest': typeof ManifestWebmanifestRoute
   '/app': typeof AppIndexRoute
   '/api/affiliates/$slug': typeof ApiAffiliatesSlugRoute
   '/api/leads/$whatsappId': typeof ApiLeadsWhatsappIdRoute
@@ -475,7 +467,6 @@ export interface FileRoutesById {
   '/app/rules': typeof AppRulesRoute
   '/convite/$referralCode': typeof ConviteReferralCodeRoute
   '/hooks/weekly-payout-summary': typeof HooksWeeklyPayoutSummaryRoute
-  '/manifest/webmanifest': typeof ManifestWebmanifestRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/api/affiliates/$slug': typeof ApiAffiliatesSlugRoute
@@ -531,7 +522,6 @@ export interface FileRouteTypes {
     | '/app/rules'
     | '/convite/$referralCode'
     | '/hooks/weekly-payout-summary'
-    | '/manifest/webmanifest'
     | '/admin/'
     | '/app/'
     | '/api/affiliates/$slug'
@@ -585,7 +575,6 @@ export interface FileRouteTypes {
     | '/app/rules'
     | '/convite/$referralCode'
     | '/hooks/weekly-payout-summary'
-    | '/manifest/webmanifest'
     | '/app'
     | '/api/affiliates/$slug'
     | '/api/leads/$whatsappId'
@@ -638,7 +627,6 @@ export interface FileRouteTypes {
     | '/app/rules'
     | '/convite/$referralCode'
     | '/hooks/weekly-payout-summary'
-    | '/manifest/webmanifest'
     | '/admin/'
     | '/app/'
     | '/api/affiliates/$slug'
@@ -693,7 +681,6 @@ export interface RootRouteChildren {
   AppRulesRoute: typeof AppRulesRoute
   ConviteReferralCodeRoute: typeof ConviteReferralCodeRoute
   HooksWeeklyPayoutSummaryRoute: typeof HooksWeeklyPayoutSummaryRoute
-  ManifestWebmanifestRoute: typeof ManifestWebmanifestRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AppIndexRoute: typeof AppIndexRoute
   ApiPushSubscribeRoute: typeof ApiPushSubscribeRoute
@@ -767,13 +754,6 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/manifest/webmanifest': {
-      id: '/manifest/webmanifest'
-      path: '/manifest/webmanifest'
-      fullPath: '/manifest/webmanifest'
-      preLoaderRoute: typeof ManifestWebmanifestRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/hooks/weekly-payout-summary': {
@@ -1139,7 +1119,6 @@ const rootRouteChildren: RootRouteChildren = {
   AppRulesRoute: AppRulesRoute,
   ConviteReferralCodeRoute: ConviteReferralCodeRoute,
   HooksWeeklyPayoutSummaryRoute: HooksWeeklyPayoutSummaryRoute,
-  ManifestWebmanifestRoute: ManifestWebmanifestRoute,
   AdminIndexRoute: AdminIndexRoute,
   AppIndexRoute: AppIndexRoute,
   ApiPushSubscribeRoute: ApiPushSubscribeRoute,
