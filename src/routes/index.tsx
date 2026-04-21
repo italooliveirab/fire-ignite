@@ -17,8 +17,8 @@ function Landing() {
   return (
     <div className="min-h-screen relative overflow-hidden">
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary/20 rounded-full blur-[140px]" />
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-info/10 rounded-full blur-[120px]" />
+        <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-primary/[0.06] rounded-full blur-[160px]" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-info/[0.05] rounded-full blur-[140px]" />
       </div>
 
       <header className="border-b border-border/50 backdrop-blur-xl bg-background/30">
