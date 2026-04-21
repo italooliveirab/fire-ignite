@@ -709,9 +709,14 @@ function StatusPage() {
             </div>
           )}
 
-          <Button variant="outline" className="w-full" onClick={() => { unlockAudio(); playCoinSound(); toast.success("💰 Som de venda"); }}>
-            <Volume2 className="h-4 w-4 mr-2" />Ouvir som de venda
-          </Button>
+          <div className="grid sm:grid-cols-2 gap-2">
+            <Button variant="outline" onClick={testAudio}>
+              <Volume2 className="h-4 w-4 mr-2" />Testar som de venda
+            </Button>
+            <Button variant="outline" onClick={testLocalNotification}>
+              <Bell className="h-4 w-4 mr-2" />Disparar notificação local
+            </Button>
+          </div>
         </div>
 
         {/* Instruções iPhone */}
