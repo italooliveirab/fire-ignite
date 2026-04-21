@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { Settings2, Plus, Trash2, Save } from "lucide-react";
+import { Settings2, Plus, Trash2, Save, RefreshCw } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Trophy } from "lucide-react";
 
@@ -90,6 +90,19 @@ function AdminNetworkRules() {
     onError: (e) => toast.error("Erro", { description: (e as Error).message }),
   });
 
+  const recalc = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.rpc("recalculate_network_commissions");
+      if (error) throw error;
+      return (data?.[0] ?? { processed: 0, skipped: 0 }) as { processed: number; skipped: number };
+    },
+    onSuccess: (r) => {
+      toast.success(`Recálculo concluído`, { description: `Processadas: ${r.processed} · Ignoradas: ${r.skipped}` });
+      qc.invalidateQueries({ queryKey: ["network-rules"] });
+    },
+    onError: (e) => toast.error("Erro ao recalcular", { description: (e as Error).message }),
+  });
+
   return (
     <DashboardLayout variant="admin" title="Regras de Comissão da Rede">
       <div className="flex items-center justify-between mb-6">
@@ -97,7 +110,13 @@ function AdminNetworkRules() {
           <h1 className="font-display text-3xl font-bold flex items-center gap-2"><Settings2 className="h-7 w-7 text-primary" /> Regras de Comissão</h1>
           <p className="text-sm text-muted-foreground mt-1">Defina % do vendedor, do afiliador e a recorrência por produto.</p>
         </div>
-        <RuleDialog products={products} mode="create" />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" disabled={recalc.isPending} onClick={() => { if (confirm("Recalcular comissões para todos os leads pagos sem comissão registrada?")) recalc.mutate(); }}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${recalc.isPending ? "animate-spin" : ""}`} />
+            {recalc.isPending ? "Recalculando..." : "Recalcular comissões"}
+          </Button>
+          <RuleDialog products={products} mode="create" />
+        </div>
       </div>
 
       {products.length > 0 && rules.length > 0 && (
