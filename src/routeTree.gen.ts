@@ -29,6 +29,7 @@ import { Route as AppLinkRouteImport } from './routes/app/link'
 import { Route as AppLeadsRouteImport } from './routes/app/leads'
 import { Route as AppCommissionsRouteImport } from './routes/app/commissions'
 import { Route as ApiTrackEventRouteImport } from './routes/api.track-event'
+import { Route as ApiProductsRouteImport } from './routes/api.products'
 import { Route as ApiAffiliatesRouteImport } from './routes/api.affiliates'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminRequestsRouteImport } from './routes/admin/requests'
@@ -149,6 +150,11 @@ const ApiTrackEventRoute = ApiTrackEventRouteImport.update({
   path: '/api/track-event',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiProductsRoute = ApiProductsRouteImport.update({
+  id: '/api/products',
+  path: '/api/products',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAffiliatesRoute = ApiAffiliatesRouteImport.update({
   id: '/api/affiliates',
   path: '/api/affiliates',
@@ -265,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
+  '/api/products': typeof ApiProductsRoute
   '/api/track-event': typeof ApiTrackEventRoute
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
@@ -305,6 +312,7 @@ export interface FileRoutesByTo {
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
+  '/api/products': typeof ApiProductsRoute
   '/api/track-event': typeof ApiTrackEventRoute
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
@@ -346,6 +354,7 @@ export interface FileRoutesById {
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
+  '/api/products': typeof ApiProductsRoute
   '/api/track-event': typeof ApiTrackEventRoute
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
@@ -388,6 +397,7 @@ export interface FileRouteTypes {
     | '/admin/requests'
     | '/admin/settings'
     | '/api/affiliates'
+    | '/api/products'
     | '/api/track-event'
     | '/app/commissions'
     | '/app/leads'
@@ -428,6 +438,7 @@ export interface FileRouteTypes {
     | '/admin/requests'
     | '/admin/settings'
     | '/api/affiliates'
+    | '/api/products'
     | '/api/track-event'
     | '/app/commissions'
     | '/app/leads'
@@ -468,6 +479,7 @@ export interface FileRouteTypes {
     | '/admin/requests'
     | '/admin/settings'
     | '/api/affiliates'
+    | '/api/products'
     | '/api/track-event'
     | '/app/commissions'
     | '/app/leads'
@@ -509,6 +521,7 @@ export interface RootRouteChildren {
   AdminRequestsRoute: typeof AdminRequestsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   ApiAffiliatesRoute: typeof ApiAffiliatesRouteWithChildren
+  ApiProductsRoute: typeof ApiProductsRoute
   ApiTrackEventRoute: typeof ApiTrackEventRoute
   AppCommissionsRoute: typeof AppCommissionsRoute
   AppLeadsRoute: typeof AppLeadsRoute
@@ -665,6 +678,13 @@ declare module '@tanstack/react-router' {
       path: '/api/track-event'
       fullPath: '/api/track-event'
       preLoaderRoute: typeof ApiTrackEventRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/products': {
+      id: '/api/products'
+      path: '/api/products'
+      fullPath: '/api/products'
+      preLoaderRoute: typeof ApiProductsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/affiliates': {
@@ -832,6 +852,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRequestsRoute: AdminRequestsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   ApiAffiliatesRoute: ApiAffiliatesRouteWithChildren,
+  ApiProductsRoute: ApiProductsRoute,
   ApiTrackEventRoute: ApiTrackEventRoute,
   AppCommissionsRoute: AppCommissionsRoute,
   AppLeadsRoute: AppLeadsRoute,
