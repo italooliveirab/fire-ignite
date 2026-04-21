@@ -82,6 +82,8 @@ function MyNetwork() {
 
   const totalEarnings = networkComm.reduce((a, c) => a + Number(c.referrer_amount), 0);
   const totalSold = networkComm.reduce((a, c) => a + Number(c.payment_amount), 0);
+  const renewalsCount = networkComm.filter((c) => (c.payment_cycle ?? 1) > 1).length;
+  const renewalsRevenue = networkComm.filter((c) => (c.payment_cycle ?? 1) > 1).reduce((a, c) => a + Number(c.referrer_amount), 0);
 
   // Leads de toda a minha rede (indicados) — para métricas de desempenho/funil
   const memberIds = members.map((m) => m.affiliate_id);
@@ -177,6 +179,24 @@ function MyNetwork() {
         <StatCard label="Vendas pagas" value={formatNumber(totalPaidLeads)} icon={TrendingUp} accent="success" />
         <StatCard label="Vendido pela rede" value={formatBRL(totalSold)} icon={Banknote} accent="neon" />
         <StatCard label="Meus ganhos da rede" value={formatBRL(totalEarnings)} icon={Banknote} accent="success" />
+      </div>
+
+      {/* Renovações da rede */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Renovações da rede</div>
+          <div className="font-display text-2xl font-bold text-emerald-400">{formatNumber(renewalsCount)}</div>
+          <div className="text-[11px] text-muted-foreground">comissões de ciclo &gt; 1</div>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Receita de renovações (você)</div>
+          <div className="font-display text-2xl font-bold text-primary">{formatBRL(renewalsRevenue)}</div>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Conversão da rede</div>
+          <div className="font-display text-2xl font-bold">{conversionRate.toFixed(1)}%</div>
+          <div className="text-[11px] text-muted-foreground">{totalPaidLeads} pagos / {totalLeads} leads</div>
+        </div>
       </div>
 
       {/* Pódio top 3 indicados */}

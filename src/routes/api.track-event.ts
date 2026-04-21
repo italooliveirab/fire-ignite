@@ -22,6 +22,9 @@ const EVENT_TO_STATUS: Record<string, string> = {
   paid: "paid",
   not_paid: "not_paid",
   abandoned: "not_paid",
+  support_received: "support_received",
+  renewed: "renewed",
+  lost: "lost",
 };
 
 function sha256(input: string) {
@@ -51,9 +54,33 @@ export const Route = createFileRoute("/api/track-event")({
           if (!whatsapp_id || !event) {
             return new Response(JSON.stringify({ error: "whatsapp_id and event are required" }), { status: 400, headers: cors });
           }
+
+          // link_clicked: apenas registra clique em link_clicks (não cria/atualiza lead)
+          if (event === "link_clicked") {
+            if (!affiliate_slug) {
+              return new Response(JSON.stringify({ error: "affiliate_slug required for link_clicked" }), { status: 400, headers: cors });
+            }
+            const { data: aff } = await supabaseAdmin.from("affiliates").select("id").eq("slug", affiliate_slug).maybeSingle();
+            if (!aff) return new Response(JSON.stringify({ error: "Affiliate not found" }), { status: 404, headers: cors });
+            let product_id: string | null = null;
+            if (product_slug) {
+              const { data: prod } = await supabaseAdmin.from("products").select("id").eq("slug", product_slug).maybeSingle();
+              product_id = prod?.id ?? null;
+            }
+            await supabaseAdmin.from("link_clicks").insert({
+              affiliate_id: aff.id,
+              affiliate_slug,
+              product_id,
+              product_slug: product_slug ?? null,
+              referrer: body.referrer ?? null,
+              user_agent: body.user_agent ?? null,
+            });
+            return new Response(JSON.stringify({ success: true, registered: "link_click" }), { status: 200, headers: cors });
+          }
+
           const newStatus = EVENT_TO_STATUS[event];
           if (!newStatus) {
-            return new Response(JSON.stringify({ error: `Unknown event: ${event}. Use: ${Object.keys(EVENT_TO_STATUS).join(", ")}` }), { status: 400, headers: cors });
+            return new Response(JSON.stringify({ error: `Unknown event: ${event}. Use: link_clicked, ${Object.keys(EVENT_TO_STATUS).join(", ")}` }), { status: 400, headers: cors });
           }
 
           // Localiza o lead pelo whatsapp_id
@@ -94,6 +121,7 @@ export const Route = createFileRoute("/api/track-event")({
           if (event === "trial_requested") update.trial_generated_at = now;
           if (event === "payment_generated") update.payment_generated_at = now;
           if (event === "paid") update.paid_at = now;
+          if (event === "renewed") update.paid_at = now;
 
           const { data: updated, error: updErr } = await supabaseAdmin.from("leads").update(update as never).eq("id", lead.id).select().single();
           if (updErr) throw updErr;
