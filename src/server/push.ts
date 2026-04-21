@@ -5,7 +5,9 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 export const getVapidPublicKey = createServerFn({ method: "GET" }).handler(async () => {
-  return { publicKey: process.env.VAPID_PUBLIC_KEY || "" };
+  const publicKey = process.env.VAPID_PUBLIC_KEY || "";
+  if (!publicKey) console.warn("[push] VAPID_PUBLIC_KEY ausente no ambiente do servidor");
+  return { publicKey };
 });
 
 export const subscribePushFn = createServerFn({ method: "POST" })
