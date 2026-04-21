@@ -27,6 +27,7 @@ export function DashboardLayout({ variant, title, children }: Props) {
   const nav = useNavigate();
   const loc = useLocation();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const roleResolved = !loading;
 
   useEffect(() => { setSheetOpen(false); }, [loc.pathname]);
 
@@ -37,13 +38,12 @@ export function DashboardLayout({ variant, title, children }: Props) {
       nav({ to: target, search: { redirect: loc.pathname } });
       return;
     }
-    // Wait until role is resolved before deciding to redirect
-    if (role === null) return;
     if (variant === "admin" && role !== "admin") nav({ to: "/app" });
-    if (variant === "affiliate" && role !== "affiliate" && role !== "admin") nav({ to: "/login" });
+    // Affiliate area may still render for authenticated users without a mapped role.
+    // Those users will see the route-level empty state instead of an infinite loader.
   }, [user, role, loading, variant, nav, loc.pathname]);
 
-  if (loading || !user || role === null) {
+   if (!roleResolved || !user) {
     return <FireLoader label="Carregando seu painel..." />;
   }
 
