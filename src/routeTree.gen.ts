@@ -32,6 +32,7 @@ import { Route as ApiTrackEventRouteImport } from './routes/api.track-event'
 import { Route as ApiStatsRouteImport } from './routes/api.stats'
 import { Route as ApiProductsRouteImport } from './routes/api.products'
 import { Route as ApiLeadsRouteImport } from './routes/api.leads'
+import { Route as ApiCommissionsRouteImport } from './routes/api.commissions'
 import { Route as ApiAffiliatesRouteImport } from './routes/api.affiliates'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminRequestsRouteImport } from './routes/admin/requests'
@@ -168,6 +169,11 @@ const ApiLeadsRoute = ApiLeadsRouteImport.update({
   path: '/api/leads',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCommissionsRoute = ApiCommissionsRouteImport.update({
+  id: '/api/commissions',
+  path: '/api/commissions',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAffiliatesRoute = ApiAffiliatesRouteImport.update({
   id: '/api/affiliates',
   path: '/api/affiliates',
@@ -289,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
+  '/api/commissions': typeof ApiCommissionsRoute
   '/api/leads': typeof ApiLeadsRouteWithChildren
   '/api/products': typeof ApiProductsRoute
   '/api/stats': typeof ApiStatsRoute
@@ -333,6 +340,7 @@ export interface FileRoutesByTo {
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
+  '/api/commissions': typeof ApiCommissionsRoute
   '/api/leads': typeof ApiLeadsRouteWithChildren
   '/api/products': typeof ApiProductsRoute
   '/api/stats': typeof ApiStatsRoute
@@ -378,6 +386,7 @@ export interface FileRoutesById {
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
+  '/api/commissions': typeof ApiCommissionsRoute
   '/api/leads': typeof ApiLeadsRouteWithChildren
   '/api/products': typeof ApiProductsRoute
   '/api/stats': typeof ApiStatsRoute
@@ -424,6 +433,7 @@ export interface FileRouteTypes {
     | '/admin/requests'
     | '/admin/settings'
     | '/api/affiliates'
+    | '/api/commissions'
     | '/api/leads'
     | '/api/products'
     | '/api/stats'
@@ -468,6 +478,7 @@ export interface FileRouteTypes {
     | '/admin/requests'
     | '/admin/settings'
     | '/api/affiliates'
+    | '/api/commissions'
     | '/api/leads'
     | '/api/products'
     | '/api/stats'
@@ -512,6 +523,7 @@ export interface FileRouteTypes {
     | '/admin/requests'
     | '/admin/settings'
     | '/api/affiliates'
+    | '/api/commissions'
     | '/api/leads'
     | '/api/products'
     | '/api/stats'
@@ -557,6 +569,7 @@ export interface RootRouteChildren {
   AdminRequestsRoute: typeof AdminRequestsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   ApiAffiliatesRoute: typeof ApiAffiliatesRouteWithChildren
+  ApiCommissionsRoute: typeof ApiCommissionsRoute
   ApiLeadsRoute: typeof ApiLeadsRouteWithChildren
   ApiProductsRoute: typeof ApiProductsRoute
   ApiStatsRoute: typeof ApiStatsRoute
@@ -737,6 +750,13 @@ declare module '@tanstack/react-router' {
       path: '/api/leads'
       fullPath: '/api/leads'
       preLoaderRoute: typeof ApiLeadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/commissions': {
+      id: '/api/commissions'
+      path: '/api/commissions'
+      fullPath: '/api/commissions'
+      preLoaderRoute: typeof ApiCommissionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/affiliates': {
@@ -923,6 +943,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRequestsRoute: AdminRequestsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   ApiAffiliatesRoute: ApiAffiliatesRouteWithChildren,
+  ApiCommissionsRoute: ApiCommissionsRoute,
   ApiLeadsRoute: ApiLeadsRouteWithChildren,
   ApiProductsRoute: ApiProductsRoute,
   ApiStatsRoute: ApiStatsRoute,
