@@ -797,6 +797,12 @@ function StatusPage() {
   serverSubs,
   serviceWorker: swInfo,
   vapid: { status: vapid.status, httpStatus: vapid.httpStatus, length: vapid.length, formatOk: vapid.formatOk },
+  session: { ...session, expiresAt: session.expiresAt ? new Date(session.expiresAt).toISOString() : undefined },
+  preferences: prefs,
+  manifest,
+  endpointMatch,
+  audioTest,
+  localNotifyTest,
   userAgent: ua.slice(0, 200),
 }, null, 2)}
           </pre>
