@@ -1,55 +1,8 @@
-// Server-only SMTP helper. Configure via env: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM
-import nodemailer from "nodemailer";
+// Server-only email helper. Sends via Resend through Lovable connector gateway.
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
-let _transporterCache: { signature: string; transporter: nodemailer.Transporter } | null = null;
-
-type SmtpConfig = {
-  host: string;
-  port: number;
-  user: string;
-  pass: string;
-  secure: boolean;
-};
-
-function getPrimarySmtpConfig(): SmtpConfig {
-  const host = process.env.SMTP_HOST;
-  const port = Number(process.env.SMTP_PORT ?? 465);
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASSWORD;
-  if (!host || !user || !pass) {
-    throw new Error("SMTP não configurado: defina SMTP_HOST, SMTP_USER, SMTP_PASSWORD");
-  }
-  return {
-    host,
-    port,
-    user,
-    pass,
-    secure: port === 465,
-  };
-}
-
-function getFallbackSmtpConfig(config: SmtpConfig): SmtpConfig | null {
-  if (config.host === "smtp.titan.email") {
-    return { ...config, host: "smtp.hostinger.com" };
-  }
-  return null;
-}
-
-function getTransporter(config: SmtpConfig) {
-  const signature = `${config.host}|${config.port}|${config.user}|${config.pass}`;
-  if (_transporterCache?.signature === signature) return _transporterCache.transporter;
-
-  const transporter = nodemailer.createTransport({
-    host: config.host,
-    port: config.port,
-    secure: config.secure,
-    auth: { user: config.user, pass: config.pass },
-  });
-  _transporterCache = { signature, transporter };
-  return transporter;
-}
+const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 
 export interface SendEmailInput {
   to: string | string[];
