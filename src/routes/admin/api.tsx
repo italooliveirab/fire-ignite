@@ -284,6 +284,94 @@ function ApiPage() {
           <Endpoint method="GET" url={ENDPOINT} />
           <p className="mt-2">Retorna os 100 leads mais recentes (apenas leitura).</p>
         </Block>
+
+        <div className="border-t border-border/60 pt-6">
+          <h2 className="font-display text-2xl font-bold text-gradient-fire mb-2">REST API completa</h2>
+          <p className="text-sm text-muted-foreground">Todos os endpoints abaixo aceitam o header <Code>X-API-Key</Code>. Base URL: <Code>{BASE}</Code></p>
+        </div>
+
+        <Block title="🤖 POST /api/track-event — eventos do bot">
+          <Endpoint method="POST" url={`${BASE}/api/track-event`} />
+          <p className="mt-2">Atualiza um lead a partir de eventos do bot WhatsApp. Cria automaticamente se não existir (precisa <Code>affiliate_slug</Code>).</p>
+          <Pre>{`{
+  "whatsapp_id": "5511999999999@c.us",   // obrigatório
+  "event": "paid",                         // ver lista
+  "affiliate_slug": "joao",                // obrigatório se lead novo
+  "product_slug": "premium",               // opcional
+  "customer_name": "Maria Silva",
+  "whatsapp_number": "+5511999999999",
+  "payment_amount": 197.00
+}`}</Pre>
+          <p className="mt-2">Eventos: <Badge>conversation_started</Badge> <Badge>trial_requested</Badge> <Badge>payment_generated</Badge> <Badge>paid</Badge> <Badge>not_paid</Badge> <Badge>abandoned</Badge></p>
+        </Block>
+
+        <Block title="👥 GET /api/affiliates — listar afiliados">
+          <Endpoint method="GET" url={`${BASE}/api/affiliates`} />
+          <p className="mt-2">Query params: <Code>status</Code> (active/paused/blocked/all, default: active), <Code>limit</Code> (max 500).</p>
+          <Pre>{`curl -H "X-API-Key: SUA_CHAVE" \\
+  "${BASE}/api/affiliates?status=active&limit=100"`}</Pre>
+        </Block>
+
+        <Block title="👤 GET /api/affiliates/:slug — detalhes + stats">
+          <Endpoint method="GET" url={`${BASE}/api/affiliates/joao`} />
+          <p className="mt-2">Retorna afiliado + estatísticas (leads, conversão, saldo).</p>
+          <Pre>{`{
+  "data": {
+    "id": "...", "full_name": "João", "slug": "joao",
+    "stats": {
+      "total_leads": 45, "paid_leads": 12,
+      "conversion_rate": 26.67,
+      "balance": { "available": 1180.50, "pending_request": 0, "lifetime_earned": 2350.00 }
+    }
+  }
+}`}</Pre>
+        </Block>
+
+        <Block title="📦 GET /api/products — listar produtos">
+          <Endpoint method="GET" url={`${BASE}/api/products`} />
+          <p className="mt-2">Query: <Code>all=true</Code> inclui inativos.</p>
+        </Block>
+
+        <Block title="📋 GET /api/leads — listar/filtrar leads">
+          <Endpoint method="GET" url={`${BASE}/api/leads`} />
+          <p className="mt-2">Query: <Code>status</Code>, <Code>affiliate_slug</Code>, <Code>since</Code> (ISO date), <Code>limit</Code>.</p>
+          <Pre>{`curl -H "X-API-Key: SUA_CHAVE" \\
+  "${BASE}/api/leads?status=paid&since=2026-04-01&limit=50"`}</Pre>
+        </Block>
+
+        <Block title="🔍 GET /api/leads/:whatsapp_id — buscar lead pelo WhatsApp ID">
+          <Endpoint method="GET" url={`${BASE}/api/leads/5511999999999@c.us`} />
+          <p className="mt-2">Retorna o histórico de leads daquele cliente (com afiliado, produto e comissão).</p>
+        </Block>
+
+        <Block title="📝 POST /api/leads/:whatsapp_id — adicionar nota">
+          <Endpoint method="POST" url={`${BASE}/api/leads/5511999999999@c.us`} />
+          <p className="mt-2">Adiciona uma observação com timestamp ao lead mais recente daquele whatsapp.</p>
+          <Pre>{`{ "note": "Cliente pediu desconto, vai pensar até amanhã" }`}</Pre>
+        </Block>
+
+        <Block title="📊 GET /api/stats — resumo de métricas">
+          <Endpoint method="GET" url={`${BASE}/api/stats`} />
+          <p className="mt-2">Query: <Code>affiliate_slug</Code>, <Code>since</Code> (ISO date).</p>
+          <Pre>{`{
+  "data": {
+    "total_leads": 320, "paid_leads": 87,
+    "conversion_rate": 27.19,
+    "revenue": 17139.00,
+    "by_status": { "paid": 87, "not_paid": 65, "initiated_conversation": 110, ... },
+    "commissions": { "total": 5141.70, "paid": 3200.00 }
+  }
+}`}</Pre>
+        </Block>
+
+        <Block title="💰 GET /api/commissions — listar comissões">
+          <Endpoint method="GET" url={`${BASE}/api/commissions`} />
+          <p className="mt-2">Query: <Code>status</Code> (pending/released/paid), <Code>affiliate_slug</Code>, <Code>limit</Code>.</p>
+        </Block>
+
+        <Block title="🔁 Webhook reverso (em breve)">
+          <p>Pretende receber notificações da FIRE quando um lead virar paid? Avise para habilitarmos webhooks de saída no seu endpoint.</p>
+        </Block>
       </section>
     </DashboardLayout>
   );
