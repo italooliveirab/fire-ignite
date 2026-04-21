@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { FireLoader } from "./FireLoader";
 import { EmberCanvas } from "./EmberCanvas";
+import { CampfireSound } from "./CampfireSound";
 import { useEffect } from "react";
 
 interface Props {
@@ -40,6 +41,7 @@ export function DashboardLayout({ variant, title, children }: Props) {
   return (
     <div className="min-h-screen flex">
       <EmberCanvas density={45} />
+      <CampfireSound />
       <AppSidebar variant={variant} />
 
       <div className="flex-1 flex flex-col min-w-0">
