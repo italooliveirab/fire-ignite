@@ -128,7 +128,7 @@ function MyNetwork() {
     return () => { supabase.removeChannel(ch); };
   }, [affiliate?.id, qc]);
 
-  const refLink = origin && affiliate?.referral_code ? `${origin}/signup?ref=${affiliate.referral_code}` : "";
+  const refLink = origin && affiliate?.referral_code ? `${origin}/convite/${affiliate.referral_code}` : "";
 
   if (!affiliate) {
     return <DashboardLayout variant="affiliate"><div className="p-10 text-center text-muted-foreground">Carregando...</div></DashboardLayout>;
