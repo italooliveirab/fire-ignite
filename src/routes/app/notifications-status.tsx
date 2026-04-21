@@ -499,7 +499,8 @@ function StatusPage() {
   supported: push.supported,
   subscribed: push.subscribed,
   serverSubs,
-  swActive,
+  serviceWorker: swInfo,
+  vapid: { status: vapid.status, httpStatus: vapid.httpStatus, length: vapid.length, formatOk: vapid.formatOk },
   userAgent: ua.slice(0, 200),
 }, null, 2)}
           </pre>
