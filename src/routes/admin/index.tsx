@@ -132,6 +132,7 @@ function ChartCard({ title, children }: { title: string; children: React.ReactNo
       onMouseLeave={onMouseLeave}
       className="spotlight-card rounded-2xl border border-border bg-card p-5 shadow-card-premium"
     >
+      <span className="spotlight-shine" aria-hidden />
       <h3 className="font-display font-semibold mb-4">{title}</h3>
       {children}
     </div>
