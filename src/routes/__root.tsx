@@ -49,7 +49,7 @@ export const Route = createRootRoute({
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "manifest", href: "/manifest.json" },
+      { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/brand/fire-icon.png" },
       { rel: "icon", type: "image/png", href: "/brand/fire-icon.png" },
     ],
