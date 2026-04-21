@@ -8,6 +8,7 @@ interface Props {
   icon?: LucideIcon;
   trend?: string;
   accent?: "fire" | "neon" | "gold" | "success" | "warning";
+  variant?: "default" | "premium";
   className?: string;
 }
 
@@ -19,11 +20,12 @@ const accentMap = {
   warning: "from-warning/20 to-transparent border-warning/30 text-warning",
 };
 
-export function StatCard({ label, value, icon: Icon, trend, accent = "fire", className }: Props) {
+export function StatCard({ label, value, icon: Icon, trend, accent = "fire", variant = "default", className }: Props) {
   const { ref, onMouseMove, onMouseLeave } = useSpotlight();
   return (
     <div className={cn(
       "spotlight-card relative overflow-hidden rounded-2xl bg-card border border-border p-5 shadow-card-premium transition-all hover:border-primary/40 hover:-translate-y-0.5",
+      variant === "premium" && "statcard-premium border-transparent shadow-fire",
       className,
     )}
     data-spot={accent}
