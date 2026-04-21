@@ -7,6 +7,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import crypto from "crypto";
 import { notifyAdminLeadPaid, notifyAffiliateLeadPaid } from "@/server/lead-notifications";
 import { dispatchWebhook } from "@/server/webhooks";
+import { sendPushToUsers } from "@/server/push";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -125,6 +126,61 @@ export const Route = createFileRoute("/api/track-event")({
 
           const { data: updated, error: updErr } = await supabaseAdmin.from("leads").update(update as never).eq("id", lead.id).select().single();
           if (updErr) throw updErr;
+
+          // Dispara push para eventos relevantes (não bloqueia a resposta)
+          try {
+            const isTransitionTo = (s: string) => newStatus === s && lead.status !== s;
+            const valor = updated.payment_amount != null
+              ? `R$ ${Number(updated.payment_amount).toFixed(2).replace(".", ",")}`
+              : "";
+            const customer = updated.customer_name || updated.whatsapp_number || "Novo cliente";
+
+            // Recipients: dono do lead (afiliado) + todos admins
+            const { data: aff } = await supabaseAdmin.from("affiliates")
+              .select("user_id").eq("id", updated.affiliate_id).maybeSingle();
+            const { data: admins } = await supabaseAdmin.from("user_roles")
+              .select("user_id").eq("role", "admin");
+            const recipients = Array.from(new Set([
+              ...(aff?.user_id ? [aff.user_id] : []),
+              ...(admins?.map((a) => a.user_id) ?? []),
+            ]));
+
+            if (recipients.length) {
+              if (isTransitionTo("paid")) {
+                void sendPushToUsers(recipients, {
+                  title: `💰 Venda paga! ${valor}`,
+                  body: `Cliente: ${customer}`,
+                  tag: `paid-${updated.id}`,
+                  url: "/app/commissions",
+                  requireInteraction: true,
+                  vibrate: [200, 100, 200, 100, 400],
+                }, { event: "lead_paid" });
+              } else if (isTransitionTo("generated_payment")) {
+                void sendPushToUsers(recipients, {
+                  title: `📋 Pagamento gerado ${valor}`,
+                  body: `Cliente: ${customer}`,
+                  tag: `pgen-${updated.id}`,
+                  url: "/app/leads",
+                }, { event: "payment_generated" });
+              } else if (isTransitionTo("generated_trial")) {
+                void sendPushToUsers(recipients, {
+                  title: `🎁 Trial iniciado`,
+                  body: `Cliente: ${customer}`,
+                  tag: `trial-${updated.id}`,
+                  url: "/app/leads",
+                }, { event: "trial_generated" });
+              } else if (isTransitionTo("initiated_conversation")) {
+                void sendPushToUsers(recipients, {
+                  title: `🔥 Novo cliente`,
+                  body: customer,
+                  tag: `new-${updated.id}`,
+                  url: "/app/leads",
+                }, { event: "lead_new" });
+              }
+            }
+          } catch (pushErr) {
+            console.error("[push] track-event failed:", pushErr);
+          }
 
           // Dispara email para admin quando lead vira "paid" (apenas na transição)
           if (newStatus === "paid" && lead.status !== "paid") {
