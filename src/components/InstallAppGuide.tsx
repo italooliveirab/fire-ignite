@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+// updated: device-aware install guide
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Smartphone, Download, Share, PlusSquare, CheckCircle2, Apple, Chrome, AlertTriangle, MoreVertical } from "lucide-react";
