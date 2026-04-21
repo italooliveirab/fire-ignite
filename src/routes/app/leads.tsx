@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { MousePointerClick, MessageCircle, Gift, Receipt, CheckCircle2, XCircle, DollarSign, ChevronRight } from "lucide-react";
+import { MousePointerClick, MessageCircle, Gift, Receipt, CheckCircle2, XCircle, DollarSign, ChevronRight, Copy, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useAuth } from "@/lib/auth";
@@ -146,6 +148,33 @@ function MyLeads() {
                   <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1">Cliente</div>
                   <div className="font-display text-xl font-bold">{selected.customer_name ?? "Lead anônimo"}</div>
                   <div className="text-xs text-muted-foreground font-mono mt-1">{maskPhone(selected.whatsapp_number)}</div>
+                  {selected.whatsapp_number && (
+                    <div className="flex items-center gap-2 mt-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-xs"
+                        onClick={() => {
+                          navigator.clipboard.writeText(selected.whatsapp_number ?? "");
+                          toast.success("WhatsApp copiado!");
+                        }}
+                      >
+                        <Copy className="h-3 w-3 mr-1" /> Copiar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 text-xs text-emerald-400 hover:text-emerald-300 border-emerald-500/30"
+                        onClick={() => {
+                          const digits = (selected.whatsapp_number ?? "").replace(/\D/g, "");
+                          if (!digits) { toast.error("Número inválido"); return; }
+                          window.open(`https://wa.me/${digits}`, "_blank", "noopener,noreferrer");
+                        }}
+                      >
+                        <ExternalLink className="h-3 w-3 mr-1" /> Abrir WhatsApp
+                      </Button>
+                    </div>
+                  )}
                 </div>
                 <StatusBadge status={selected.status} />
               </div>
