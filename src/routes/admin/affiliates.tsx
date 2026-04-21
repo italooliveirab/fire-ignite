@@ -55,6 +55,22 @@ function AffiliatesPage() {
     staleTime: 60_000,
   });
 
+  const { data: networkMap = {} } = useQuery({
+    queryKey: ["affiliates-network-map"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("affiliate_network")
+        .select("affiliate_id, referrer:affiliates!affiliate_network_referrer_id_fkey(full_name)")
+        .eq("status", "active");
+      if (error) throw error;
+      const map: Record<string, string> = {};
+      for (const row of (data ?? []) as Array<{ affiliate_id: string; referrer: { full_name: string } | null }>) {
+        if (row.referrer?.full_name) map[row.affiliate_id] = row.referrer.full_name;
+      }
+      return map;
+    },
+  });
+
   const filtered = affiliates.filter((a) =>
     [a.full_name, a.username, a.email].some((f) => f?.toLowerCase().includes(search.toLowerCase())),
   );
@@ -131,6 +147,17 @@ function AffiliatesPage() {
                   <td className="px-5 py-3.5">
                     <div className="font-medium text-foreground">{a.full_name}</div>
                     <div className="text-xs text-muted-foreground">{a.email}</div>
+                    <div className="mt-1">
+                      {networkMap[a.id] ? (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-purple-500/30 bg-purple-500/10 px-2 py-0.5 text-[10px] font-medium text-purple-300">
+                          Rede de {networkMap[a.id]}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                          Independente
+                        </span>
+                      )}
+                    </div>
                     <InactivityBadge lastSignInAt={lastSignInMap[a.id] ?? null} />
                   </td>
                   <td className="px-5 py-3.5 hidden md:table-cell font-mono text-xs text-muted-foreground">/{a.slug}</td>
