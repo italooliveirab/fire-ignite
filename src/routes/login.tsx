@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveRoleForUser } from "@/lib/auth";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
 
@@ -34,13 +35,19 @@ function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
+      setLoading(false);
       toast.error("Credenciais inválidas", { description: error.message });
       return;
     }
+
+    const signedInUser = data.user ?? data.session?.user;
+    const resolvedRole = signedInUser ? await resolveRoleForUser(signedInUser.id) : null;
+
     toast.success("Bem-vindo de volta!");
+    const target = search.redirect || (resolvedRole === "admin" ? "/admin" : "/app");
+    nav({ to: target });
   };
 
   return (

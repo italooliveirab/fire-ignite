@@ -1,8 +1,40 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
 export type Role = "admin" | "affiliate" | null;
+
+const roleCache = new Map<string, Role>();
+const roleInflight = new Map<string, Promise<Role>>();
+
+export async function resolveRoleForUser(uid: string): Promise<Role> {
+  if (roleCache.has(uid)) return roleCache.get(uid) ?? null;
+  const inflight = roleInflight.get(uid);
+  if (inflight) return inflight;
+
+  const request = (async () => {
+    const { data, error } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", uid);
+      if (error) throw error;
+      const roles = data?.map((row) => row.role) ?? [];
+      const nextRole: Role = roles.includes("admin" as never)
+        ? "admin"
+        : roles.includes("affiliate" as never)
+          ? "affiliate"
+          : null;
+      roleCache.set(uid, nextRole);
+      return nextRole;
+    })()
+    .catch(() => null)
+    .finally(() => {
+      roleInflight.delete(uid);
+    });
+
+  roleInflight.set(uid, request);
+  return request;
+}
 
 interface AuthCtx {
   user: User | null;
@@ -21,27 +53,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<Role>(null);
   const [loading, setLoading] = useState(true);
+  const mountedRef = useRef(true);
+  const lastUserIdRef = useRef<string | null>(null);
+
+  const syncSessionState = useCallback(async (nextSession: Session | null) => {
+    setSession(nextSession);
+    setUser(nextSession?.user ?? null);
+
+    const nextUserId = nextSession?.user?.id ?? null;
+    if (!nextUserId) {
+      lastUserIdRef.current = null;
+      setRole(null);
+      setLoading(false);
+      return;
+    }
+
+    if (lastUserIdRef.current === nextUserId && roleCache.has(nextUserId)) {
+      setRole(roleCache.get(nextUserId) ?? null);
+      setLoading(false);
+      return;
+    }
+
+    lastUserIdRef.current = nextUserId;
+
+    if (roleCache.has(nextUserId)) {
+      setRole(roleCache.get(nextUserId) ?? null);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    const nextRole = await resolveRoleForUser(nextUserId);
+    if (!mountedRef.current) return;
+    setRole(nextRole);
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
-    // Listener FIRST
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
-      setSession(sess);
-      setUser(sess?.user ?? null);
-      if (sess?.user) {
-        // defer to avoid deadlock
-        setTimeout(() => fetchRole(sess.user.id), 0);
-      } else {
-        setRole(null);
-      }
+    mountedRef.current = true;
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      void syncSessionState(nextSession);
     });
 
-    // Then check existing session
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
-      if (data.session?.user) fetchRole(data.session.user.id);
-      setLoading(false);
-    });
+    void supabase.auth.getSession().then(({ data }) => syncSessionState(data.session));
 
     // Refresh session when tab regains focus (avoids silent expiry on long sessions)
     const refreshIfStale = async () => {
@@ -60,24 +114,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const interval = window.setInterval(refreshIfStale, 4 * 60 * 1000);
 
     return () => {
+      mountedRef.current = false;
       sub.subscription.unsubscribe();
       document.removeEventListener("visibilitychange", onVisible);
       window.removeEventListener("focus", refreshIfStale);
       window.clearInterval(interval);
     };
-  }, []);
-
-  const fetchRole = async (uid: string) => {
-    const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid);
-    if (data && data.length) {
-      // priorizar admin
-      const roles = data.map((r) => r.role);
-      setRole(roles.includes("admin" as never) ? "admin" : "affiliate");
-    } else {
-      setRole(null);
-    }
-    setLoading(false);
-  };
+  }, [syncSessionState]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
