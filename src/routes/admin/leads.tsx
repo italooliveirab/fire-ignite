@@ -128,17 +128,31 @@ function LeadsPage() {
             cliente: l.customer_name ?? "",
             whatsapp: l.whatsapp_number ?? "",
             afiliado: (l as { affiliates?: { full_name: string } }).affiliates?.full_name ?? "",
+            link_slug: (l as { affiliates?: { slug: string } }).affiliates?.slug ?? "",
+            afiliador: (() => {
+              const refId = referrerByAffiliate.get(l.affiliate_id);
+              return refId ? (affiliates.find((a) => a.id === refId)?.full_name ?? "") : "";
+            })(),
             produto: (l as { products?: { name: string } }).products?.name ?? "",
             status: STATUS_LABEL[l.status] ?? l.status,
+            teste_solicitado: l.trial_generated_at ? "sim" : "não",
+            cobranca_gerada: l.payment_generated_at ? "sim" : "não",
             valor: l.payment_amount ? Number(l.payment_amount).toFixed(2).replace(".", ",") : "",
+            criado_em: formatDateTime(l.created_at),
+            pago_em: l.paid_at ? formatDateTime(l.paid_at) : "",
           })), [
             { key: "data", label: "Data" },
             { key: "cliente", label: "Cliente" },
             { key: "whatsapp", label: "WhatsApp" },
             { key: "afiliado", label: "Afiliado" },
+            { key: "link_slug", label: "Link/Slug" },
+            { key: "afiliador", label: "Afiliador (rede)" },
             { key: "produto", label: "Produto" },
             { key: "status", label: "Status" },
+            { key: "teste_solicitado", label: "Teste solicitado" },
+            { key: "cobranca_gerada", label: "Cobrança gerada" },
             { key: "valor", label: "Valor (R$)" },
+            { key: "pago_em", label: "Pago em" },
           ]);
           toast.success(`${filtered.length} leads exportados`);
         }} className="border-border">
