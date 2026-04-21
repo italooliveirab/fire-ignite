@@ -98,8 +98,18 @@ function AdminNetworkRules() {
               : rules.map((r) => (
                 <tr key={r.id} className="border-b border-border/50 hover:bg-background/40">
                   <td className="px-5 py-3.5 font-medium">{r.name}</td>
-                  <td className="px-5 py-3.5 text-xs text-muted-foreground">
-                    {r.product_id ? productMap.get(r.product_id) ?? "—" : <span className="italic">Global (default)</span>}
+                  <td className="px-5 py-3.5 text-xs">
+                    {r.product_id ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-500/30 bg-orange-500/10 px-2 py-0.5 font-medium text-orange-300">
+                        <span className="h-1.5 w-1.5 rounded-full bg-orange-400" />
+                        {productMap.get(r.product_id) ?? "Produto removido"}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-500/30 bg-blue-500/10 px-2 py-0.5 font-medium text-blue-300">
+                        <span className="h-1.5 w-1.5 rounded-full bg-blue-400" />
+                        Global (todos os produtos)
+                      </span>
+                    )}
                   </td>
                   <td className="px-5 py-3.5 text-xs">
                     <span className="font-mono">{r.seller_commission_type === "percentage" ? `${r.seller_commission_value}%` : `R$ ${r.seller_commission_value}`}</span>
