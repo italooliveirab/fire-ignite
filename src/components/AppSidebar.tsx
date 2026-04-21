@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useId } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   LayoutDashboard, Users, Target, DollarSign, Banknote, Settings, FileCode2,
@@ -44,6 +44,7 @@ const affiliateNav = [
 
 function usePendingRequestsCount(enabled: boolean) {
   const qc = useQueryClient();
+  const channelId = useId();
   const { data = 0 } = useQuery({
     queryKey: ["pending-requests-count"],
     enabled,
@@ -61,7 +62,7 @@ function usePendingRequestsCount(enabled: boolean) {
   useEffect(() => {
     if (!enabled) return;
     const channel = supabase
-      .channel("sidebar-affiliate-products")
+      .channel(`sidebar-affiliate-products-${channelId}`)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "affiliate_products" },
@@ -72,7 +73,7 @@ function usePendingRequestsCount(enabled: boolean) {
       )
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [enabled, qc]);
+  }, [channelId, enabled, qc]);
 
   return data;
 }
