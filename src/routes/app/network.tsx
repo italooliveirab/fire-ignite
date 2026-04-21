@@ -83,6 +83,35 @@ function MyNetwork() {
   const totalEarnings = networkComm.reduce((a, c) => a + Number(c.referrer_amount), 0);
   const totalSold = networkComm.reduce((a, c) => a + Number(c.payment_amount), 0);
 
+  // Leads de toda a minha rede (indicados) — para métricas de desempenho/funil
+  const memberIds = members.map((m) => m.affiliate_id);
+  const { data: networkLeads = [] } = useQuery({
+    queryKey: ["my-network-leads", affiliate?.id, memberIds.join(",")],
+    enabled: !!affiliate?.id && memberIds.length > 0,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("leads")
+        .select("id, affiliate_id, status, payment_amount, created_at, paid_at")
+        .in("affiliate_id", memberIds)
+        .order("created_at", { ascending: false });
+      return data ?? [];
+    },
+  });
+
+  const totalLeads = networkLeads.length;
+  const totalPaidLeads = networkLeads.filter((l) => l.status === "paid").length;
+  const conversionRate = totalLeads > 0 ? (totalPaidLeads / totalLeads) * 100 : 0;
+
+  // Métricas por indicado (ranking)
+  const memberStats = members.map((m) => {
+    const leads = networkLeads.filter((l) => l.affiliate_id === m.affiliate_id);
+    const paidLeads = leads.filter((l) => l.status === "paid");
+    const sold = paidLeads.reduce((a, l) => a + Number(l.payment_amount ?? 0), 0);
+    const myCommission = networkComm.filter((c) => c.seller_affiliate_id === m.affiliate_id).reduce((a, c) => a + Number(c.referrer_amount), 0);
+    const conv = leads.length > 0 ? (paidLeads.length / leads.length) * 100 : 0;
+    return { ...m, leadsCount: leads.length, paidCount: paidLeads.length, sold, myCommission, conv };
+  }).sort((a, b) => b.myCommission - a.myCommission);
+
   // Realtime: atualiza ao vivo quando alguém entra na minha rede ou gera comissão
   useEffect(() => {
     if (!affiliate?.id) return;
