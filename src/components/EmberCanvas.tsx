@@ -5,7 +5,7 @@ import { fireEvents } from "@/lib/fire-events";
  * Performant canvas of floating ember particles. Subtle, fixed background.
  * Auto-pauses if reduced motion is preferred or tab is hidden.
  */
-export function EmberCanvas({ density = 50, className }: { density?: number; className?: string }) {
+export function EmberCanvas({ density = 25, className }: { density?: number; className?: string }) {
   const ref = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -19,8 +19,11 @@ export function EmberCanvas({ density = 50, className }: { density?: number; cla
 
     // Mobile-friendly: cap DPR and density to keep 60fps on low-end devices
     const isMobile = window.matchMedia?.("(max-width: 768px)").matches;
-    const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2);
-    const effectiveDensity = isMobile ? Math.round(density * 0.45) : density;
+    const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1 : 1.5);
+    const effectiveDensity = isMobile ? Math.round(density * 0.35) : density;
+    // Throttle to ~30fps to dramatically reduce CPU on low-end devices
+    const FRAME_INTERVAL = 1000 / 30;
+    let lastFrame = 0;
     let width = 0;
     let height = 0;
 
@@ -80,7 +83,12 @@ export function EmberCanvas({ density = 50, className }: { density?: number; cla
     let raf = 0;
     let running = true;
 
-    const tick = () => {
+    const tick = (now: number = 0) => {
+      if (now - lastFrame < FRAME_INTERVAL) {
+        if (running) raf = requestAnimationFrame(tick);
+        return;
+      }
+      lastFrame = now;
       ctx.clearRect(0, 0, width, height);
       ctx.globalCompositeOperation = "lighter";
       // Steady ambient particles

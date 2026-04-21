@@ -8,6 +8,8 @@ export function ClickSpark() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    // Skip on mobile/touch devices for performance
+    if (window.matchMedia?.("(hover: none), (max-width: 768px)").matches) return;
 
     const handler = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;

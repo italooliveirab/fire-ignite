@@ -16,8 +16,8 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
-  const { loading } = useAuth();
-  if (loading) return <FireLoader label="Iniciando o FIRE..." />;
+  // Don't block the landing on auth — render immediately for fast LCP
+  useAuth();
   return (
     <div className="min-h-screen relative overflow-hidden">
       <div className="absolute inset-0 -z-10">
