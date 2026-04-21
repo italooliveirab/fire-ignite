@@ -737,6 +737,7 @@ export type Database = {
           is_active: boolean
           media_kit_url: string | null
           name: string
+          product_type: Database["public"]["Enums"]["product_kind"]
           slug: string
           updated_at: string
         }
@@ -747,6 +748,7 @@ export type Database = {
           is_active?: boolean
           media_kit_url?: string | null
           name: string
+          product_type?: Database["public"]["Enums"]["product_kind"]
           slug: string
           updated_at?: string
         }
@@ -757,6 +759,7 @@ export type Database = {
           is_active?: boolean
           media_kit_url?: string | null
           name?: string
+          product_type?: Database["public"]["Enums"]["product_kind"]
           slug?: string
           updated_at?: string
         }
@@ -887,6 +890,7 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_network_member: { Args: { _affiliate_id: string }; Returns: boolean }
       mark_payout_paid: {
         Args: {
           _amount_paid: number
@@ -919,6 +923,7 @@ export type Database = {
       payout_frequency: "weekly" | "biweekly" | "monthly"
       payout_status: "requested" | "approved" | "paid" | "rejected"
       pix_type: "cpf" | "cnpj" | "email" | "phone" | "random"
+      product_kind: "normal" | "network"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1063,6 +1068,7 @@ export const Constants = {
       payout_frequency: ["weekly", "biweekly", "monthly"],
       payout_status: ["requested", "approved", "paid", "rejected"],
       pix_type: ["cpf", "cnpj", "email", "phone", "random"],
+      product_kind: ["normal", "network"],
     },
   },
 } as const
