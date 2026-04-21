@@ -1,7 +1,7 @@
 // Server-only helpers (not server functions) for lead-related notifications.
 // Kept separate from notifications.ts so client bundles importing server functions
 // don't pull nodemailer through tree-shaking edge cases.
-import { sendEmail, renderEmail } from "./email";
+import { sendEmail, renderEmail, getEmailBranding } from "./email";
 
 export async function notifyAdminLeadPaid(opts: {
   customer_name?: string | null;
@@ -17,6 +17,7 @@ export async function notifyAdminLeadPaid(opts: {
     return { ok: false, error: "ADMIN_NOTIFICATION_EMAIL not configured" };
   }
   const valor = opts.amount != null ? `R$ ${Number(opts.amount).toFixed(2).replace(".", ",")}` : "—";
+  const brand = await getEmailBranding();
   const body = `
     <p>🎉 Um novo pagamento foi confirmado!</p>
     <table style="width:100%;border-collapse:collapse;margin:16px 0">
@@ -34,6 +35,10 @@ export async function notifyAdminLeadPaid(opts: {
       title: "Nova venda confirmada",
       preheader: `Pagamento de ${valor} recebido`,
       bodyHtml: body,
+      highlightAmount: valor,
+      highlightLabel: "Valor da venda",
+      logoUrl: brand.logoUrl,
+      companyName: brand.companyName,
       ctaUrl: "https://firefly-affiliates.lovable.app/admin/leads",
       ctaLabel: "Ver no painel",
     }),
@@ -52,6 +57,7 @@ export async function notifyAffiliateLeadPaid(opts: {
 }) {
   const valor = opts.payment_amount != null ? `R$ ${Number(opts.payment_amount).toFixed(2).replace(".", ",")}` : "—";
   const comissao = opts.commission_amount != null ? `R$ ${Number(opts.commission_amount).toFixed(2).replace(".", ",")}` : "—";
+  const brand = await getEmailBranding();
   const body = `
     <p>Olá <b>${opts.affiliate_name ?? "afiliado(a)"}</b>, ótima notícia! 🎉</p>
     <p>Uma das suas indicações acabou de ser confirmada como <b>paga</b>.</p>
@@ -70,6 +76,10 @@ export async function notifyAffiliateLeadPaid(opts: {
       title: "Nova comissão confirmada",
       preheader: `Comissão de ${comissao} liberada`,
       bodyHtml: body,
+      highlightAmount: comissao,
+      highlightLabel: "Sua comissão",
+      logoUrl: brand.logoUrl,
+      companyName: brand.companyName,
       ctaUrl: "https://firefly-affiliates.lovable.app/app/commissions",
       ctaLabel: "Ver minhas comissões",
     }),
