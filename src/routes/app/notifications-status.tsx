@@ -267,6 +267,24 @@ function StatusPage() {
             <p className="text-xs text-muted-foreground">{resyncMsg}</p>
           )}
 
+          {lastApiResponse && (
+            <div className={`rounded-lg border p-3 text-xs space-y-1 ${lastApiResponse.ok ? "border-green-500/40 bg-green-500/5" : "border-red-500/40 bg-red-500/5"}`}>
+              <p className="font-semibold">
+                Última resposta de POST /api/push/subscribe
+                <span className="ml-2 text-muted-foreground font-normal">{lastApiResponse.at}</span>
+              </p>
+              <p><b>Status HTTP:</b> {lastApiResponse.status || "(sem resposta)"}</p>
+              {lastApiResponse.error && <p><b>error:</b> {lastApiResponse.error}</p>}
+              {lastApiResponse.detail && <p><b>detail:</b> {lastApiResponse.detail}</p>}
+              {lastApiResponse.raw && (
+                <details>
+                  <summary className="cursor-pointer text-muted-foreground">Corpo bruto</summary>
+                  <pre className="mt-1 overflow-auto bg-background/60 p-2 rounded">{lastApiResponse.raw}</pre>
+                </details>
+              )}
+            </div>
+          )}
+
           <Button variant="outline" className="w-full" onClick={() => { unlockAudio(); playCoinSound(); toast.success("💰 Som de venda"); }}>
             <Volume2 className="h-4 w-4 mr-2" />Ouvir som de venda
           </Button>
