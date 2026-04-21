@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { fireEvents } from "@/lib/fire-events";
 
 const STORAGE_KEY = "fire_campfire_sound";
 
@@ -94,6 +95,9 @@ export function CampfireSound() {
         for (let i = 0; i < pops; i++) {
           const t = now + i * (0.02 + Math.random() * 0.05);
           createPop(ctxRef.current, masterRef.current, t);
+          // Fire a visual spark in sync with each pop's onset time
+          const lead = Math.max(0, (t - now) * 1000);
+          window.setTimeout(() => fireEvents.emitCrackle(), lead);
         }
 
         // Next crackle in 180–900ms
@@ -148,7 +152,9 @@ export function CampfireSound() {
       aria-label={enabled ? "Desligar som de fogueira" : "Ligar som de fogueira"}
       title={enabled ? "Som de fogueira: ligado" : "Som de fogueira: ligado em silêncio — clique para ativar"}
       className={cn(
-        "fixed bottom-5 right-5 z-50 h-11 w-11 rounded-full border backdrop-blur-xl",
+        "fixed z-50 h-11 w-11 rounded-full border backdrop-blur-xl",
+        // Safe-area friendly position (notch / home indicator on iOS)
+        "right-4 bottom-[max(1rem,env(safe-area-inset-bottom,0))] md:right-5 md:bottom-5",
         "flex items-center justify-center shadow-card-premium transition-all",
         enabled
           ? "bg-primary/15 border-primary/50 text-primary shadow-fire"

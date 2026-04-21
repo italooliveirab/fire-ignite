@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { fireEvents } from "@/lib/fire-events";
 
 /**
  * Performant canvas of floating ember particles. Subtle, fixed background.
@@ -16,7 +17,10 @@ export function EmberCanvas({ density = 50, className }: { density?: number; cla
     const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     if (reduced) return;
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // Mobile-friendly: cap DPR and density to keep 60fps on low-end devices
+    const isMobile = window.matchMedia?.("(max-width: 768px)").matches;
+    const dpr = Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2);
+    const effectiveDensity = isMobile ? Math.round(density * 0.45) : density;
     let width = 0;
     let height = 0;
 
@@ -34,27 +38,43 @@ export function EmberCanvas({ density = 50, className }: { density?: number; cla
     type Particle = {
       x: number; y: number; vx: number; vy: number;
       r: number; life: number; maxLife: number; hue: number;
+      burst?: boolean;
     };
 
-    const spawn = (): Particle => {
+    const spawn = (originX?: number, originY?: number, burst = false): Particle => {
       const hueChoices = [18, 28, 38, 45]; // ember oranges/golds
       return {
-        x: Math.random() * width,
-        y: height + Math.random() * 40,
-        vx: (Math.random() - 0.5) * 0.25,
-        vy: -(0.25 + Math.random() * 0.6),
-        r: 0.6 + Math.random() * 1.6,
+        x: originX ?? Math.random() * width,
+        y: originY ?? height + Math.random() * 40,
+        vx: burst ? (Math.random() - 0.5) * 1.6 : (Math.random() - 0.5) * 0.25,
+        vy: burst ? -(0.6 + Math.random() * 1.6) : -(0.25 + Math.random() * 0.6),
+        r: burst ? 1.0 + Math.random() * 1.8 : 0.6 + Math.random() * 1.6,
         life: 0,
-        maxLife: 220 + Math.random() * 380,
+        maxLife: burst ? 80 + Math.random() * 140 : 220 + Math.random() * 380,
         hue: hueChoices[Math.floor(Math.random() * hueChoices.length)],
+        burst,
       };
     };
 
-    const particles: Particle[] = Array.from({ length: density }, () => {
+    const particles: Particle[] = Array.from({ length: effectiveDensity }, () => {
       const p = spawn();
       p.y = Math.random() * height;
       p.life = Math.random() * p.maxLife;
       return p;
+    });
+    // Transient burst sparks (spawned by audio crackles), pruned on death
+    const burstParticles: Particle[] = [];
+    const MAX_BURSTS = isMobile ? 60 : 140;
+
+    const unsubscribe = fireEvents.on((x, y) => {
+      // Default burst origin: bottom band, random X
+      const ox = x ?? Math.random() * width;
+      const oy = y ?? height - 30 - Math.random() * Math.min(140, height * 0.25);
+      const count = isMobile ? 4 + Math.floor(Math.random() * 3) : 6 + Math.floor(Math.random() * 5);
+      for (let i = 0; i < count; i++) {
+        if (burstParticles.length >= MAX_BURSTS) break;
+        burstParticles.push(spawn(ox + (Math.random() - 0.5) * 18, oy, true));
+      }
     });
 
     let raf = 0;
@@ -63,6 +83,7 @@ export function EmberCanvas({ density = 50, className }: { density?: number; cla
     const tick = () => {
       ctx.clearRect(0, 0, width, height);
       ctx.globalCompositeOperation = "lighter";
+      // Steady ambient particles
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
         p.life += 1;
@@ -72,20 +93,21 @@ export function EmberCanvas({ density = 50, className }: { density?: number; cla
           particles[i] = spawn();
           continue;
         }
-        const lifeRatio = p.life / p.maxLife;
-        const alpha =
-          lifeRatio < 0.15 ? lifeRatio / 0.15 :
-          lifeRatio > 0.7 ? Math.max(0, 1 - (lifeRatio - 0.7) / 0.3) :
-          1;
-        const a = alpha * 0.55;
-        const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 6);
-        grad.addColorStop(0, `hsla(${p.hue}, 100%, 65%, ${a})`);
-        grad.addColorStop(0.4, `hsla(${p.hue}, 100%, 50%, ${a * 0.4})`);
-        grad.addColorStop(1, `hsla(${p.hue}, 100%, 40%, 0)`);
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r * 6, 0, Math.PI * 2);
-        ctx.fill();
+        drawParticle(ctx, p, 0.55);
+      }
+      // Transient bursts (audio-synced) — drawn brighter
+      for (let i = burstParticles.length - 1; i >= 0; i--) {
+        const p = burstParticles[i];
+        p.life += 1;
+        // Slight gravity slowdown so they arc upward then fade
+        p.vy += 0.012;
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.life >= p.maxLife || p.y < -10) {
+          burstParticles.splice(i, 1);
+          continue;
+        }
+        drawParticle(ctx, p, 0.95);
       }
       if (running) raf = requestAnimationFrame(tick);
     };
@@ -106,6 +128,7 @@ export function EmberCanvas({ density = 50, className }: { density?: number; cla
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", onVisibility);
+      unsubscribe();
     };
   }, [density]);
 
@@ -119,4 +142,25 @@ export function EmberCanvas({ density = 50, className }: { density?: number; cla
       }
     />
   );
+}
+
+function drawParticle(
+  ctx: CanvasRenderingContext2D,
+  p: { x: number; y: number; r: number; life: number; maxLife: number; hue: number },
+  intensity: number,
+) {
+  const lifeRatio = p.life / p.maxLife;
+  const alpha =
+    lifeRatio < 0.15 ? lifeRatio / 0.15 :
+    lifeRatio > 0.7 ? Math.max(0, 1 - (lifeRatio - 0.7) / 0.3) :
+    1;
+  const a = alpha * intensity;
+  const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 6);
+  grad.addColorStop(0, `hsla(${p.hue}, 100%, 70%, ${a})`);
+  grad.addColorStop(0.4, `hsla(${p.hue}, 100%, 50%, ${a * 0.4})`);
+  grad.addColorStop(1, `hsla(${p.hue}, 100%, 40%, 0)`);
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, p.r * 6, 0, Math.PI * 2);
+  ctx.fill();
 }
