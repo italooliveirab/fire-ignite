@@ -29,6 +29,7 @@ import { Route as AppLinkRouteImport } from './routes/app/link'
 import { Route as AppLeadsRouteImport } from './routes/app/leads'
 import { Route as AppCommissionsRouteImport } from './routes/app/commissions'
 import { Route as ApiTrackEventRouteImport } from './routes/api.track-event'
+import { Route as ApiStatsRouteImport } from './routes/api.stats'
 import { Route as ApiProductsRouteImport } from './routes/api.products'
 import { Route as ApiLeadsRouteImport } from './routes/api.leads'
 import { Route as ApiAffiliatesRouteImport } from './routes/api.affiliates'
@@ -150,6 +151,11 @@ const AppCommissionsRoute = AppCommissionsRouteImport.update({
 const ApiTrackEventRoute = ApiTrackEventRouteImport.update({
   id: '/api/track-event',
   path: '/api/track-event',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStatsRoute = ApiStatsRouteImport.update({
+  id: '/api/stats',
+  path: '/api/stats',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiProductsRoute = ApiProductsRouteImport.update({
@@ -285,6 +291,7 @@ export interface FileRoutesByFullPath {
   '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
   '/api/leads': typeof ApiLeadsRouteWithChildren
   '/api/products': typeof ApiProductsRoute
+  '/api/stats': typeof ApiStatsRoute
   '/api/track-event': typeof ApiTrackEventRoute
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
@@ -328,6 +335,7 @@ export interface FileRoutesByTo {
   '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
   '/api/leads': typeof ApiLeadsRouteWithChildren
   '/api/products': typeof ApiProductsRoute
+  '/api/stats': typeof ApiStatsRoute
   '/api/track-event': typeof ApiTrackEventRoute
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
@@ -372,6 +380,7 @@ export interface FileRoutesById {
   '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
   '/api/leads': typeof ApiLeadsRouteWithChildren
   '/api/products': typeof ApiProductsRoute
+  '/api/stats': typeof ApiStatsRoute
   '/api/track-event': typeof ApiTrackEventRoute
   '/app/commissions': typeof AppCommissionsRoute
   '/app/leads': typeof AppLeadsRoute
@@ -417,6 +426,7 @@ export interface FileRouteTypes {
     | '/api/affiliates'
     | '/api/leads'
     | '/api/products'
+    | '/api/stats'
     | '/api/track-event'
     | '/app/commissions'
     | '/app/leads'
@@ -460,6 +470,7 @@ export interface FileRouteTypes {
     | '/api/affiliates'
     | '/api/leads'
     | '/api/products'
+    | '/api/stats'
     | '/api/track-event'
     | '/app/commissions'
     | '/app/leads'
@@ -503,6 +514,7 @@ export interface FileRouteTypes {
     | '/api/affiliates'
     | '/api/leads'
     | '/api/products'
+    | '/api/stats'
     | '/api/track-event'
     | '/app/commissions'
     | '/app/leads'
@@ -547,6 +559,7 @@ export interface RootRouteChildren {
   ApiAffiliatesRoute: typeof ApiAffiliatesRouteWithChildren
   ApiLeadsRoute: typeof ApiLeadsRouteWithChildren
   ApiProductsRoute: typeof ApiProductsRoute
+  ApiStatsRoute: typeof ApiStatsRoute
   ApiTrackEventRoute: typeof ApiTrackEventRoute
   AppCommissionsRoute: typeof AppCommissionsRoute
   AppLeadsRoute: typeof AppLeadsRoute
@@ -703,6 +716,13 @@ declare module '@tanstack/react-router' {
       path: '/api/track-event'
       fullPath: '/api/track-event'
       preLoaderRoute: typeof ApiTrackEventRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/stats': {
+      id: '/api/stats'
+      path: '/api/stats'
+      fullPath: '/api/stats'
+      preLoaderRoute: typeof ApiStatsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/products': {
@@ -905,6 +925,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAffiliatesRoute: ApiAffiliatesRouteWithChildren,
   ApiLeadsRoute: ApiLeadsRouteWithChildren,
   ApiProductsRoute: ApiProductsRoute,
+  ApiStatsRoute: ApiStatsRoute,
   ApiTrackEventRoute: ApiTrackEventRoute,
   AppCommissionsRoute: AppCommissionsRoute,
   AppLeadsRoute: AppLeadsRoute,
