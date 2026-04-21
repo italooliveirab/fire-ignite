@@ -17,7 +17,16 @@ function StatusPage() {
   const { user } = useAuth();
   const push = useWebPush();
   const [serverSubs, setServerSubs] = useState<number | null>(null);
-  const [swActive, setSwActive] = useState<boolean>(false);
+  const [swInfo, setSwInfo] = useState<{
+    registered: boolean;
+    ready: boolean;
+    scope?: string;
+    scriptURL?: string;
+    state?: string; // installing | waiting | active
+    hasController: boolean;
+    updateChecked: boolean;
+    error?: string;
+  }>({ registered: false, ready: false, hasController: false, updateChecked: false });
   const [serverSubError, setServerSubError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [resyncing, setResyncing] = useState(false);
@@ -56,9 +65,41 @@ function StatusPage() {
   useEffect(() => {
     let alive = true;
     if (typeof navigator === "undefined") return;
-    navigator.serviceWorker?.getRegistration("/sw.js").then((reg) => {
-      if (alive) setSwActive(!!reg?.active);
-    });
+    (async () => {
+      try {
+        const reg = await navigator.serviceWorker?.getRegistration("/sw.js");
+        if (!alive) return;
+        if (!reg) {
+          setSwInfo({ registered: false, ready: false, hasController: false, updateChecked: false });
+          return;
+        }
+        const sw = reg.active || reg.waiting || reg.installing;
+        // Tenta forçar checagem de update (não bloqueia se falhar)
+        let updateChecked = false;
+        try { await reg.update(); updateChecked = true; } catch { /* noop */ }
+        // Aguarda ready (com timeout) para confirmar que o SW está controlando
+        let ready = false;
+        try {
+          await Promise.race([
+            navigator.serviceWorker.ready.then(() => { ready = true; }),
+            new Promise((res) => setTimeout(res, 1500)),
+          ]);
+        } catch { /* noop */ }
+        if (!alive) return;
+        setSwInfo({
+          registered: true,
+          ready,
+          scope: reg.scope,
+          scriptURL: sw?.scriptURL,
+          state: sw?.state,
+          hasController: !!navigator.serviceWorker.controller,
+          updateChecked,
+        });
+      } catch (e) {
+        if (!alive) return;
+        setSwInfo({ registered: false, ready: false, hasController: false, updateChecked: false, error: (e as Error).message });
+      }
+    })();
     if (user) {
       supabase.from("push_subscriptions").select("id, endpoint, created_at", { count: "exact" }).eq("user_id", user.id)
         .then(({ data, count, error }) => {
@@ -74,6 +115,8 @@ function StatusPage() {
     }
     return () => { alive = false; };
   }, [user, refreshKey, push.subscribed]);
+
+  const swActive = swInfo.registered && swInfo.state === "activated";
 
   // Validar /api/push/vapid-key (status, presença e formato base64url)
   useEffect(() => {
@@ -198,10 +241,18 @@ function StatusPage() {
         : undefined,
     },
     {
-      ok: swActive,
+      ok: swActive ? true : swInfo.registered ? "warn" : false,
       label: "Service Worker ativo",
-      detail: swActive ? "Registrado em /sw.js" : "Não registrado neste dispositivo",
-      fix: !swActive ? "Clique em 'Ativar neste dispositivo' abaixo" : undefined,
+      detail: !swInfo.registered
+        ? (swInfo.error ? `Erro: ${swInfo.error}` : "Não registrado neste dispositivo")
+        : `state=${swInfo.state ?? "?"} · ready=${swInfo.ready ? "sim" : "não"} · controller=${swInfo.hasController ? "sim" : "não"} · scope=${swInfo.scope ?? "?"} · script=${swInfo.scriptURL?.split("/").pop() ?? "?"}${swInfo.updateChecked ? " · update OK" : " · update falhou"}`,
+      fix: !swInfo.registered
+        ? "Clique em 'Ativar neste dispositivo' abaixo para registrar /sw.js"
+        : !swActive
+          ? `Service Worker registrado mas não ativo (state=${swInfo.state ?? "?"}). Recarregue a página; se persistir, desative e ative novamente, ou limpe os dados do site no navegador. Push NÃO funcionará enquanto o SW não estiver 'activated'.`
+          : !swInfo.hasController
+            ? "SW ativo mas ainda não controla a página — recarregue uma vez para que o controller assuma."
+            : undefined,
     },
     {
       ok: vapid.status === "loading" ? "warn" : vapid.status === "ok",
@@ -275,6 +326,22 @@ function StatusPage() {
             </div>
           </div>
         </div>
+
+        {/* Aviso destacado quando SW não está ativo */}
+        {!swActive && (
+          <div className="rounded-2xl border border-red-500/40 bg-red-500/5 p-4 shadow-card-premium flex items-start gap-3">
+            <XCircle className="h-5 w-5 text-red-500 mt-0.5 shrink-0" />
+            <div className="text-sm">
+              <p className="font-display font-semibold">Service Worker não está ativo</p>
+              <p className="text-muted-foreground mt-1">
+                Push notifications NÃO funcionam sem um Service Worker em estado <code className="px-1 rounded bg-background/60">activated</code>.
+                {swInfo.registered
+                  ? ` Estado atual: ${swInfo.state ?? "desconhecido"} (ready=${swInfo.ready ? "sim" : "não"}). Recarregue a página ou desative e ative novamente.`
+                  : " Toque em 'Ativar neste dispositivo' para registrar /sw.js."}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Checklist */}
         <div className="rounded-2xl border border-border bg-card p-5 shadow-card-premium space-y-3">
@@ -432,7 +499,8 @@ function StatusPage() {
   supported: push.supported,
   subscribed: push.subscribed,
   serverSubs,
-  swActive,
+  serviceWorker: swInfo,
+  vapid: { status: vapid.status, httpStatus: vapid.httpStatus, length: vapid.length, formatOk: vapid.formatOk },
   userAgent: ua.slice(0, 200),
 }, null, 2)}
           </pre>
