@@ -273,3 +273,11 @@ function Stat({ number, label }: { number: string; label: string }) {
     </div>
   );
 }
+
+function ClientDate() {
+  const [date, setDate] = useState<string>("");
+  useEffect(() => {
+    setDate(new Date().toLocaleDateString("pt-BR"));
+  }, []);
+  return <span className="text-foreground">{date || "—"}</span>;
+}
