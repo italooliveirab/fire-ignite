@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { Mail, Lock, ArrowRight } from "lucide-react";
+import { Mail, Lock, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
 import { BrandMark } from "@/components/BrandMark";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState<0 | 1 | 2 | 3>(0);
   const nav = useNavigate();
   const { user, role } = useAuth();
   const search = Route.useSearch();
@@ -35,18 +36,30 @@ function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setStep(1);
+    const t0 = performance.now();
+    console.log("[login] start");
+
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const t1 = performance.now();
+    console.log(`[login] auth done in ${(t1 - t0).toFixed(0)}ms`);
     if (error) {
       setLoading(false);
+      setStep(0);
       toast.error("Credenciais inválidas", { description: error.message });
       return;
     }
 
+    setStep(2);
     const signedInUser = data.user ?? data.session?.user;
     const resolvedRole = signedInUser ? await resolveRoleForUser(signedInUser.id) : null;
+    const t2 = performance.now();
+    console.log(`[login] role resolved in ${(t2 - t1).toFixed(0)}ms (role=${resolvedRole})`);
 
+    setStep(3);
     toast.success("Bem-vindo de volta!");
     const target = search.redirect || (resolvedRole === "admin" ? "/admin" : "/app");
+    console.log(`[login] redirecting to ${target} (total ${(performance.now() - t0).toFixed(0)}ms)`);
     nav({ to: target });
   };
 
@@ -91,9 +104,26 @@ function LoginPage() {
             </div>
 
             <Button type="submit" disabled={loading} className="w-full h-11 bg-gradient-fire shadow-fire hover:opacity-90 text-white font-semibold">
-              {loading ? "Entrando..." : <>Entrar <ArrowRight className="ml-2 h-4 w-4" /></>}
+              {loading ? (
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {step === 1 && "Autenticando..."}
+                  {step === 2 && "Verificando permissão..."}
+                  {step === 3 && "Redirecionando..."}
+                </span>
+              ) : (
+                <>Entrar <ArrowRight className="ml-2 h-4 w-4" /></>
+              )}
             </Button>
           </form>
+
+          {loading && (
+            <ul className="mt-4 space-y-2 text-xs">
+              <StepLine active={step >= 1} done={step > 1} label="Autenticando credenciais" />
+              <StepLine active={step >= 2} done={step > 2} label="Verificando permissão de acesso" />
+              <StepLine active={step >= 3} done={false} label="Redirecionando ao painel" />
+            </ul>
+          )}
 
           <div className="mt-4 text-right">
             <Link to="/forgot-password" className="text-xs text-muted-foreground hover:text-primary transition">
@@ -117,5 +147,20 @@ function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+function StepLine({ active, done, label }: { active: boolean; done: boolean; label: string }) {
+  return (
+    <li className={`flex items-center gap-2 transition-opacity ${active ? "opacity-100" : "opacity-40"}`}>
+      {done ? (
+        <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+      ) : active ? (
+        <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+      ) : (
+        <span className="h-3.5 w-3.5 rounded-full border border-border" />
+      )}
+      <span className={done ? "text-foreground" : "text-muted-foreground"}>{label}</span>
+    </li>
   );
 }
