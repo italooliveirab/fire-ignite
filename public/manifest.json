@@ -10,9 +10,9 @@
   "theme_color": "#ff5722",
   "categories": ["business", "finance", "productivity"],
   "icons": [
-    { "src": "/brand/fire-icon.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/brand/fire-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/brand/fire-icon.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "/brand/fire-icon.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "/brand-logo.jpg", "sizes": "192x192", "type": "image/jpeg", "purpose": "any" },
+    { "src": "/brand-logo.jpg", "sizes": "512x512", "type": "image/jpeg", "purpose": "any" },
+    { "src": "/brand-logo.jpg", "sizes": "192x192", "type": "image/jpeg", "purpose": "maskable" },
+    { "src": "/brand-logo.jpg", "sizes": "512x512", "type": "image/jpeg", "purpose": "maskable" }
   ]
 }

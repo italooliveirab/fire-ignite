@@ -1,5 +1,5 @@
-// Som de venda estilo Kiwify/Eduzz — toca um MP3 real de caixa registradora ("cha-ching").
-// Carregado de /sounds/cha-ching.mp3 (servido pelo /public).
+// Som de venda estilo Eduzz — "ding" de sino agudo curto.
+// Carregado de /sounds/sale-ding.mp3 (servido pelo /public).
 
 let coinAudio: HTMLAudioElement | null = null;
 let pingAudio: HTMLAudioElement | null = null;
@@ -8,7 +8,7 @@ let unlocked = false;
 function getCoin(): HTMLAudioElement | null {
   if (typeof window === "undefined") return null;
   if (!coinAudio) {
-    coinAudio = new Audio("/sounds/cha-ching.mp3");
+    coinAudio = new Audio("/sounds/sale-ding.mp3");
     coinAudio.preload = "auto";
     coinAudio.volume = 0.85;
   }
@@ -19,7 +19,7 @@ function getPing(): HTMLAudioElement | null {
   if (typeof window === "undefined") return null;
   if (!pingAudio) {
     // Reutiliza o mesmo arquivo em volume mais baixo para o "ping" de novo lead
-    pingAudio = new Audio("/sounds/cha-ching.mp3");
+    pingAudio = new Audio("/sounds/sale-ding.mp3");
     pingAudio.preload = "auto";
     pingAudio.volume = 0.35;
   }

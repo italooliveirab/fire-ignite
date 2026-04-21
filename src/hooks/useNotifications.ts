@@ -24,10 +24,13 @@ export function useNotifications() {
 
   // Destrava áudio na primeira interação
   useEffect(() => {
+    // Só registra o destravador de áudio quando há usuário autenticado.
+    // Evita carregar/preparar o som em telas públicas como /login e /admin/login.
+    if (!user) return;
     const fn = () => { unlockAudio(); window.removeEventListener("pointerdown", fn); };
     window.addEventListener("pointerdown", fn, { once: true });
     return () => window.removeEventListener("pointerdown", fn);
-  }, []);
+  }, [user]);
 
   // Carrega prefs + identidade do usuário
   useEffect(() => {
