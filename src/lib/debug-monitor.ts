@@ -63,7 +63,7 @@ export async function flushDebug() {
     route: e.route ?? route,
     user_id: currentUserId,
     user_email: currentUserEmail,
-    context: e.context ?? null,
+    context: (e.context ?? null) as never,
   }));
   try {
     await supabase.from("debug_events").insert(rows);
