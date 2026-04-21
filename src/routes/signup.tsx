@@ -112,7 +112,7 @@ function SignupPage() {
 
       <div className="w-full max-w-md">
         <Link to="/" className="flex justify-center mb-8">
-          <BrandMark size="lg" subtitle="Afiliados" />
+          <BrandMark size="lg" subtitle="Afiliados" animated />
         </Link>
 
         <div className="rounded-2xl border border-border bg-card/80 backdrop-blur-xl p-8 shadow-card-premium">

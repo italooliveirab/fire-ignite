@@ -14,27 +14,41 @@ export function BrandMark({
   size = "md",
   subtitle,
   className,
+  animated = false,
 }: {
   size?: Size;
   subtitle?: string;
   className?: string;
+  /** When true, applies the FireLoader flame animation + ember sparks. */
+  animated?: boolean;
 }) {
   const { logoUrl, companyName } = useBrand();
   const s = sizes[size];
 
   return (
     <div className={cn("flex items-center gap-2.5", className)}>
-      {logoUrl ? (
-        <div className={cn(s.box, "bg-card border border-border flex items-center justify-center overflow-hidden shrink-0")}>
-          <img src={logoUrl} alt={`${companyName} logo`} className="h-full w-full object-contain p-1" />
-        </div>
-      ) : (
-        <div className={cn(s.box, "bg-gradient-fire flex items-center justify-center shadow-fire shrink-0")}>
-          <Flame className={cn(s.icon, "text-white")} strokeWidth={2.5} />
-        </div>
-      )}
+      <div className="relative flex items-center justify-center shrink-0">
+        {animated && (
+          <>
+            <span className={cn("absolute rounded-2xl border border-primary/40 fire-pulse-ring", s.box)} />
+            <span className={cn("absolute rounded-2xl border border-primary/30 fire-pulse-ring", s.box)} style={{ animationDelay: "0.6s" }} />
+            <span className="absolute -bottom-1 left-[28%] h-1 w-1 rounded-full bg-gold fire-ember" />
+            <span className="absolute -bottom-1 left-[55%] h-[3px] w-[3px] rounded-full bg-ember fire-ember" style={{ animationDelay: "0.5s" }} />
+            <span className="absolute -bottom-1 right-[24%] h-1 w-1 rounded-full bg-primary fire-ember" style={{ animationDelay: "1s" }} />
+          </>
+        )}
+        {logoUrl ? (
+          <div className={cn(s.box, "bg-card border border-border flex items-center justify-center overflow-hidden shrink-0", animated && "fire-logo-flicker")}>
+            <img src={logoUrl} alt={`${companyName} logo`} className="h-full w-full object-contain p-1" />
+          </div>
+        ) : (
+          <div className={cn(s.box, "bg-gradient-fire flex items-center justify-center shadow-fire shrink-0", animated && "fire-logo-flicker")}>
+            <Flame className={cn(s.icon, "text-white")} strokeWidth={2.5} fill={animated ? "rgba(255,255,255,0.15)" : undefined} />
+          </div>
+        )}
+      </div>
       <div className="min-w-0">
-        <div className={cn("font-display font-bold leading-none text-foreground truncate", s.title)}>{companyName}</div>
+        <div className={cn("font-display font-bold leading-none truncate", s.title, animated ? "fire-shimmer" : "text-foreground")}>{companyName}</div>
         {subtitle && (
           <div className={cn("uppercase tracking-[0.25em] text-muted-foreground mt-0.5", s.sub)}>{subtitle}</div>
         )}

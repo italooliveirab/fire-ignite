@@ -73,10 +73,10 @@ function AdminDashboard() {
       ) : (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-            <StatCard label="Faturamento total" value={formatBRL(stats.revenue)} icon={TrendingUp} accent="fire" />
-            <StatCard label="Taxa de conversão" value={`${stats.conversion.toFixed(1)}%`} icon={Percent} accent="gold" />
-            <StatCard label="Comissão paga" value={formatBRL(stats.commPaid)} icon={Banknote} accent="success" />
-            <StatCard label="Comissão pendente" value={formatBRL(stats.commPending)} icon={Clock} accent="warning" />
+            <StatCard variant="premium" label="Faturamento total" value={formatBRL(stats.revenue)} icon={TrendingUp} accent="fire" />
+            <StatCard variant="premium" label="Taxa de conversão" value={`${stats.conversion.toFixed(1)}%`} icon={Percent} accent="gold" />
+            <StatCard variant="premium" label="Comissão paga" value={formatBRL(stats.commPaid)} icon={Banknote} accent="success" />
+            <StatCard variant="premium" label="Comissão pendente" value={formatBRL(stats.commPending)} icon={Clock} accent="warning" />
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
