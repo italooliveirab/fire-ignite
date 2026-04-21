@@ -216,7 +216,7 @@ function LeadsPage() {
         </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar..." className="pl-10 bg-card" />
@@ -246,7 +246,30 @@ function LeadsPage() {
             {products.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
           </SelectContent>
         </Select>
-        <div className="flex gap-2">
+        <Select value={referrerFilter} onValueChange={setReferrerFilter}>
+          <SelectTrigger className="bg-card"><SelectValue placeholder="Afiliador (rede)" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Todos afiliadores</SelectItem>
+            {affiliates
+              .filter((a) => Array.from(referrerByAffiliate.values()).includes(a.id))
+              .map((a) => <SelectItem key={a.id} value={a.id}>{a.full_name}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={trialFilter} onValueChange={setTrialFilter}>
+          <SelectTrigger className="bg-card"><SelectValue placeholder="Teste solicitado" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Teste: todos</SelectItem>
+            <SelectItem value="yes">Teste solicitado</SelectItem>
+            <SelectItem value="no">Sem teste</SelectItem>
+          </SelectContent>
+        </Select>
+        <Input
+          value={linkSlug}
+          onChange={(e) => setLinkSlug(e.target.value)}
+          placeholder="Origem do link (slug)..."
+          className="bg-card"
+        />
+        <div className="flex gap-2 sm:col-span-2 lg:col-span-1">
           <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="bg-card" />
           <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="bg-card" />
         </div>
