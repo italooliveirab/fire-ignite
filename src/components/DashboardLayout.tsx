@@ -6,8 +6,11 @@ import { AppSidebar } from "./AppSidebar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { FireLoader } from "./FireLoader";
-import { EmberCanvas } from "./EmberCanvas";
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
+
+const EmberCanvas = lazy(() =>
+  import("./EmberCanvas").then((m) => ({ default: m.EmberCanvas })),
+);
 
 interface Props {
   variant: "admin" | "affiliate";
@@ -39,7 +42,9 @@ export function DashboardLayout({ variant, title, children }: Props) {
 
   return (
     <div className="min-h-screen flex">
-      <EmberCanvas density={20} />
+      <Suspense fallback={null}>
+        <EmberCanvas density={20} />
+      </Suspense>
       <AppSidebar variant={variant} />
 
       <div className="flex-1 flex flex-col min-w-0">
