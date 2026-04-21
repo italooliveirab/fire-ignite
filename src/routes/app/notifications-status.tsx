@@ -22,6 +22,14 @@ function StatusPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [resyncing, setResyncing] = useState(false);
   const [resyncMsg, setResyncMsg] = useState<string | null>(null);
+  const [vapid, setVapid] = useState<{
+    status: "loading" | "ok" | "fail";
+    httpStatus?: number;
+    key?: string;
+    length?: number;
+    formatOk?: boolean;
+    error?: string;
+  }>({ status: "loading" });
   const [lastApiResponse, setLastApiResponse] = useState<{
     status: number;
     ok: boolean;
@@ -66,6 +74,48 @@ function StatusPage() {
     }
     return () => { alive = false; };
   }, [user, refreshKey, push.subscribed]);
+
+  // Validar /api/push/vapid-key (status, presença e formato base64url)
+  useEffect(() => {
+    let alive = true;
+    setVapid({ status: "loading" });
+    fetch("/api/push/vapid-key", { headers: { Accept: "application/json" } })
+      .then(async (res) => {
+        const raw = await res.text();
+        let j: { publicKey?: string; error?: string } = {};
+        try { j = JSON.parse(raw); } catch { /* não-JSON */ }
+        if (!alive) return;
+        const key = j.publicKey || "";
+        // VAPID public key: base64url, ~87 chars, decodifica para 65 bytes (P-256 uncompressed, prefix 0x04)
+        const base64urlOk = /^[A-Za-z0-9_-]+$/.test(key);
+        const lengthOk = key.length >= 80 && key.length <= 100;
+        const formatOk = base64urlOk && lengthOk;
+        if (!res.ok || !key) {
+          setVapid({
+            status: "fail",
+            httpStatus: res.status,
+            key,
+            length: key.length,
+            formatOk: false,
+            error: j.error || (!key ? "publicKey ausente" : `HTTP ${res.status}`),
+          });
+        } else {
+          setVapid({
+            status: formatOk ? "ok" : "fail",
+            httpStatus: res.status,
+            key,
+            length: key.length,
+            formatOk,
+            error: formatOk ? undefined : "Formato inválido (esperado base64url com ~87 chars)",
+          });
+        }
+      })
+      .catch((e) => {
+        if (!alive) return;
+        setVapid({ status: "fail", error: (e as Error).message });
+      });
+    return () => { alive = false; };
+  }, [refreshKey]);
 
   // Re-sincronizar: pega a subscription do navegador e força reenvio para o servidor.
   const resync = async () => {
@@ -152,6 +202,22 @@ function StatusPage() {
       label: "Service Worker ativo",
       detail: swActive ? "Registrado em /sw.js" : "Não registrado neste dispositivo",
       fix: !swActive ? "Clique em 'Ativar neste dispositivo' abaixo" : undefined,
+    },
+    {
+      ok: vapid.status === "loading" ? "warn" : vapid.status === "ok",
+      label: "Chave VAPID do servidor",
+      detail: vapid.status === "loading"
+        ? "Consultando /api/push/vapid-key..."
+        : vapid.status === "ok"
+          ? `OK · HTTP ${vapid.httpStatus} · ${vapid.length} chars · base64url válido · prefixo ${vapid.key?.slice(0, 8)}…`
+          : `FALHOU · HTTP ${vapid.httpStatus ?? "?"}${vapid.length != null ? ` · ${vapid.length} chars` : ""} · ${vapid.error || "erro"}`,
+      fix: vapid.status === "fail"
+        ? (vapid.httpStatus === 200 && vapid.key
+            ? "A chave foi retornada mas não tem o formato esperado (base64url ~87 chars). Verifique o secret VAPID_PUBLIC_KEY no servidor."
+            : !vapid.key
+              ? "O servidor não retornou publicKey. Configure os secrets VAPID_PUBLIC_KEY e VAPID_PRIVATE_KEY e republique."
+              : "A API /api/push/vapid-key falhou. Republique o app para aplicar as últimas correções de runtime.")
+        : undefined,
     },
     {
       ok: push.subscribed,
