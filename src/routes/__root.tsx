@@ -86,7 +86,7 @@ function RootComponent() {
         <PageTransition>
           <Outlet />
         </PageTransition>
-        <Toaster theme="dark" position="top-right" richColors />
+        <Toaster theme="dark" position="top-center" richColors closeButton duration={3500} />
       </AuthProvider>
     </QueryClientProvider>
   );
