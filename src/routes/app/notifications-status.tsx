@@ -41,6 +41,40 @@ function StatusPage() {
     formatOk?: boolean;
     error?: string;
   }>({ status: "loading" });
+  const [session, setSession] = useState<{
+    loaded: boolean;
+    hasSession: boolean;
+    userId?: string;
+    email?: string;
+    expiresAt?: number;
+    expired?: boolean;
+  }>({ loaded: false, hasSession: false });
+  const [prefs, setPrefs] = useState<{
+    loaded: boolean;
+    found: boolean;
+    push_enabled?: boolean;
+    sound_enabled?: boolean;
+    email_enabled?: boolean;
+    error?: string;
+  }>({ loaded: false, found: false });
+  const [manifest, setManifest] = useState<{
+    loaded: boolean;
+    ok: boolean;
+    href?: string;
+    httpStatus?: number;
+    name?: string;
+    display?: string;
+    iconsCount?: number;
+    error?: string;
+  }>({ loaded: false, ok: false });
+  const [endpointMatch, setEndpointMatch] = useState<{
+    loaded: boolean;
+    browserEndpoint?: string;
+    serverHasIt?: boolean;
+    error?: string;
+  }>({ loaded: false });
+  const [audioTest, setAudioTest] = useState<{ tried: boolean; ok: boolean; error?: string }>({ tried: false, ok: false });
+  const [localNotifyTest, setLocalNotifyTest] = useState<{ tried: boolean; ok: boolean; error?: string }>({ tried: false, ok: false });
   const [lastApiResponse, setLastApiResponse] = useState<{
     status: number;
     ok: boolean;
