@@ -900,6 +900,13 @@ export type Database = {
         }
         Returns: undefined
       }
+      recalculate_network_commissions: {
+        Args: never
+        Returns: {
+          processed: number
+          skipped: number
+        }[]
+      }
       reject_payout: {
         Args: { _payout_id: string; _reason: string }
         Returns: undefined
