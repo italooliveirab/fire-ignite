@@ -47,20 +47,28 @@ export function useWebPush() {
       if (perm !== "granted") { toast.error("Permissão de notificação negada"); return; }
       const { publicKey } = await getKey();
       if (!publicKey) { toast.error("Configuração de push indisponível"); return; }
-      const sub = await reg.pushManager.subscribe({
+      // Reaproveita subscription existente (evita InvalidStateError se já existir com outra key)
+      let sub = await reg.pushManager.getSubscription();
+      if (sub) {
+        try { await sub.unsubscribe(); } catch { /* noop */ }
+      }
+      sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicKey),
       });
       const json = sub.toJSON() as { endpoint: string; keys: { p256dh: string; auth: string } };
+      console.log("[push] subscription criada", json.endpoint);
       await subscribe({ data: {
         endpoint: json.endpoint,
         p256dh: json.keys.p256dh,
         auth: json.keys.auth,
         user_agent: navigator.userAgent.slice(0, 500),
       }});
+      console.log("[push] subscription salva no servidor");
       setSubscribed(true);
       toast.success("Notificações ativadas neste dispositivo!");
     } catch (e) {
+      console.error("[push] enable falhou", e);
       toast.error("Falha ao ativar notificações", { description: (e as Error).message });
     } finally { setBusy(false); }
   }, [supported, getKey, subscribe]);
@@ -82,15 +90,23 @@ export function useWebPush() {
   }, [unsubscribe]);
 
   const test = useCallback(async () => {
+    if (!subscribed) {
+      toast.error("Ative as notificações neste dispositivo primeiro", {
+        description: "Clique em 'Ativar neste dispositivo' antes de testar.",
+      });
+      return;
+    }
     setBusy(true);
     try {
       const r = await sendTest({});
       if (r.sent > 0) toast.success(`Teste enviado para ${r.sent} dispositivo(s)`);
-      else toast.error("Nenhum dispositivo recebeu — verifique se está ativado");
+      else toast.error("Nenhum dispositivo recebeu", {
+        description: "Tente desativar e ativar de novo neste celular. Em iPhone, é preciso 'Adicionar à Tela de Início' primeiro.",
+      });
     } catch (e) {
       toast.error("Falha no teste", { description: (e as Error).message });
     } finally { setBusy(false); }
-  }, [sendTest]);
+  }, [sendTest, subscribed]);
 
   return { supported, permission, subscribed, busy, enable, disable, test };
 }
