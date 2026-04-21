@@ -171,11 +171,46 @@ function MyNetwork() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         <StatCard label="Indicados ativos" value={formatNumber(members.filter((m) => m.status === "active").length)} icon={Users} accent="fire" />
+        <StatCard label="Leads da rede" value={formatNumber(totalLeads)} icon={Target} accent="primary" />
+        <StatCard label="Vendas pagas" value={formatNumber(totalPaidLeads)} icon={TrendingUp} accent="success" />
         <StatCard label="Vendido pela rede" value={formatBRL(totalSold)} icon={Banknote} accent="neon" />
         <StatCard label="Meus ganhos da rede" value={formatBRL(totalEarnings)} icon={Banknote} accent="success" />
       </div>
+
+      {/* Pódio top 3 indicados */}
+      {memberStats.length > 0 && (
+        <div className="rounded-2xl border border-border bg-card p-5 mb-6 shadow-card-premium">
+          <h3 className="font-display font-semibold mb-4 flex items-center gap-2"><Trophy className="h-5 w-5 text-fire" /> Top indicados (por comissão gerada para você)</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {memberStats.slice(0, 3).map((m, i) => (
+              <div key={m.id} className="rounded-xl border border-border bg-background/40 p-4">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="text-xs uppercase tracking-wider text-muted-foreground">#{i + 1}</div>
+                  <div className="text-xs text-muted-foreground">{m.paidCount} pagos / {m.leadsCount} leads</div>
+                </div>
+                <div className="font-display font-semibold truncate">{m.aff?.full_name ?? "—"}</div>
+                <div className="text-xs text-muted-foreground truncate mb-2">{m.aff?.email}</div>
+                <div className="flex items-end justify-between">
+                  <div>
+                    <div className="text-[10px] uppercase text-muted-foreground">Vendido</div>
+                    <div className="font-mono text-sm">{formatBRL(m.sold)}</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[10px] uppercase text-muted-foreground">Sua comissão</div>
+                    <div className="font-mono text-primary font-semibold">{formatBRL(m.myCommission)}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 pt-4 border-t border-border text-xs text-muted-foreground flex items-center justify-between">
+            <span>Conversão da rede</span>
+            <span className="font-mono text-foreground">{conversionRate.toFixed(1)}%</span>
+          </div>
+        </div>
+      )}
 
       {/* Lista de indicados */}
       <div className="rounded-2xl border border-border bg-card overflow-hidden shadow-card-premium mb-6">
