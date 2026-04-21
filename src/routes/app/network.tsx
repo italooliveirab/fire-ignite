@@ -122,6 +122,8 @@ function MyNetwork() {
         () => { qc.invalidateQueries({ queryKey: ["my-referrer", affiliate.id] }); })
       .on("postgres_changes", { event: "*", schema: "public", table: "network_commissions", filter: `referrer_affiliate_id=eq.${affiliate.id}` },
         () => { qc.invalidateQueries({ queryKey: ["my-network-comm", affiliate.id] }); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "leads" },
+        () => { qc.invalidateQueries({ queryKey: ["my-network-leads", affiliate.id] }); })
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [affiliate?.id, qc]);
