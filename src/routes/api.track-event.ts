@@ -22,6 +22,9 @@ const EVENT_TO_STATUS: Record<string, string> = {
   paid: "paid",
   not_paid: "not_paid",
   abandoned: "not_paid",
+  support_received: "support_received",
+  renewed: "renewed",
+  lost: "lost",
 };
 
 function sha256(input: string) {
