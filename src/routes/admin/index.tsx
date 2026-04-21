@@ -67,7 +67,7 @@ function AdminDashboard() {
 
       {isLoading || !stats ? (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-32 rounded-2xl bg-card border border-border animate-pulse" />)}
+          {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-32 bg-card border border-border animate-pulse" />)}
         </div>
       ) : (
         <>
@@ -124,9 +124,12 @@ function AdminDashboard() {
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 shadow-card-premium">
-      <h3 className="font-display font-semibold mb-4">{title}</h3>
-      {children}
+    <div className="border border-border bg-card">
+      <div className="px-5 py-3 border-b border-border flex items-center gap-3">
+        <span className="h-1 w-1 bg-primary" />
+        <h3 className="font-display uppercase text-sm tracking-wider">{title}</h3>
+      </div>
+      <div className="p-5">{children}</div>
     </div>
   );
 }
