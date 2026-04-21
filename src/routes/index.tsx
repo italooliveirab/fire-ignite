@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { ArrowUpRight, Flame } from "lucide-react";
 
 export const Route = createFileRoute("/")({
@@ -136,7 +137,7 @@ function Landing() {
             <div className="hidden sm:flex items-center gap-6">
               <span>BR-001</span>
               <span>LAT -23.5°</span>
-              <span className="text-foreground">{new Date().toLocaleDateString("pt-BR")}</span>
+              <ClientDate />
             </div>
           </div>
         </div>
@@ -271,4 +272,12 @@ function Stat({ number, label }: { number: string; label: string }) {
       </div>
     </div>
   );
+}
+
+function ClientDate() {
+  const [date, setDate] = useState<string>("");
+  useEffect(() => {
+    setDate(new Date().toLocaleDateString("pt-BR"));
+  }, []);
+  return <span className="text-foreground">{date || "—"}</span>;
 }
