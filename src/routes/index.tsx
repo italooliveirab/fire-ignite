@@ -102,6 +102,9 @@ function Landing() {
       </section>
 
       <footer className="border-t border-border/50 py-8 text-center text-xs text-muted-foreground">
+        <div className="max-w-4xl mx-auto px-6 mb-8">
+          <InstallPWA variant="card" />
+        </div>
         © {new Date().getFullYear()} FIRE — Programa oficial de afiliados.
       </footer>
     </div>
