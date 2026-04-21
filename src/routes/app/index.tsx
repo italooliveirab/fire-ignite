@@ -145,7 +145,7 @@ function AffiliateDashboard() {
           </div>
 
           <div className="grid lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2 rounded-2xl border border-border bg-card p-5 shadow-card-premium">
+            <SpotlightChart>
               <h3 className="font-display font-semibold mb-4">Desempenho — últimos 30 dias</h3>
               <ResponsiveContainer width="100%" height={260}>
                 <LineChart data={stats.days}>
@@ -156,11 +156,24 @@ function AffiliateDashboard() {
                   <Line type="monotone" dataKey="leads" stroke="#FF5A00" strokeWidth={2.5} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
-            </div>
+            </SpotlightChart>
             <TopAffiliatesRanking currentAffiliateId={affiliate.id} />
           </div>
         </>
       )}
     </DashboardLayout>
+  );
+}
+
+function SpotlightChart({ children }: { children: React.ReactNode }) {
+  const { ref, onMouseMove } = useSpotlight();
+  return (
+    <div
+      ref={ref}
+      onMouseMove={onMouseMove}
+      className="spotlight-card lg:col-span-2 rounded-2xl border border-border bg-card p-5 shadow-card-premium"
+    >
+      {children}
+    </div>
   );
 }
