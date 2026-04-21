@@ -3,6 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
+const FROM_EMAIL = "notify@servicosfire.online";
+const FROM_NAME = "FIRE";
 
 export interface SendEmailInput {
   to: string | string[];
@@ -24,8 +26,7 @@ export async function sendEmail(input: SendEmailInput): Promise<{ ok: boolean; e
     if (!lovableKey) throw new Error("LOVABLE_API_KEY não configurado");
     if (!resendKey) throw new Error("RESEND_API_KEY não configurado (conecte Resend)");
 
-    const fromAddress = process.env.SMTP_FROM ?? process.env.SMTP_USER ?? "notify@servicosfire.online";
-    const fromHeader = /<.+@.+>/.test(fromAddress) ? fromAddress : `FIRE <${fromAddress}>`;
+    const fromHeader = `${FROM_NAME} <${FROM_EMAIL}>`;
 
     const toList = Array.isArray(input.to) ? input.to : [input.to];
     const payload: Record<string, unknown> = {
