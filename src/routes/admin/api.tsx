@@ -12,6 +12,7 @@ import { formatDateTime } from "@/lib/format";
 export const Route = createFileRoute("/admin/api")({ component: ApiPage });
 
 const ENDPOINT = "https://jaajatugxxhwfgthmtia.supabase.co/functions/v1/integration-leads";
+const TRACK_EVENT_ENDPOINT = "/api/track-event";
 
 async function sha256(input: string) {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(input));
@@ -22,6 +23,12 @@ function ApiPage() {
   const [keys, setKeys] = useState<{ id: string; name: string; key_prefix: string; last_used_at: string | null; created_at: string }[]>([]);
   const [name, setName] = useState("");
   const [newKey, setNewKey] = useState<string | null>(null);
+  const [testKey, setTestKey] = useState("");
+  const [testEvent, setTestEvent] = useState("conversation_started");
+  const [testWhatsappId, setTestWhatsappId] = useState("5511999999999@c.us");
+  const [testAffiliateSlug, setTestAffiliateSlug] = useState("");
+  const [testLoading, setTestLoading] = useState(false);
+  const [testResponse, setTestResponse] = useState<{ status: number; body: unknown } | null>(null);
 
   const load = async () => {
     const { data } = await supabase.from("api_keys").select("*").order("created_at", { ascending: false });
