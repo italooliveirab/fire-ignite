@@ -221,15 +221,17 @@ function MyNetwork() {
               <tr>
                 <th className="text-left px-5 py-3">Afiliado</th>
                 <th className="text-left px-5 py-3 hidden md:table-cell">Status</th>
-                <th className="text-right px-5 py-3 hidden md:table-cell">Vinculado em</th>
-                <th className="text-right px-5 py-3">Ganhos gerados</th>
+                <th className="text-right px-5 py-3 hidden lg:table-cell">Vinculado</th>
+                <th className="text-center px-5 py-3 hidden md:table-cell">Leads</th>
+                <th className="text-center px-5 py-3 hidden md:table-cell">Pagos</th>
+                <th className="text-right px-5 py-3 hidden lg:table-cell">Vendido</th>
+                <th className="text-right px-5 py-3 hidden md:table-cell">Conv.</th>
+                <th className="text-right px-5 py-3">Sua comissão</th>
               </tr>
             </thead>
             <tbody>
-              {members.length === 0 ? <tr><td colSpan={4} className="py-10 text-center text-muted-foreground">Você ainda não tem indicados. Compartilhe seu link!</td></tr>
-              : members.map((m) => {
-                const earned = networkComm.filter((c) => c.seller_affiliate_id === m.affiliate_id).reduce((a, c) => a + Number(c.referrer_amount), 0);
-                return (
+              {memberStats.length === 0 ? <tr><td colSpan={8} className="py-10 text-center text-muted-foreground">Você ainda não tem indicados. Compartilhe seu link!</td></tr>
+              : memberStats.map((m) => (
                   <tr key={m.id} className="border-b border-border/50 hover:bg-background/40">
                     <td className="px-5 py-3">
                       <div className="font-medium">{m.aff?.full_name ?? "—"}</div>
@@ -238,11 +240,14 @@ function MyNetwork() {
                     <td className="px-5 py-3 hidden md:table-cell text-xs">
                       <span className={m.status === "active" ? "text-emerald-400" : "text-muted-foreground"}>{m.status}</span>
                     </td>
-                    <td className="px-5 py-3 hidden md:table-cell text-right text-xs text-muted-foreground">{formatDate(m.linked_at)}</td>
-                    <td className="px-5 py-3 text-right font-mono text-primary">{formatBRL(earned)}</td>
+                    <td className="px-5 py-3 hidden lg:table-cell text-right text-xs text-muted-foreground">{formatDate(m.linked_at)}</td>
+                    <td className="px-5 py-3 hidden md:table-cell text-center font-mono text-xs">{m.leadsCount}</td>
+                    <td className="px-5 py-3 hidden md:table-cell text-center font-mono text-xs text-emerald-400">{m.paidCount}</td>
+                    <td className="px-5 py-3 hidden lg:table-cell text-right font-mono text-xs">{formatBRL(m.sold)}</td>
+                    <td className="px-5 py-3 hidden md:table-cell text-right font-mono text-xs text-muted-foreground">{m.conv.toFixed(0)}%</td>
+                    <td className="px-5 py-3 text-right font-mono text-primary">{formatBRL(m.myCommission)}</td>
                   </tr>
-                );
-              })}
+                ))}
             </tbody>
           </table>
         </div>
