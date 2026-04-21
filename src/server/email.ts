@@ -1,55 +1,9 @@
-// Server-only SMTP helper. Configure via env: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM
-import nodemailer from "nodemailer";
+// Server-only Resend helper via Lovable connector gateway.
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
-let _transporterCache: { signature: string; transporter: nodemailer.Transporter } | null = null;
-
-type SmtpConfig = {
-  host: string;
-  port: number;
-  user: string;
-  pass: string;
-  secure: boolean;
-};
-
-function getPrimarySmtpConfig(): SmtpConfig {
-  const host = process.env.SMTP_HOST;
-  const port = Number(process.env.SMTP_PORT ?? 465);
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASSWORD;
-  if (!host || !user || !pass) {
-    throw new Error("SMTP não configurado: defina SMTP_HOST, SMTP_USER, SMTP_PASSWORD");
-  }
-  return {
-    host,
-    port,
-    user,
-    pass,
-    secure: port === 465,
-  };
-}
-
-function getFallbackSmtpConfig(config: SmtpConfig): SmtpConfig | null {
-  if (config.host === "smtp.titan.email") {
-    return { ...config, host: "smtp.hostinger.com" };
-  }
-  return null;
-}
-
-function getTransporter(config: SmtpConfig) {
-  const signature = `${config.host}|${config.port}|${config.user}|${config.pass}`;
-  if (_transporterCache?.signature === signature) return _transporterCache.transporter;
-
-  const transporter = nodemailer.createTransport({
-    host: config.host,
-    port: config.port,
-    secure: config.secure,
-    auth: { user: config.user, pass: config.pass },
-  });
-  _transporterCache = { signature, transporter };
-  return transporter;
-}
+const RESEND_GATEWAY_URL = "https://connector-gateway.lovable.dev/resend/emails";
+const DEFAULT_FROM = "FIRE <onboarding@resend.dev>";
 
 export interface SendEmailInput {
   to: string | string[];
@@ -61,33 +15,96 @@ export interface SendEmailInput {
   context?: Record<string, unknown>;
 }
 
+function normalizeFrom(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return DEFAULT_FROM;
+  return trimmed.includes("<") ? trimmed : `FIRE <${trimmed}>`;
+}
+
+function getSenderCandidates() {
+  const candidates = [
+    process.env.RESEND_FROM,
+    process.env.SMTP_FROM,
+    DEFAULT_FROM,
+  ]
+    .filter((value): value is string => Boolean(value?.trim()))
+    .map(normalizeFrom);
+
+  return [...new Set(candidates)];
+}
+
+async function parseError(response: Response) {
+  const raw = await response.text();
+  if (!raw) return `Resend retornou ${response.status}`;
+
+  try {
+    const parsed = JSON.parse(raw) as { message?: string; error?: string; name?: string };
+    return parsed.message ?? parsed.error ?? parsed.name ?? raw;
+  } catch {
+    return raw;
+  }
+}
+
+function canFallbackToSandbox(sender: string, errorMsg: string, status: number) {
+  if (sender === DEFAULT_FROM) return false;
+  if (![400, 403, 422].includes(status)) return false;
+
+  const normalized = errorMsg.toLowerCase();
+  return [
+    "verify a domain",
+    "verified domain",
+    "domain is not verified",
+    "valid from address",
+    "testing emails",
+    "sandbox",
+    "from address",
+  ].some((snippet) => normalized.includes(snippet));
+}
+
 export async function sendEmail(input: SendEmailInput): Promise<{ ok: boolean; error?: string }> {
-  const recipient = Array.isArray(input.to) ? input.to.join(",") : input.to;
+  const recipients = Array.isArray(input.to) ? input.to : [input.to];
+  const recipient = recipients.join(",");
   let okFlag = false;
   let errorMsg: string | undefined;
   try {
-    const from = process.env.SMTP_FROM ?? process.env.SMTP_USER!;
-    const config = getPrimarySmtpConfig();
-    const message = {
-      from,
-      to: recipient,
+    const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY não configurada");
+
+    const RESEND_API_KEY = process.env.RESEND_API_KEY;
+    if (!RESEND_API_KEY) throw new Error("RESEND_API_KEY não configurada");
+
+    const payload = {
+      to: recipients,
       subject: input.subject,
       html: input.html,
-      text: input.text ?? input.html.replace(/<[^>]+>/g, ""),
-      replyTo: input.replyTo,
+      text: input.text ?? input.html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim(),
+      ...(input.replyTo ? { reply_to: input.replyTo } : {}),
     };
 
-    try {
-      await getTransporter(config).sendMail(message);
-    } catch (primaryError) {
-      _transporterCache = null;
-      const fallbackConfig = getFallbackSmtpConfig(config);
-      const isAuthFailure = (primaryError as { responseCode?: number }).responseCode === 535;
-      if (!fallbackConfig || !isAuthFailure) throw primaryError;
+    for (const from of getSenderCandidates()) {
+      const response = await fetch(RESEND_GATEWAY_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "X-Connection-Api-Key": RESEND_API_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ from, ...payload }),
+      });
 
-      await getTransporter(fallbackConfig).sendMail(message);
+      if (response.ok) {
+        okFlag = true;
+        errorMsg = undefined;
+        break;
+      }
+
+      const resendError = await parseError(response);
+      errorMsg = resendError;
+      if (canFallbackToSandbox(from, resendError, response.status)) continue;
+      throw new Error(resendError);
     }
-    okFlag = true;
+
+    if (!okFlag) throw new Error(errorMsg ?? "Falha ao enviar email pelo Resend");
   } catch (e) {
     console.error("[email] send failed:", e);
     errorMsg = (e as Error).message;

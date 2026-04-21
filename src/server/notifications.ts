@@ -46,9 +46,9 @@ export const sendTestEmailFn = createServerFn({ method: "POST" })
       to: data.to,
       subject: "Teste de envio — FIRE",
       html: renderEmail({
-        title: "✅ SMTP funcionando",
+        title: "✅ Email funcionando",
         preheader: "Teste de envio do painel admin",
-        bodyHtml: `<p>Este é um email de teste enviado em <b>${now}</b>.</p><p>Se você recebeu, suas credenciais SMTP estão configuradas corretamente.</p>`,
+        bodyHtml: `<p>Este é um email de teste enviado em <b>${now}</b>.</p><p>Se você recebeu, a integração de envio está configurada corretamente.</p>`,
       }),
       template: "smtp_test",
       context: { sent_at: now },
