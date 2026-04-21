@@ -46,14 +46,7 @@ function Landing() {
           <Zap className="h-3 w-3" /> Programa oficial de afiliados FIRE
         </div>
         <h1 className="font-display text-5xl md:text-7xl font-extrabold tracking-tight max-w-4xl mx-auto leading-[1.05]">
-          Revenda os produtos da{" "}
-          <span
-            className="bg-clip-text text-transparent"
-            style={{ backgroundImage: "linear-gradient(90deg, #FF2A00 0%, #FF5A00 50%, #FF8A00 100%)" }}
-          >
-            FIRE
-          </span>{" "}
-          e ganhe comissão.
+          Revenda os produtos da <span className="text-gradient-fire">FIRE</span> e ganhe comissão.
         </h1>
         <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
           Cadastre-se grátis, escolha quais produtos da FIRE você quer divulgar e receba seu link exclusivo. A cada venda confirmada, você ganha sua comissão via Pix.
