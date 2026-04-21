@@ -79,7 +79,7 @@ export async function sendPushToUsers(
       const sub: WPSub = { endpoint: s.endpoint, expirationTime: null, keys: { p256dh: s.p256dh, auth: s.auth } };
       const message: PushMessage = { data: JSON.stringify(payload), options: { ttl: 60 * 60 * 24 } };
       const init = await buildPushPayload(message, sub, vapid);
-      const res = await fetch(s.endpoint, init);
+      const res = await fetch(s.endpoint, init as unknown as RequestInit);
       if (res.status >= 200 && res.status < 300) {
         sent++;
       } else {
