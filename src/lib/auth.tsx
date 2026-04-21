@@ -12,11 +12,11 @@ export async function resolveRoleForUser(uid: string): Promise<Role> {
   const inflight = roleInflight.get(uid);
   if (inflight) return inflight;
 
-  const request = supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", uid)
-    .then(({ data, error }) => {
+  const request = (async () => {
+    const { data, error } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", uid);
       if (error) throw error;
       const roles = data?.map((row) => row.role) ?? [];
       const nextRole: Role = roles.includes("admin" as never)
@@ -26,7 +26,7 @@ export async function resolveRoleForUser(uid: string): Promise<Role> {
           : null;
       roleCache.set(uid, nextRole);
       return nextRole;
-    })
+    })()
     .catch(() => null)
     .finally(() => {
       roleInflight.delete(uid);
