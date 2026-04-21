@@ -196,6 +196,120 @@ function StatusPage() {
     return () => { alive = false; };
   }, [refreshKey]);
 
+  // Sessão Supabase (token, expiração)
+  useEffect(() => {
+    let alive = true;
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      if (!alive) return;
+      if (!s) { setSession({ loaded: true, hasSession: false }); return; }
+      const exp = s.expires_at ? s.expires_at * 1000 : undefined;
+      setSession({
+        loaded: true,
+        hasSession: true,
+        userId: s.user.id,
+        email: s.user.email ?? undefined,
+        expiresAt: exp,
+        expired: exp ? Date.now() > exp : false,
+      });
+    }).catch(() => alive && setSession({ loaded: true, hasSession: false }));
+    return () => { alive = false; };
+  }, [refreshKey]);
+
+  // Preferências de notificação do usuário
+  useEffect(() => {
+    if (!user) return;
+    let alive = true;
+    supabase.from("notification_preferences")
+      .select("push_enabled, sound_enabled, email_enabled")
+      .eq("user_id", user.id).maybeSingle()
+      .then(({ data, error }) => {
+        if (!alive) return;
+        if (error) { setPrefs({ loaded: true, found: false, error: error.message }); return; }
+        if (!data) { setPrefs({ loaded: true, found: false }); return; }
+        setPrefs({ loaded: true, found: true, ...data });
+      });
+    return () => { alive = false; };
+  }, [user, refreshKey]);
+
+  // Manifest PWA (/manifest.json ou link rel=manifest)
+  useEffect(() => {
+    let alive = true;
+    const linkEl = typeof document !== "undefined" ? document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null : null;
+    const href = linkEl?.href || "/manifest.json";
+    fetch(href).then(async (res) => {
+      const txt = await res.text();
+      let j: { name?: string; short_name?: string; display?: string; icons?: unknown[] } = {};
+      try { j = JSON.parse(txt); } catch { /* não-JSON */ }
+      if (!alive) return;
+      setManifest({
+        loaded: true,
+        ok: res.ok && !!j.name,
+        href,
+        httpStatus: res.status,
+        name: j.name || j.short_name,
+        display: j.display,
+        iconsCount: Array.isArray(j.icons) ? j.icons.length : 0,
+        error: !res.ok ? `HTTP ${res.status}` : !j.name ? "manifest sem 'name'" : undefined,
+      });
+    }).catch((e) => alive && setManifest({ loaded: true, ok: false, href, error: (e as Error).message }));
+    return () => { alive = false; };
+  }, [refreshKey]);
+
+  // Verifica se o endpoint atual do navegador está realmente salvo no banco
+  useEffect(() => {
+    if (!user) return;
+    let alive = true;
+    (async () => {
+      try {
+        const reg = await navigator.serviceWorker?.getRegistration("/sw.js");
+        const sub = await reg?.pushManager.getSubscription();
+        if (!sub) { if (alive) setEndpointMatch({ loaded: true }); return; }
+        const { data, error } = await supabase.from("push_subscriptions")
+          .select("endpoint").eq("user_id", user.id).eq("endpoint", sub.endpoint).maybeSingle();
+        if (!alive) return;
+        if (error) setEndpointMatch({ loaded: true, browserEndpoint: sub.endpoint, error: error.message });
+        else setEndpointMatch({ loaded: true, browserEndpoint: sub.endpoint, serverHasIt: !!data });
+      } catch (e) {
+        if (alive) setEndpointMatch({ loaded: true, error: (e as Error).message });
+      }
+    })();
+    return () => { alive = false; };
+  }, [user, refreshKey, push.subscribed]);
+
+  // Teste de notificação local (sem servidor) — verifica se o SO mostra notificações do navegador
+  const testLocalNotification = async () => {
+    try {
+      if (!("Notification" in window)) throw new Error("Notification API ausente");
+      if (Notification.permission !== "granted") throw new Error(`Permissão: ${Notification.permission}`);
+      const reg = await navigator.serviceWorker.getRegistration("/sw.js");
+      if (reg) {
+        await reg.showNotification("🔔 Teste local", { body: "Esta notificação foi disparada pelo SW (sem servidor).", tag: "local-test" });
+      } else {
+        new Notification("🔔 Teste local", { body: "Esta notificação foi disparada pelo navegador (sem SW)." });
+      }
+      setLocalNotifyTest({ tried: true, ok: true });
+      toast.success("Notificação local enviada");
+    } catch (e) {
+      const msg = (e as Error).message;
+      setLocalNotifyTest({ tried: true, ok: false, error: msg });
+      toast.error("Falha no teste local", { description: msg });
+    }
+  };
+
+  // Teste de áudio (verifica se o som é desbloqueado/reproduz)
+  const testAudio = async () => {
+    try {
+      unlockAudio();
+      await playCoinSound();
+      setAudioTest({ tried: true, ok: true });
+      toast.success("💰 Som de venda OK");
+    } catch (e) {
+      const msg = (e as Error).message;
+      setAudioTest({ tried: true, ok: false, error: msg });
+      toast.error("Falha no áudio", { description: msg });
+    }
+  };
+
   // Re-registrar Service Worker: desregistra o atual, registra de novo e aguarda ficar 'activated'.
   const reregisterSW = async () => {
     if (!("serviceWorker" in navigator)) {
