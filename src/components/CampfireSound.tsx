@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { fireEvents } from "@/lib/fire-events";
 
 const STORAGE_KEY = "fire_campfire_sound";
 
@@ -94,6 +95,9 @@ export function CampfireSound() {
         for (let i = 0; i < pops; i++) {
           const t = now + i * (0.02 + Math.random() * 0.05);
           createPop(ctxRef.current, masterRef.current, t);
+          // Fire a visual spark in sync with each pop's onset time
+          const lead = Math.max(0, (t - now) * 1000);
+          window.setTimeout(() => fireEvents.emitCrackle(), lead);
         }
 
         // Next crackle in 180–900ms
