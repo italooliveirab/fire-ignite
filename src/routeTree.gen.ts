@@ -30,6 +30,7 @@ import { Route as AppLeadsRouteImport } from './routes/app/leads'
 import { Route as AppCommissionsRouteImport } from './routes/app/commissions'
 import { Route as ApiTrackEventRouteImport } from './routes/api.track-event'
 import { Route as ApiProductsRouteImport } from './routes/api.products'
+import { Route as ApiLeadsRouteImport } from './routes/api.leads'
 import { Route as ApiAffiliatesRouteImport } from './routes/api.affiliates'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminRequestsRouteImport } from './routes/admin/requests'
@@ -155,6 +156,11 @@ const ApiProductsRoute = ApiProductsRouteImport.update({
   path: '/api/products',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiLeadsRoute = ApiLeadsRouteImport.update({
+  id: '/api/leads',
+  path: '/api/leads',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAffiliatesRoute = ApiAffiliatesRouteImport.update({
   id: '/api/affiliates',
   path: '/api/affiliates',
@@ -271,6 +277,7 @@ export interface FileRoutesByFullPath {
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
+  '/api/leads': typeof ApiLeadsRoute
   '/api/products': typeof ApiProductsRoute
   '/api/track-event': typeof ApiTrackEventRoute
   '/app/commissions': typeof AppCommissionsRoute
@@ -312,6 +319,7 @@ export interface FileRoutesByTo {
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
+  '/api/leads': typeof ApiLeadsRoute
   '/api/products': typeof ApiProductsRoute
   '/api/track-event': typeof ApiTrackEventRoute
   '/app/commissions': typeof AppCommissionsRoute
@@ -354,6 +362,7 @@ export interface FileRoutesById {
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
+  '/api/leads': typeof ApiLeadsRoute
   '/api/products': typeof ApiProductsRoute
   '/api/track-event': typeof ApiTrackEventRoute
   '/app/commissions': typeof AppCommissionsRoute
@@ -397,6 +406,7 @@ export interface FileRouteTypes {
     | '/admin/requests'
     | '/admin/settings'
     | '/api/affiliates'
+    | '/api/leads'
     | '/api/products'
     | '/api/track-event'
     | '/app/commissions'
@@ -438,6 +448,7 @@ export interface FileRouteTypes {
     | '/admin/requests'
     | '/admin/settings'
     | '/api/affiliates'
+    | '/api/leads'
     | '/api/products'
     | '/api/track-event'
     | '/app/commissions'
@@ -479,6 +490,7 @@ export interface FileRouteTypes {
     | '/admin/requests'
     | '/admin/settings'
     | '/api/affiliates'
+    | '/api/leads'
     | '/api/products'
     | '/api/track-event'
     | '/app/commissions'
@@ -521,6 +533,7 @@ export interface RootRouteChildren {
   AdminRequestsRoute: typeof AdminRequestsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   ApiAffiliatesRoute: typeof ApiAffiliatesRouteWithChildren
+  ApiLeadsRoute: typeof ApiLeadsRoute
   ApiProductsRoute: typeof ApiProductsRoute
   ApiTrackEventRoute: typeof ApiTrackEventRoute
   AppCommissionsRoute: typeof AppCommissionsRoute
@@ -685,6 +698,13 @@ declare module '@tanstack/react-router' {
       path: '/api/products'
       fullPath: '/api/products'
       preLoaderRoute: typeof ApiProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/leads': {
+      id: '/api/leads'
+      path: '/api/leads'
+      fullPath: '/api/leads'
+      preLoaderRoute: typeof ApiLeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/affiliates': {
@@ -852,6 +872,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRequestsRoute: AdminRequestsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   ApiAffiliatesRoute: ApiAffiliatesRouteWithChildren,
+  ApiLeadsRoute: ApiLeadsRoute,
   ApiProductsRoute: ApiProductsRoute,
   ApiTrackEventRoute: ApiTrackEventRoute,
   AppCommissionsRoute: AppCommissionsRoute,
