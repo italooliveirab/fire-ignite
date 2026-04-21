@@ -8,6 +8,7 @@ import { ClickSpark } from "@/components/ClickSpark";
 import { PageTransition } from "@/components/PageTransition";
 import { Flame } from "lucide-react";
 import { installDebugMonitor, setDebugUser } from "@/lib/debug-monitor";
+import { useNotifications } from "@/hooks/useNotifications";
 
 import appCss from "../styles.css?url";
 
@@ -83,6 +84,7 @@ function RootComponent() {
         <BrandHead />
         <ClickSpark />
         <DebugMonitorBridge />
+        <NotificationsBridge />
         <PageTransition>
           <Outlet />
         </PageTransition>
@@ -100,5 +102,10 @@ function DebugMonitorBridge() {
   useEffect(() => {
     setDebugUser(user?.id ?? null, user?.email ?? null);
   }, [user]);
+  return null;
+}
+
+function NotificationsBridge() {
+  useNotifications();
   return null;
 }

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { NotificationSettings } from "@/components/NotificationSettings";
 
 export const Route = createFileRoute("/app/profile")({ component: ProfilePage });
 
@@ -72,6 +73,11 @@ function ProfilePage() {
       <Button onClick={save} disabled={saving} className="mt-6 bg-gradient-fire text-white shadow-fire">
         {saving ? "Salvando..." : "Salvar alterações"}
       </Button>
+
+      <div className="mt-10">
+        <h2 className="font-display text-2xl font-bold mb-4">Notificações</h2>
+        <NotificationSettings />
+      </div>
     </DashboardLayout>
   );
 }
