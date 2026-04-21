@@ -80,7 +80,14 @@ function AffiliateDashboard() {
   const { data: affiliate } = useQuery({
     queryKey: ["my-aff", user?.id],
     enabled: !!user,
-    queryFn: async () => (await supabase.from("affiliates").select("*").eq("user_id", user!.id).maybeSingle()).data,
+    queryFn: async () => {
+      const first = await supabase.from("affiliates").select("*").eq("user_id", user!.id).maybeSingle();
+      if (first.data) return first.data;
+      // Reconciliação: vincula por email se algum admin criou o affiliate sem user_id
+      await supabase.rpc("link_current_user_to_affiliate");
+      const second = await supabase.from("affiliates").select("*").eq("user_id", user!.id).maybeSingle();
+      return second.data;
+    },
   });
 
   const { data: stats } = useQuery({
