@@ -140,6 +140,62 @@ function ApiPage() {
         )}
       </section>
 
+      {/* Simulador de bot */}
+      <section className="rounded-2xl border border-border bg-card p-6 shadow-card-premium mb-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-10 w-10 rounded-lg bg-success/15 border border-success/30 flex items-center justify-center text-success">🤖</div>
+          <div>
+            <h3 className="font-display font-bold text-lg">Testar bot (simulador)</h3>
+            <p className="text-xs text-muted-foreground">Envia um POST de exemplo para <code className="text-primary">/api/track-event</code> sem precisar do bot externo.</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+          <div>
+            <Label className="text-xs">Chave de API</Label>
+            <Input placeholder="fire_..." value={testKey} onChange={(e) => setTestKey(e.target.value)} />
+          </div>
+          <div>
+            <Label className="text-xs">Evento</Label>
+            <select
+              className="w-full h-10 rounded-md border border-border bg-background px-3 text-sm"
+              value={testEvent}
+              onChange={(e) => setTestEvent(e.target.value)}
+            >
+              <option value="conversation_started">conversation_started</option>
+              <option value="trial_requested">trial_requested</option>
+              <option value="payment_generated">payment_generated</option>
+              <option value="paid">paid</option>
+              <option value="not_paid">not_paid</option>
+              <option value="abandoned">abandoned</option>
+            </select>
+          </div>
+          <div>
+            <Label className="text-xs">whatsapp_id</Label>
+            <Input placeholder="5511999999999@c.us" value={testWhatsappId} onChange={(e) => setTestWhatsappId(e.target.value)} />
+          </div>
+          <div>
+            <Label className="text-xs">affiliate_slug (necessário se o lead não existir)</Label>
+            <Input placeholder="joao" value={testAffiliateSlug} onChange={(e) => setTestAffiliateSlug(e.target.value)} />
+          </div>
+        </div>
+
+        <Button onClick={runTest} disabled={testLoading} className="bg-gradient-fire text-white shadow-fire">
+          {testLoading ? "Enviando..." : "▶ Disparar evento"}
+        </Button>
+
+        {testResponse && (
+          <div className={`mt-4 rounded-xl border p-4 ${testResponse.status >= 200 && testResponse.status < 300 ? "border-success/40 bg-success/10" : "border-destructive/40 bg-destructive/10"}`}>
+            <div className="text-xs font-semibold mb-2">
+              Status: <span className="font-mono">{testResponse.status || "network error"}</span>
+            </div>
+            <pre className="font-mono text-xs bg-background/60 border border-border rounded-lg p-3 overflow-x-auto whitespace-pre-wrap break-all max-h-64">
+{JSON.stringify(testResponse.body, null, 2)}
+            </pre>
+          </div>
+        )}
+      </section>
+
       {/* Documentação */}
       <section className="rounded-2xl border border-border bg-card p-6 md:p-8 shadow-card-premium space-y-8">
         <Block title="Visão geral">
