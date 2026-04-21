@@ -486,6 +486,86 @@ function StatusPage() {
             : "Toque em 'Re-sincronizar com servidor' abaixo para ver o erro exato da API")
         : undefined,
     },
+    {
+      ok: !session.loaded ? "warn" : session.hasSession && !session.expired,
+      label: "Sessão de autenticação",
+      detail: !session.loaded
+        ? "Carregando..."
+        : !session.hasSession
+          ? "Sem sessão — faça login novamente"
+          : session.expired
+            ? `Token EXPIRADO (em ${session.expiresAt ? new Date(session.expiresAt).toLocaleString() : "?"})`
+            : `OK · ${session.email ?? session.userId} · expira ${session.expiresAt ? new Date(session.expiresAt).toLocaleTimeString() : "?"}`,
+      fix: session.loaded && (!session.hasSession || session.expired)
+        ? "Saia e entre novamente para renovar o token Bearer usado pela API."
+        : undefined,
+    },
+    {
+      ok: !endpointMatch.loaded ? "warn"
+        : !endpointMatch.browserEndpoint ? "warn"
+        : endpointMatch.serverHasIt === true,
+      label: "Endpoint do navegador bate com o servidor",
+      detail: !endpointMatch.loaded
+        ? "Carregando..."
+        : !endpointMatch.browserEndpoint
+          ? "Sem subscription no navegador"
+          : endpointMatch.error
+            ? `Erro: ${endpointMatch.error}`
+            : endpointMatch.serverHasIt
+              ? `OK · ${endpointMatch.browserEndpoint.slice(0, 60)}…`
+              : `Divergente · navegador tem endpoint, servidor não · ${endpointMatch.browserEndpoint.slice(0, 60)}…`,
+      fix: endpointMatch.loaded && endpointMatch.browserEndpoint && endpointMatch.serverHasIt === false
+        ? "Toque em 'Re-sincronizar com servidor' para gravar este endpoint no banco."
+        : undefined,
+    },
+    {
+      ok: !prefs.loaded ? "warn" : prefs.found && prefs.push_enabled === true,
+      label: "Preferências de notificação",
+      detail: !prefs.loaded
+        ? "Carregando..."
+        : !prefs.found
+          ? "Sem registro em notification_preferences (usará defaults)"
+          : `push=${prefs.push_enabled ? "on" : "OFF"} · som=${prefs.sound_enabled ? "on" : "off"} · email=${prefs.email_enabled ? "on" : "off"}`,
+      fix: prefs.loaded && prefs.found && prefs.push_enabled === false
+        ? "Push está DESLIGADO nas suas preferências. Vá em Configurações → Notificações e ative."
+        : undefined,
+    },
+    {
+      ok: !manifest.loaded ? "warn" : manifest.ok,
+      label: "Manifest PWA",
+      detail: !manifest.loaded
+        ? "Carregando..."
+        : manifest.ok
+          ? `OK · ${manifest.name} · display=${manifest.display ?? "?"} · ${manifest.iconsCount} ícone(s)`
+          : `${manifest.error || "inválido"} (${manifest.href})`,
+      fix: manifest.loaded && !manifest.ok
+        ? "manifest.json ausente ou inválido — necessário para 'Adicionar à Tela de Início' no iPhone."
+        : undefined,
+    },
+    {
+      ok: !audioTest.tried ? "warn" : audioTest.ok,
+      label: "Áudio (som de venda)",
+      detail: !audioTest.tried
+        ? "Não testado ainda — toque em 'Ouvir som de venda' abaixo"
+        : audioTest.ok
+          ? "OK · áudio reproduzido"
+          : `Falhou: ${audioTest.error}`,
+      fix: audioTest.tried && !audioTest.ok
+        ? "Verifique o volume do dispositivo e o modo silencioso. Em iPhone, o som só toca após interação do usuário."
+        : undefined,
+    },
+    {
+      ok: !localNotifyTest.tried ? "warn" : localNotifyTest.ok,
+      label: "Teste local de notificação (sem servidor)",
+      detail: !localNotifyTest.tried
+        ? "Não testado — use 'Disparar notificação local' abaixo para isolar problemas do SO"
+        : localNotifyTest.ok
+          ? "OK · notificação exibida pelo SO"
+          : `Falhou: ${localNotifyTest.error}`,
+      fix: localNotifyTest.tried && !localNotifyTest.ok
+        ? "Se o teste local falha, o problema é de SO/permissões — não do servidor. Verifique 'Não Perturbe', 'Foco' e permissões do app."
+        : undefined,
+    },
   ];
 
   const allGood = checks.every((c) => c.ok === true);
