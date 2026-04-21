@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { AppSidebar } from "./AppSidebar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { FireLoader } from "./FireLoader";
 import { useEffect } from "react";
 
 interface Props {
@@ -32,11 +33,7 @@ export function DashboardLayout({ variant, title, children }: Props) {
   }, [user, role, loading, variant, nav, loc.pathname]);
 
   if (loading || !user || role === null) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="h-10 w-10 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-      </div>
-    );
+    return <FireLoader label="Carregando seu painel..." />;
   }
 
   return (
