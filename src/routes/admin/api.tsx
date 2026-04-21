@@ -13,6 +13,7 @@ export const Route = createFileRoute("/admin/api")({ component: ApiPage });
 
 const ENDPOINT = "https://jaajatugxxhwfgthmtia.supabase.co/functions/v1/integration-leads";
 const TRACK_EVENT_ENDPOINT = "/api/track-event";
+const BASE = typeof window !== "undefined" ? window.location.origin : "";
 
 async function sha256(input: string) {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(input));
