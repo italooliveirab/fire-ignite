@@ -1,55 +1,8 @@
-// Server-only SMTP helper. Configure via env: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD, SMTP_FROM
-import nodemailer from "nodemailer";
+// Server-only email helper. Sends via Resend through Lovable connector gateway.
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
-let _transporterCache: { signature: string; transporter: nodemailer.Transporter } | null = null;
-
-type SmtpConfig = {
-  host: string;
-  port: number;
-  user: string;
-  pass: string;
-  secure: boolean;
-};
-
-function getPrimarySmtpConfig(): SmtpConfig {
-  const host = process.env.SMTP_HOST;
-  const port = Number(process.env.SMTP_PORT ?? 465);
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASSWORD;
-  if (!host || !user || !pass) {
-    throw new Error("SMTP não configurado: defina SMTP_HOST, SMTP_USER, SMTP_PASSWORD");
-  }
-  return {
-    host,
-    port,
-    user,
-    pass,
-    secure: port === 465,
-  };
-}
-
-function getFallbackSmtpConfig(config: SmtpConfig): SmtpConfig | null {
-  if (config.host === "smtp.titan.email") {
-    return { ...config, host: "smtp.hostinger.com" };
-  }
-  return null;
-}
-
-function getTransporter(config: SmtpConfig) {
-  const signature = `${config.host}|${config.port}|${config.user}|${config.pass}`;
-  if (_transporterCache?.signature === signature) return _transporterCache.transporter;
-
-  const transporter = nodemailer.createTransport({
-    host: config.host,
-    port: config.port,
-    secure: config.secure,
-    auth: { user: config.user, pass: config.pass },
-  });
-  _transporterCache = { signature, transporter };
-  return transporter;
-}
+const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 
 export interface SendEmailInput {
   to: string | string[];
@@ -66,26 +19,36 @@ export async function sendEmail(input: SendEmailInput): Promise<{ ok: boolean; e
   let okFlag = false;
   let errorMsg: string | undefined;
   try {
-    const from = process.env.SMTP_FROM ?? process.env.SMTP_USER!;
-    const config = getPrimarySmtpConfig();
-    const message = {
-      from,
-      to: recipient,
+    const lovableKey = process.env.LOVABLE_API_KEY;
+    const resendKey = process.env.RESEND_API_KEY;
+    if (!lovableKey) throw new Error("LOVABLE_API_KEY não configurado");
+    if (!resendKey) throw new Error("RESEND_API_KEY não configurado (conecte Resend)");
+
+    const fromAddress = process.env.SMTP_FROM ?? process.env.SMTP_USER ?? "notify@servicosfire.online";
+    const fromHeader = /<.+@.+>/.test(fromAddress) ? fromAddress : `FIRE <${fromAddress}>`;
+
+    const toList = Array.isArray(input.to) ? input.to : [input.to];
+    const payload: Record<string, unknown> = {
+      from: fromHeader,
+      to: toList,
       subject: input.subject,
       html: input.html,
       text: input.text ?? input.html.replace(/<[^>]+>/g, ""),
-      replyTo: input.replyTo,
     };
+    if (input.replyTo) payload.reply_to = input.replyTo;
 
-    try {
-      await getTransporter(config).sendMail(message);
-    } catch (primaryError) {
-      _transporterCache = null;
-      const fallbackConfig = getFallbackSmtpConfig(config);
-      const isAuthFailure = (primaryError as { responseCode?: number }).responseCode === 535;
-      if (!fallbackConfig || !isAuthFailure) throw primaryError;
-
-      await getTransporter(fallbackConfig).sendMail(message);
+    const res = await fetch(`${GATEWAY_URL}/emails`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${lovableKey}`,
+        "X-Connection-Api-Key": resendKey,
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(`Resend ${res.status}: ${JSON.stringify(data)}`);
     }
     okFlag = true;
   } catch (e) {
