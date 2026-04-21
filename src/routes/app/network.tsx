@@ -173,7 +173,7 @@ function MyNetwork() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         <StatCard label="Indicados ativos" value={formatNumber(members.filter((m) => m.status === "active").length)} icon={Users} accent="fire" />
-        <StatCard label="Leads da rede" value={formatNumber(totalLeads)} icon={Target} accent="primary" />
+        <StatCard label="Leads da rede" value={formatNumber(totalLeads)} icon={Target} accent="gold" />
         <StatCard label="Vendas pagas" value={formatNumber(totalPaidLeads)} icon={TrendingUp} accent="success" />
         <StatCard label="Vendido pela rede" value={formatBRL(totalSold)} icon={Banknote} accent="neon" />
         <StatCard label="Meus ganhos da rede" value={formatBRL(totalEarnings)} icon={Banknote} accent="success" />
