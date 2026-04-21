@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Flame, Zap, ShieldCheck, ArrowRight, Wallet, Rocket, PackageCheck, BarChart3 } from "lucide-react";
+import { useAuth } from "@/lib/auth";
+import { FireLoader } from "@/components/FireLoader";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -14,6 +16,8 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  const { loading } = useAuth();
+  if (loading) return <FireLoader label="Iniciando o FIRE..." />;
   return (
     <div className="min-h-screen relative overflow-hidden">
       <div className="absolute inset-0 -z-10">
