@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   LayoutDashboard, Users, Target, DollarSign, Banknote, Settings, FileCode2,
-  LogOut, Link2, User, ScrollText, ShoppingCart, Package, Inbox, ShieldCheck, Network, Settings2,
+  LogOut, Link2, User, ScrollText, ShoppingCart, Package, Inbox, ShieldCheck, Network, Settings2, BarChart3,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 const adminNav = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { to: "/admin/products", label: "Produtos", icon: Package },
   { to: "/admin/requests", label: "Solicitações", icon: Inbox, badgeKey: "pending-requests" as const },
   { to: "/admin/affiliates", label: "Afiliados", icon: Users },
