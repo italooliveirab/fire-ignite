@@ -1,7 +1,6 @@
 // Hook para registrar/desregistrar Web Push no navegador.
 import { useCallback, useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
-import { getVapidPublicKey, subscribePushFn, unsubscribePushFn, sendTestPushFn } from "@/server/push";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 function urlBase64ToUint8Array(base64: string) {
@@ -13,15 +12,19 @@ function urlBase64ToUint8Array(base64: string) {
   return out;
 }
 
+async function authedFetch(path: string, init?: RequestInit) {
+  const { data: { session } } = await supabase.auth.getSession();
+  const headers = new Headers(init?.headers);
+  if (session?.access_token) headers.set("Authorization", `Bearer ${session.access_token}`);
+  if (init?.body && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
+  return fetch(path, { ...init, headers });
+}
+
 export function useWebPush() {
   const [supported, setSupported] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission>("default");
   const [subscribed, setSubscribed] = useState(false);
   const [busy, setBusy] = useState(false);
-  const getKey = useServerFn(getVapidPublicKey);
-  const subscribe = useServerFn(subscribePushFn);
-  const unsubscribe = useServerFn(unsubscribePushFn);
-  const sendTest = useServerFn(sendTestPushFn);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -53,12 +56,14 @@ export function useWebPush() {
       }
       let publicKey = "";
       try {
-        const r = await getKey();
-        publicKey = r.publicKey;
+        const res = await fetch("/api/push/vapid-key", { headers: { Accept: "application/json" } });
+        const json = await res.json().catch(() => ({}));
+        publicKey = json.publicKey || "";
+        if (!res.ok || !publicKey) throw new Error(json.error || `HTTP ${res.status}`);
       } catch (e) {
         console.error("[push] getVapidPublicKey falhou", e);
         toast.error("Servidor de notificações indisponível", {
-          description: "O build publicado parece desatualizado. Republique o app para corrigir.",
+          description: "Não foi possível obter a chave VAPID. Verifique se o app foi republicado.",
           duration: 10000,
         });
         return;
@@ -78,20 +83,28 @@ export function useWebPush() {
       });
       const json = sub.toJSON() as { endpoint: string; keys: { p256dh: string; auth: string } };
       console.log("[push] subscription criada", json.endpoint);
-      await subscribe({ data: {
-        endpoint: json.endpoint,
-        p256dh: json.keys.p256dh,
-        auth: json.keys.auth,
-        user_agent: navigator.userAgent.slice(0, 500),
-      }});
-      console.log("[push] subscription salva no servidor");
+      const saveRes = await authedFetch("/api/push/subscribe", {
+        method: "POST",
+        body: JSON.stringify({
+          endpoint: json.endpoint,
+          p256dh: json.keys.p256dh,
+          auth: json.keys.auth,
+          user_agent: navigator.userAgent.slice(0, 500),
+        }),
+      });
+      const saveJson = await saveRes.json().catch(() => ({}));
+      if (!saveRes.ok) {
+        console.error("[push] save failed", saveRes.status, saveJson);
+        throw new Error(saveJson.detail || saveJson.error || `HTTP ${saveRes.status}`);
+      }
+      console.log("[push] subscription salva no servidor", saveJson);
       setSubscribed(true);
       toast.success("Notificações ativadas neste dispositivo!");
     } catch (e) {
       console.error("[push] enable falhou", e);
       toast.error("Falha ao ativar notificações", { description: (e as Error).message });
     } finally { setBusy(false); }
-  }, [supported, getKey, subscribe]);
+  }, [supported]);
 
   const disable = useCallback(async () => {
     setBusy(true);
@@ -99,7 +112,10 @@ export function useWebPush() {
       const reg = await navigator.serviceWorker.getRegistration("/sw.js");
       const sub = await reg?.pushManager.getSubscription();
       if (sub) {
-        await unsubscribe({ data: { endpoint: sub.endpoint } });
+        await authedFetch("/api/push/unsubscribe", {
+          method: "POST",
+          body: JSON.stringify({ endpoint: sub.endpoint }),
+        });
         await sub.unsubscribe();
       }
       setSubscribed(false);
@@ -107,7 +123,7 @@ export function useWebPush() {
     } catch (e) {
       toast.error("Falha ao desativar", { description: (e as Error).message });
     } finally { setBusy(false); }
-  }, [unsubscribe]);
+  }, []);
 
   const test = useCallback(async () => {
     if (!subscribed) {
@@ -118,15 +134,16 @@ export function useWebPush() {
     }
     setBusy(true);
     try {
-      const r = await sendTest({});
+      const res = await authedFetch("/api/push/test", { method: "POST", body: "{}" });
+      const r = await res.json().catch(() => ({ sent: 0, failed: 0 }));
       if (r.sent > 0) toast.success(`Teste enviado para ${r.sent} dispositivo(s)`);
       else toast.error("Nenhum dispositivo recebeu", {
-        description: "Tente desativar e ativar de novo neste celular. Em iPhone, é preciso 'Adicionar à Tela de Início' primeiro.",
+        description: r.detail || "Tente desativar e ativar de novo neste celular. Em iPhone, é preciso 'Adicionar à Tela de Início' primeiro.",
       });
     } catch (e) {
       toast.error("Falha no teste", { description: (e as Error).message });
     } finally { setBusy(false); }
-  }, [sendTest, subscribed]);
+  }, [subscribed]);
 
   return { supported, permission, subscribed, busy, enable, disable, test };
 }
