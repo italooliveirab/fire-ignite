@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { formatBRL, formatNumber, formatDate } from "@/lib/format";
-import { Network, Users, Banknote, Copy, Share2, UserCheck } from "lucide-react";
+import { Network, Users, Banknote, Copy, Share2, UserCheck, TrendingUp, Trophy, Target } from "lucide-react";
 
 export const Route = createFileRoute("/app/network")({ component: MyNetwork });
 
