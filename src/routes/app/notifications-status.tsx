@@ -41,6 +41,40 @@ function StatusPage() {
     formatOk?: boolean;
     error?: string;
   }>({ status: "loading" });
+  const [session, setSession] = useState<{
+    loaded: boolean;
+    hasSession: boolean;
+    userId?: string;
+    email?: string;
+    expiresAt?: number;
+    expired?: boolean;
+  }>({ loaded: false, hasSession: false });
+  const [prefs, setPrefs] = useState<{
+    loaded: boolean;
+    found: boolean;
+    push_enabled?: boolean;
+    sound_enabled?: boolean;
+    email_enabled?: boolean;
+    error?: string;
+  }>({ loaded: false, found: false });
+  const [manifest, setManifest] = useState<{
+    loaded: boolean;
+    ok: boolean;
+    href?: string;
+    httpStatus?: number;
+    name?: string;
+    display?: string;
+    iconsCount?: number;
+    error?: string;
+  }>({ loaded: false, ok: false });
+  const [endpointMatch, setEndpointMatch] = useState<{
+    loaded: boolean;
+    browserEndpoint?: string;
+    serverHasIt?: boolean;
+    error?: string;
+  }>({ loaded: false });
+  const [audioTest, setAudioTest] = useState<{ tried: boolean; ok: boolean; error?: string }>({ tried: false, ok: false });
+  const [localNotifyTest, setLocalNotifyTest] = useState<{ tried: boolean; ok: boolean; error?: string }>({ tried: false, ok: false });
   const [lastApiResponse, setLastApiResponse] = useState<{
     status: number;
     ok: boolean;
@@ -161,6 +195,120 @@ function StatusPage() {
       });
     return () => { alive = false; };
   }, [refreshKey]);
+
+  // Sessão Supabase (token, expiração)
+  useEffect(() => {
+    let alive = true;
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      if (!alive) return;
+      if (!s) { setSession({ loaded: true, hasSession: false }); return; }
+      const exp = s.expires_at ? s.expires_at * 1000 : undefined;
+      setSession({
+        loaded: true,
+        hasSession: true,
+        userId: s.user.id,
+        email: s.user.email ?? undefined,
+        expiresAt: exp,
+        expired: exp ? Date.now() > exp : false,
+      });
+    }).catch(() => alive && setSession({ loaded: true, hasSession: false }));
+    return () => { alive = false; };
+  }, [refreshKey]);
+
+  // Preferências de notificação do usuário
+  useEffect(() => {
+    if (!user) return;
+    let alive = true;
+    supabase.from("notification_preferences")
+      .select("push_enabled, sound_enabled, email_enabled")
+      .eq("user_id", user.id).maybeSingle()
+      .then(({ data, error }) => {
+        if (!alive) return;
+        if (error) { setPrefs({ loaded: true, found: false, error: error.message }); return; }
+        if (!data) { setPrefs({ loaded: true, found: false }); return; }
+        setPrefs({ loaded: true, found: true, ...data });
+      });
+    return () => { alive = false; };
+  }, [user, refreshKey]);
+
+  // Manifest PWA (/manifest.json ou link rel=manifest)
+  useEffect(() => {
+    let alive = true;
+    const linkEl = typeof document !== "undefined" ? document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null : null;
+    const href = linkEl?.href || "/manifest.json";
+    fetch(href).then(async (res) => {
+      const txt = await res.text();
+      let j: { name?: string; short_name?: string; display?: string; icons?: unknown[] } = {};
+      try { j = JSON.parse(txt); } catch { /* não-JSON */ }
+      if (!alive) return;
+      setManifest({
+        loaded: true,
+        ok: res.ok && !!j.name,
+        href,
+        httpStatus: res.status,
+        name: j.name || j.short_name,
+        display: j.display,
+        iconsCount: Array.isArray(j.icons) ? j.icons.length : 0,
+        error: !res.ok ? `HTTP ${res.status}` : !j.name ? "manifest sem 'name'" : undefined,
+      });
+    }).catch((e) => alive && setManifest({ loaded: true, ok: false, href, error: (e as Error).message }));
+    return () => { alive = false; };
+  }, [refreshKey]);
+
+  // Verifica se o endpoint atual do navegador está realmente salvo no banco
+  useEffect(() => {
+    if (!user) return;
+    let alive = true;
+    (async () => {
+      try {
+        const reg = await navigator.serviceWorker?.getRegistration("/sw.js");
+        const sub = await reg?.pushManager.getSubscription();
+        if (!sub) { if (alive) setEndpointMatch({ loaded: true }); return; }
+        const { data, error } = await supabase.from("push_subscriptions")
+          .select("endpoint").eq("user_id", user.id).eq("endpoint", sub.endpoint).maybeSingle();
+        if (!alive) return;
+        if (error) setEndpointMatch({ loaded: true, browserEndpoint: sub.endpoint, error: error.message });
+        else setEndpointMatch({ loaded: true, browserEndpoint: sub.endpoint, serverHasIt: !!data });
+      } catch (e) {
+        if (alive) setEndpointMatch({ loaded: true, error: (e as Error).message });
+      }
+    })();
+    return () => { alive = false; };
+  }, [user, refreshKey, push.subscribed]);
+
+  // Teste de notificação local (sem servidor) — verifica se o SO mostra notificações do navegador
+  const testLocalNotification = async () => {
+    try {
+      if (!("Notification" in window)) throw new Error("Notification API ausente");
+      if (Notification.permission !== "granted") throw new Error(`Permissão: ${Notification.permission}`);
+      const reg = await navigator.serviceWorker.getRegistration("/sw.js");
+      if (reg) {
+        await reg.showNotification("🔔 Teste local", { body: "Esta notificação foi disparada pelo SW (sem servidor).", tag: "local-test" });
+      } else {
+        new Notification("🔔 Teste local", { body: "Esta notificação foi disparada pelo navegador (sem SW)." });
+      }
+      setLocalNotifyTest({ tried: true, ok: true });
+      toast.success("Notificação local enviada");
+    } catch (e) {
+      const msg = (e as Error).message;
+      setLocalNotifyTest({ tried: true, ok: false, error: msg });
+      toast.error("Falha no teste local", { description: msg });
+    }
+  };
+
+  // Teste de áudio (verifica se o som é desbloqueado/reproduz)
+  const testAudio = async () => {
+    try {
+      unlockAudio();
+      await playCoinSound();
+      setAudioTest({ tried: true, ok: true });
+      toast.success("💰 Som de venda OK");
+    } catch (e) {
+      const msg = (e as Error).message;
+      setAudioTest({ tried: true, ok: false, error: msg });
+      toast.error("Falha no áudio", { description: msg });
+    }
+  };
 
   // Re-registrar Service Worker: desregistra o atual, registra de novo e aguarda ficar 'activated'.
   const reregisterSW = async () => {
@@ -338,6 +486,86 @@ function StatusPage() {
             : "Toque em 'Re-sincronizar com servidor' abaixo para ver o erro exato da API")
         : undefined,
     },
+    {
+      ok: !session.loaded ? "warn" : session.hasSession && !session.expired,
+      label: "Sessão de autenticação",
+      detail: !session.loaded
+        ? "Carregando..."
+        : !session.hasSession
+          ? "Sem sessão — faça login novamente"
+          : session.expired
+            ? `Token EXPIRADO (em ${session.expiresAt ? new Date(session.expiresAt).toLocaleString() : "?"})`
+            : `OK · ${session.email ?? session.userId} · expira ${session.expiresAt ? new Date(session.expiresAt).toLocaleTimeString() : "?"}`,
+      fix: session.loaded && (!session.hasSession || session.expired)
+        ? "Saia e entre novamente para renovar o token Bearer usado pela API."
+        : undefined,
+    },
+    {
+      ok: !endpointMatch.loaded ? "warn"
+        : !endpointMatch.browserEndpoint ? "warn"
+        : endpointMatch.serverHasIt === true,
+      label: "Endpoint do navegador bate com o servidor",
+      detail: !endpointMatch.loaded
+        ? "Carregando..."
+        : !endpointMatch.browserEndpoint
+          ? "Sem subscription no navegador"
+          : endpointMatch.error
+            ? `Erro: ${endpointMatch.error}`
+            : endpointMatch.serverHasIt
+              ? `OK · ${endpointMatch.browserEndpoint.slice(0, 60)}…`
+              : `Divergente · navegador tem endpoint, servidor não · ${endpointMatch.browserEndpoint.slice(0, 60)}…`,
+      fix: endpointMatch.loaded && endpointMatch.browserEndpoint && endpointMatch.serverHasIt === false
+        ? "Toque em 'Re-sincronizar com servidor' para gravar este endpoint no banco."
+        : undefined,
+    },
+    {
+      ok: !prefs.loaded ? "warn" : prefs.found && prefs.push_enabled === true,
+      label: "Preferências de notificação",
+      detail: !prefs.loaded
+        ? "Carregando..."
+        : !prefs.found
+          ? "Sem registro em notification_preferences (usará defaults)"
+          : `push=${prefs.push_enabled ? "on" : "OFF"} · som=${prefs.sound_enabled ? "on" : "off"} · email=${prefs.email_enabled ? "on" : "off"}`,
+      fix: prefs.loaded && prefs.found && prefs.push_enabled === false
+        ? "Push está DESLIGADO nas suas preferências. Vá em Configurações → Notificações e ative."
+        : undefined,
+    },
+    {
+      ok: !manifest.loaded ? "warn" : manifest.ok,
+      label: "Manifest PWA",
+      detail: !manifest.loaded
+        ? "Carregando..."
+        : manifest.ok
+          ? `OK · ${manifest.name} · display=${manifest.display ?? "?"} · ${manifest.iconsCount} ícone(s)`
+          : `${manifest.error || "inválido"} (${manifest.href})`,
+      fix: manifest.loaded && !manifest.ok
+        ? "manifest.json ausente ou inválido — necessário para 'Adicionar à Tela de Início' no iPhone."
+        : undefined,
+    },
+    {
+      ok: !audioTest.tried ? "warn" : audioTest.ok,
+      label: "Áudio (som de venda)",
+      detail: !audioTest.tried
+        ? "Não testado ainda — toque em 'Ouvir som de venda' abaixo"
+        : audioTest.ok
+          ? "OK · áudio reproduzido"
+          : `Falhou: ${audioTest.error}`,
+      fix: audioTest.tried && !audioTest.ok
+        ? "Verifique o volume do dispositivo e o modo silencioso. Em iPhone, o som só toca após interação do usuário."
+        : undefined,
+    },
+    {
+      ok: !localNotifyTest.tried ? "warn" : localNotifyTest.ok,
+      label: "Teste local de notificação (sem servidor)",
+      detail: !localNotifyTest.tried
+        ? "Não testado — use 'Disparar notificação local' abaixo para isolar problemas do SO"
+        : localNotifyTest.ok
+          ? "OK · notificação exibida pelo SO"
+          : `Falhou: ${localNotifyTest.error}`,
+      fix: localNotifyTest.tried && !localNotifyTest.ok
+        ? "Se o teste local falha, o problema é de SO/permissões — não do servidor. Verifique 'Não Perturbe', 'Foco' e permissões do app."
+        : undefined,
+    },
   ];
 
   const allGood = checks.every((c) => c.ok === true);
@@ -481,9 +709,14 @@ function StatusPage() {
             </div>
           )}
 
-          <Button variant="outline" className="w-full" onClick={() => { unlockAudio(); playCoinSound(); toast.success("💰 Som de venda"); }}>
-            <Volume2 className="h-4 w-4 mr-2" />Ouvir som de venda
-          </Button>
+          <div className="grid sm:grid-cols-2 gap-2">
+            <Button variant="outline" onClick={testAudio}>
+              <Volume2 className="h-4 w-4 mr-2" />Testar som de venda
+            </Button>
+            <Button variant="outline" onClick={testLocalNotification}>
+              <Bell className="h-4 w-4 mr-2" />Disparar notificação local
+            </Button>
+          </div>
         </div>
 
         {/* Instruções iPhone */}
@@ -564,6 +797,12 @@ function StatusPage() {
   serverSubs,
   serviceWorker: swInfo,
   vapid: { status: vapid.status, httpStatus: vapid.httpStatus, length: vapid.length, formatOk: vapid.formatOk },
+  session: { ...session, expiresAt: session.expiresAt ? new Date(session.expiresAt).toISOString() : undefined },
+  preferences: prefs,
+  manifest,
+  endpointMatch,
+  audioTest,
+  localNotifyTest,
   userAgent: ua.slice(0, 200),
 }, null, 2)}
           </pre>
