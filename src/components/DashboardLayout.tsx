@@ -6,7 +6,7 @@ import { AppSidebar } from "./AppSidebar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { FireLoader } from "./FireLoader";
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 
 const EmberCanvas = lazy(() =>
   import("./EmberCanvas").then((m) => ({ default: m.EmberCanvas })),
@@ -22,6 +22,9 @@ export function DashboardLayout({ variant, title, children }: Props) {
   const { user, role, loading, signOut } = useAuth();
   const nav = useNavigate();
   const loc = useLocation();
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  useEffect(() => { setSheetOpen(false); }, [loc.pathname]);
 
   useEffect(() => {
     if (loading) return;
@@ -51,7 +54,7 @@ export function DashboardLayout({ variant, title, children }: Props) {
         {/* Topbar */}
         <header className="sticky top-0 z-20 h-16 border-b border-border bg-background/80 backdrop-blur-xl flex items-center justify-between px-4 md:px-8">
           <div className="flex items-center gap-3">
-            <Sheet>
+            <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="md:hidden">
                   <Menu className="h-5 w-5" />
