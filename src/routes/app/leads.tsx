@@ -200,6 +200,25 @@ function MyLeads() {
 
               <Timeline lead={selected} commission={selectedComm} />
 
+              {/* Observações */}
+              <div className="mt-6 pt-4 border-t border-border">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Observações internas</div>
+                  <span className="text-[10px] text-muted-foreground">Visível para você e admin</span>
+                </div>
+                <Textarea
+                  value={noteDraft}
+                  onChange={(e) => setNoteDraft(e.target.value)}
+                  placeholder="Ex.: cliente pediu desconto, retornar segunda..."
+                  className="min-h-[80px] bg-background/50 text-sm"
+                />
+                <div className="flex justify-end mt-2">
+                  <Button size="sm" onClick={saveNote} disabled={savingNote || noteDraft === (selected.notes ?? "")}>
+                    {savingNote ? "Salvando..." : "Salvar observação"}
+                  </Button>
+                </div>
+              </div>
+
               {selected.payment_amount ? (
                 <div className="mt-6 pt-4 border-t border-border grid grid-cols-2 gap-4">
                   <div>
