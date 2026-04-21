@@ -1,13 +1,13 @@
 // Server-only push helpers. Blocked from client bundles by `.server.ts` suffix.
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import webpush from "web-push";
+import { buildPushPayload, type PushSubscription as WPSub, type PushMessage, type VapidKeys } from "@block65/webcrypto-web-push";
 
-function configureVapid() {
-  const pub = process.env.VAPID_PUBLIC_KEY;
-  const priv = process.env.VAPID_PRIVATE_KEY;
+function getVapid(): VapidKeys | null {
+  const publicKey = process.env.VAPID_PUBLIC_KEY;
+  const privateKey = process.env.VAPID_PRIVATE_KEY;
   const subject = process.env.VAPID_SUBJECT || "mailto:admin@fire.com";
-  if (!pub || !priv) throw new Error("VAPID keys não configuradas");
-  webpush.setVapidDetails(subject, pub, priv);
+  if (!publicKey || !privateKey) return null;
+  return { subject, publicKey, privateKey };
 }
 
 export interface PushPayload {
