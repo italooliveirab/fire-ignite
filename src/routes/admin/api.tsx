@@ -369,8 +369,31 @@ function ApiPage() {
           <p className="mt-2">Query: <Code>status</Code> (pending/released/paid), <Code>affiliate_slug</Code>, <Code>limit</Code>.</p>
         </Block>
 
-        <Block title="🔁 Webhook reverso (em breve)">
-          <p>Pretende receber notificações da FIRE quando um lead virar paid? Avise para habilitarmos webhooks de saída no seu endpoint.</p>
+        <Block title="🔔 Webhooks de saída (HMAC)">
+          <p>A FIRE faz <b>POST</b> em uma URL configurada toda vez que um lead vira <Code>paid</Code>. Cada requisição é assinada com HMAC-SHA256.</p>
+          <p className="mt-2">Configure em <Code>/admin/webhooks</Code>. Headers enviados:</p>
+          <ul className="text-xs font-mono space-y-1 ml-4 mt-2">
+            <li><span className="text-primary">X-Fire-Event</span>: <Code>lead.paid</Code></li>
+            <li><span className="text-primary">X-Fire-Timestamp</span>: timestamp Unix (segundos)</li>
+            <li><span className="text-primary">X-Fire-Signature</span>: <Code>sha256=&lt;hex&gt;</Code> de <Code>{`{timestamp}.{body}`}</Code></li>
+            <li><span className="text-primary">X-Fire-Delivery-Id</span>: id único da entrega</li>
+          </ul>
+          <Pre>{`POST https://seu-bot.com/webhook
+{
+  "event": "lead.paid",
+  "sent_at": "2026-04-21T12:00:00.000Z",
+  "data": {
+    "lead_id": "uuid",
+    "whatsapp_id": "5511999999999@c.us",
+    "customer_name": "João",
+    "payment_amount": 197,
+    "paid_at": "2026-04-21T12:00:00.000Z",
+    "affiliate": { "slug": "maria", "full_name": "Maria", "email": "..." },
+    "product": { "name": "Curso X", "slug": "curso-x" },
+    "commission": { "value": 49.25, "type": "percentage" }
+  }
+}`}</Pre>
+          <p className="mt-2">Retentativas: até 3x com backoff (500ms, 2s). Timeout: 10s. Histórico de entregas em <Code>/admin/webhooks</Code>.</p>
         </Block>
       </section>
     </DashboardLayout>

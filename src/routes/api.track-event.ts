@@ -6,6 +6,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import crypto from "crypto";
 import { notifyAdminLeadPaid, notifyAffiliateLeadPaid } from "@/server/lead-notifications";
+import { dispatchWebhook } from "@/server/webhooks";
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -136,6 +137,43 @@ export const Route = createFileRoute("/api/track-event")({
               }
             } catch (notifyErr) {
               console.error("notify admin paid failed:", notifyErr);
+            }
+
+            // Dispara webhooks de saída (HMAC-signed) para integrações externas
+            try {
+              const { data: aff2 } = await supabaseAdmin
+                .from("affiliates")
+                .select("full_name, slug, email")
+                .eq("id", updated.affiliate_id)
+                .maybeSingle();
+              const { data: prod2 } = updated.product_id
+                ? await supabaseAdmin.from("products").select("name, slug").eq("id", updated.product_id).maybeSingle()
+                : { data: null };
+              const { data: commission } = await supabaseAdmin
+                .from("commissions")
+                .select("commission_value, commission_type")
+                .eq("lead_id", updated.id)
+                .maybeSingle();
+              await dispatchWebhook("lead.paid", {
+                lead_id: updated.id,
+                whatsapp_id: updated.whatsapp_id,
+                whatsapp_number: updated.whatsapp_number,
+                customer_name: updated.customer_name,
+                payment_amount: Number(updated.payment_amount ?? 0),
+                paid_at: updated.paid_at,
+                affiliate: aff2
+                  ? { id: updated.affiliate_id, slug: aff2.slug, full_name: aff2.full_name, email: aff2.email }
+                  : null,
+                product: prod2 ? { name: (prod2 as { name?: string }).name, slug: (prod2 as { slug?: string }).slug } : null,
+                commission: commission
+                  ? {
+                      value: Number((commission as { commission_value: number }).commission_value),
+                      type: (commission as { commission_type: string }).commission_type,
+                    }
+                  : null,
+              });
+            } catch (whErr) {
+              console.error("webhook dispatch failed:", whErr);
             }
           }
 
