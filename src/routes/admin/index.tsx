@@ -124,11 +124,12 @@ function AdminDashboard() {
 }
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
-  const { ref, onMouseMove } = useSpotlight();
+  const { ref, onMouseMove, onMouseLeave } = useSpotlight();
   return (
     <div
       ref={ref}
       onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
       className="spotlight-card rounded-2xl border border-border bg-card p-5 shadow-card-premium"
     >
       <h3 className="font-display font-semibold mb-4">{title}</h3>
