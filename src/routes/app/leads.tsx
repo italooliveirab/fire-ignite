@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 import { MousePointerClick, MessageCircle, Gift, Receipt, CheckCircle2, XCircle, DollarSign, ChevronRight, Copy, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -25,6 +26,7 @@ interface LeadRow {
   payment_generated_at: string | null;
   paid_at: string | null;
   product_id: string | null;
+  notes: string | null;
 }
 
 interface CommissionRow { id: string; lead_id: string; commission_value: number; status: string }
