@@ -1015,6 +1015,9 @@ export type Database = {
         | "generated_payment"
         | "paid"
         | "not_paid"
+        | "support_received"
+        | "renewed"
+        | "lost"
       network_link_status: "active" | "paused" | "removed"
       payout_frequency: "weekly" | "biweekly" | "monthly"
       payout_status: "requested" | "approved" | "paid" | "rejected"
@@ -1159,6 +1162,9 @@ export const Constants = {
         "generated_payment",
         "paid",
         "not_paid",
+        "support_received",
+        "renewed",
+        "lost",
       ],
       network_link_status: ["active", "paused", "removed"],
       payout_frequency: ["weekly", "biweekly", "monthly"],
