@@ -44,9 +44,29 @@ export function useWebPush() {
       await navigator.serviceWorker.ready;
       const perm = await Notification.requestPermission();
       setPermission(perm);
-      if (perm !== "granted") { toast.error("Permissão de notificação negada"); return; }
-      const { publicKey } = await getKey();
-      if (!publicKey) { toast.error("Configuração de push indisponível"); return; }
+      if (perm !== "granted") {
+        toast.error("Permissão de notificação negada", {
+          description: "Clique no cadeado 🔒 ao lado da URL → Notificações → Permitir → recarregue.",
+          duration: 8000,
+        });
+        return;
+      }
+      let publicKey = "";
+      try {
+        const r = await getKey();
+        publicKey = r.publicKey;
+      } catch (e) {
+        console.error("[push] getVapidPublicKey falhou", e);
+        toast.error("Servidor de notificações indisponível", {
+          description: "O build publicado parece desatualizado. Republique o app para corrigir.",
+          duration: 10000,
+        });
+        return;
+      }
+      if (!publicKey) {
+        toast.error("Chaves VAPID não configuradas no servidor");
+        return;
+      }
       // Reaproveita subscription existente (evita InvalidStateError se já existir com outra key)
       let sub = await reg.pushManager.getSubscription();
       if (sub) {

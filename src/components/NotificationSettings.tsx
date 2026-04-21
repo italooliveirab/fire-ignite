@@ -6,9 +6,10 @@ import { useWebPush } from "@/hooks/useWebPush";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Bell, BellOff, Smartphone, Volume2, Mail, Loader2, Send, AlertCircle } from "lucide-react";
+import { Bell, BellOff, Smartphone, Volume2, Mail, Loader2, Send, AlertCircle, Activity } from "lucide-react";
 import { toast } from "sonner";
 import { playCoinSound } from "@/lib/coin-sound";
+import { Link } from "@tanstack/react-router";
 
 type Prefs = {
   push_enabled: boolean; sound_enabled: boolean; email_enabled: boolean;
@@ -81,7 +82,12 @@ export function NotificationSettings() {
         {/* Push setup neste dispositivo */}
         {prefs.push_enabled && (
           <div className="rounded-xl bg-background/60 border border-border p-4 mt-2">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Este dispositivo</p>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">Este dispositivo</p>
+              <Link to="/app/notifications-status" className="text-xs text-primary hover:underline flex items-center gap-1">
+                <Activity className="h-3 w-3" />Diagnóstico
+              </Link>
+            </div>
             {!push.supported ? (
               <p className="text-sm text-muted-foreground flex items-center gap-2"><AlertCircle className="h-4 w-4" />Seu navegador não suporta push.</p>
             ) : isIOS && !isStandalone ? (
