@@ -18,6 +18,7 @@ function StatusPage() {
   const push = useWebPush();
   const [serverSubs, setServerSubs] = useState<number | null>(null);
   const [swActive, setSwActive] = useState<boolean>(false);
+  const [serverSubError, setServerSubError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   // Detecções
@@ -41,8 +42,17 @@ function StatusPage() {
       if (alive) setSwActive(!!reg?.active);
     });
     if (user) {
-      supabase.from("push_subscriptions").select("id", { count: "exact", head: true }).eq("user_id", user.id)
-        .then(({ count }) => { if (alive) setServerSubs(count ?? 0); });
+      supabase.from("push_subscriptions").select("id, endpoint, created_at", { count: "exact" }).eq("user_id", user.id)
+        .then(({ data, count, error }) => {
+          if (!alive) return;
+          if (error) {
+            setServerSubError(error.message);
+            setServerSubs(0);
+          } else {
+            setServerSubError(null);
+            setServerSubs(count ?? data?.length ?? 0);
+          }
+        });
     }
     return () => { alive = false; };
   }, [user, refreshKey, push.subscribed]);
@@ -100,8 +110,16 @@ function StatusPage() {
     {
       ok: serverSubs === null ? "warn" : serverSubs > 0,
       label: "Salvo no servidor",
-      detail: serverSubs === null ? "Carregando..." : serverSubs > 0 ? `${serverSubs} dispositivo(s) registrado(s)` : "Nenhum registro encontrado",
-      fix: serverSubs === 0 && push.subscribed ? "Desative e ative novamente — a inscrição no navegador não chegou ao servidor" : undefined,
+      detail: serverSubs === null
+        ? "Carregando..."
+        : serverSubs > 0
+          ? `${serverSubs} dispositivo(s) registrado(s)`
+          : serverSubError
+            ? `Erro ao consultar: ${serverSubError}`
+            : "Nenhum registro encontrado",
+      fix: serverSubs === 0 && push.subscribed
+        ? "Desative e ative novamente. Se persistir, abra o console do navegador e verifique a chamada para /api/push/subscribe"
+        : undefined,
     },
   ];
 
