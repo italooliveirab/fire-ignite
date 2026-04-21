@@ -10,33 +10,36 @@ interface Props {
   className?: string;
 }
 
-const accentMap = {
-  fire: "from-primary/20 to-transparent border-primary/30 text-primary",
-  neon: "from-info/20 to-transparent border-info/30 text-info",
-  gold: "from-gold/20 to-transparent border-gold/30 text-gold",
-  success: "from-success/20 to-transparent border-success/30 text-success",
-  warning: "from-warning/20 to-transparent border-warning/30 text-warning",
+const accentMap: Record<NonNullable<Props["accent"]>, string> = {
+  fire: "text-primary",
+  neon: "text-info",
+  gold: "text-gold",
+  success: "text-success",
+  warning: "text-warning",
 };
 
 export function StatCard({ label, value, icon: Icon, trend, accent = "fire", className }: Props) {
   return (
     <div className={cn(
-      "relative overflow-hidden rounded-2xl bg-card border border-border p-5 shadow-card-premium transition-all hover:border-primary/40 hover:-translate-y-0.5",
+      "relative bg-card border border-border p-5 transition-colors hover:border-primary group",
       className,
     )}>
-      <div className={cn("absolute inset-0 bg-gradient-to-br opacity-60 pointer-events-none", accentMap[accent].split(" ").slice(0, 2).join(" "))} />
-      <div className="relative">
-        <div className="flex items-start justify-between mb-3">
-          <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{label}</span>
-          {Icon && (
-            <div className={cn("h-9 w-9 rounded-lg border flex items-center justify-center bg-background/40", accentMap[accent].split(" ").slice(2).join(" "))}>
-              <Icon className="h-4 w-4" />
-            </div>
-          )}
-        </div>
-        <div className="font-display text-3xl font-bold text-foreground">{value}</div>
-        {trend && <div className="text-xs text-muted-foreground mt-1.5">{trend}</div>}
+      <div className="flex items-start justify-between mb-6">
+        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-muted-foreground">
+          {label}
+        </span>
+        {Icon && (
+          <Icon className={cn("h-4 w-4", accentMap[accent])} strokeWidth={2} />
+        )}
       </div>
+      <div className="font-display text-4xl text-foreground leading-none tracking-tight">{value}</div>
+      {trend && (
+        <div className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground mt-3">
+          {trend}
+        </div>
+      )}
+      {/* corner accent */}
+      <div className="absolute bottom-0 right-0 h-2 w-8 bg-primary opacity-0 group-hover:opacity-100 transition-opacity" />
     </div>
   );
 }
