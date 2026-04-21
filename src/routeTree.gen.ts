@@ -50,6 +50,7 @@ import { Route as AdminApiRouteImport } from './routes/admin/api'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin/analytics'
 import { Route as AdminAffiliatesRouteImport } from './routes/admin/affiliates'
 import { Route as PProductSlugAffiliateSlugRouteImport } from './routes/p.$productSlug.$affiliateSlug'
+import { Route as ApiWebhooksTestRouteImport } from './routes/api.webhooks.test'
 import { Route as ApiLeadsWhatsappIdRouteImport } from './routes/api.leads.$whatsappId'
 import { Route as ApiAffiliatesSlugRouteImport } from './routes/api.affiliates.$slug'
 
@@ -260,6 +261,11 @@ const PProductSlugAffiliateSlugRoute =
     path: '/p/$productSlug/$affiliateSlug',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiWebhooksTestRoute = ApiWebhooksTestRouteImport.update({
+  id: '/api/webhooks/test',
+  path: '/api/webhooks/test',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiLeadsWhatsappIdRoute = ApiLeadsWhatsappIdRouteImport.update({
   id: '/$whatsappId',
   path: '/$whatsappId',
@@ -314,6 +320,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AppIndexRoute
   '/api/affiliates/$slug': typeof ApiAffiliatesSlugRoute
   '/api/leads/$whatsappId': typeof ApiLeadsWhatsappIdRoute
+  '/api/webhooks/test': typeof ApiWebhooksTestRoute
   '/p/$productSlug/$affiliateSlug': typeof PProductSlugAffiliateSlugRoute
 }
 export interface FileRoutesByTo {
@@ -359,6 +366,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppIndexRoute
   '/api/affiliates/$slug': typeof ApiAffiliatesSlugRoute
   '/api/leads/$whatsappId': typeof ApiLeadsWhatsappIdRoute
+  '/api/webhooks/test': typeof ApiWebhooksTestRoute
   '/p/$productSlug/$affiliateSlug': typeof PProductSlugAffiliateSlugRoute
 }
 export interface FileRoutesById {
@@ -405,6 +413,7 @@ export interface FileRoutesById {
   '/app/': typeof AppIndexRoute
   '/api/affiliates/$slug': typeof ApiAffiliatesSlugRoute
   '/api/leads/$whatsappId': typeof ApiLeadsWhatsappIdRoute
+  '/api/webhooks/test': typeof ApiWebhooksTestRoute
   '/p/$productSlug/$affiliateSlug': typeof PProductSlugAffiliateSlugRoute
 }
 export interface FileRouteTypes {
@@ -452,6 +461,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/api/affiliates/$slug'
     | '/api/leads/$whatsappId'
+    | '/api/webhooks/test'
     | '/p/$productSlug/$affiliateSlug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -497,6 +507,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/api/affiliates/$slug'
     | '/api/leads/$whatsappId'
+    | '/api/webhooks/test'
     | '/p/$productSlug/$affiliateSlug'
   id:
     | '__root__'
@@ -542,6 +553,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/api/affiliates/$slug'
     | '/api/leads/$whatsappId'
+    | '/api/webhooks/test'
     | '/p/$productSlug/$affiliateSlug'
   fileRoutesById: FileRoutesById
 }
@@ -586,6 +598,7 @@ export interface RootRouteChildren {
   HooksWeeklyPayoutSummaryRoute: typeof HooksWeeklyPayoutSummaryRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AppIndexRoute: typeof AppIndexRoute
+  ApiWebhooksTestRoute: typeof ApiWebhooksTestRoute
   PProductSlugAffiliateSlugRoute: typeof PProductSlugAffiliateSlugRoute
 }
 
@@ -878,6 +891,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PProductSlugAffiliateSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/webhooks/test': {
+      id: '/api/webhooks/test'
+      path: '/api/webhooks/test'
+      fullPath: '/api/webhooks/test'
+      preLoaderRoute: typeof ApiWebhooksTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/leads/$whatsappId': {
       id: '/api/leads/$whatsappId'
       path: '/$whatsappId'
@@ -960,8 +980,18 @@ const rootRouteChildren: RootRouteChildren = {
   HooksWeeklyPayoutSummaryRoute: HooksWeeklyPayoutSummaryRoute,
   AdminIndexRoute: AdminIndexRoute,
   AppIndexRoute: AppIndexRoute,
+  ApiWebhooksTestRoute: ApiWebhooksTestRoute,
   PProductSlugAffiliateSlugRoute: PProductSlugAffiliateSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
