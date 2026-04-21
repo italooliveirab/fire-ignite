@@ -58,7 +58,7 @@ export function DashboardLayout({ variant, title, children }: Props) {
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="p-0 w-64 bg-sidebar border-sidebar-border">
-                <AppSidebar variant={variant} />
+                <AppSidebar variant={variant} inSheet />
               </SheetContent>
             </Sheet>
             <Link to="/" className="md:hidden flex items-center gap-2">

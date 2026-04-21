@@ -77,14 +77,17 @@ function usePendingRequestsCount(enabled: boolean) {
   return data;
 }
 
-export function AppSidebar({ variant }: { variant: "admin" | "affiliate" }) {
+export function AppSidebar({ variant, inSheet = false }: { variant: "admin" | "affiliate"; inSheet?: boolean }) {
   const items = variant === "admin" ? adminNav : affiliateNav;
   const { signOut, user } = useAuth();
   const loc = useLocation();
   const pendingRequests = usePendingRequestsCount(variant === "admin");
 
   return (
-    <aside className="hidden md:flex w-64 flex-col bg-sidebar border-r border-sidebar-border h-screen sticky top-0">
+    <aside className={cn(
+      "w-64 flex-col bg-sidebar border-r border-sidebar-border",
+      inSheet ? "flex h-full w-full border-r-0" : "hidden md:flex h-screen sticky top-0",
+    )}>
       <div className="px-6 py-6 border-b border-sidebar-border">
         <Link to="/">
           <BrandMark size="sm" subtitle={variant === "admin" ? "Admin" : "Afiliado"} />
