@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { resolveRoleForUser } from "@/lib/auth";
 import { toast } from "sonner";
 import { useAuth } from "@/lib/auth";
+import { InstallAppGuide } from "@/components/InstallAppGuide";
 
 export const Route = createFileRoute("/admin/login")({
   component: AdminLoginPage,
@@ -133,6 +134,10 @@ function AdminLoginPage() {
         <p className="text-center text-xs text-muted-foreground mt-6">
           🔒 Área restrita · Apenas administradores autorizados
         </p>
+
+        <div className="mt-4">
+          <InstallAppGuide variant="card" />
+        </div>
       </div>
     </div>
   );
