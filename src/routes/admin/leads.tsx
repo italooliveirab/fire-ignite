@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatBRL, formatDateTime } from "@/lib/format";
 import { exportCSV } from "@/lib/csv";
 import { toast } from "sonner";
-import { Search, Download, MousePointerClick, MessageCircle, Beaker, CreditCard, CheckCircle2, TrendingUp, Copy } from "lucide-react";
+import { Search, Download, MousePointerClick, MessageCircle, Beaker, CreditCard, CheckCircle2, TrendingUp, Copy, ExternalLink } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -312,6 +312,20 @@ function LeadsPage() {
                           }}
                         >
                           <Copy className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-6 w-6 shrink-0 text-emerald-400 hover:text-emerald-300"
+                          title="Abrir WhatsApp"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const digits = (l.whatsapp_number ?? "").replace(/\D/g, "");
+                            if (!digits) { toast.error("Número inválido"); return; }
+                            window.open(`https://wa.me/${digits}`, "_blank", "noopener,noreferrer");
+                          }}
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
                         </Button>
                       </div>
                     ) : "—"}
