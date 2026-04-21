@@ -720,8 +720,7 @@ function StatusPage() {
         </div>
 
         {/* Instruções iPhone */}
-        {isIOS && !isStandalone && (
-          <div className="rounded-2xl border border-amber-500/40 bg-amber-500/5 p-5 shadow-card-premium">
+        <div className="rounded-2xl border border-amber-500/40 bg-amber-500/5 p-5 shadow-card-premium">
             <h2 className="font-display font-semibold text-lg flex items-center gap-2 mb-3">
               <Smartphone className="h-4 w-4 text-amber-500" />iPhone — Adicione à Tela de Início
             </h2>
@@ -743,8 +742,7 @@ function StatusPage() {
                 </li>
               ))}
             </ol>
-          </div>
-        )}
+        </div>
 
         {/* Instruções Android / Desktop com permissão negada */}
         {push.permission === "denied" && (
