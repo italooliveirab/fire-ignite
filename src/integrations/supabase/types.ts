@@ -297,6 +297,45 @@ export type Database = {
           },
         ]
       }
+      debug_events: {
+        Row: {
+          category: string
+          context: Json | null
+          created_at: string
+          duration_ms: number | null
+          id: string
+          message: string
+          route: string | null
+          severity: string
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          category: string
+          context?: Json | null
+          created_at?: string
+          duration_ms?: number | null
+          id?: string
+          message: string
+          route?: string | null
+          severity?: string
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          category?: string
+          context?: Json | null
+          created_at?: string
+          duration_ms?: number | null
+          id?: string
+          message?: string
+          route?: string | null
+          severity?: string
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       email_log: {
         Row: {
           context: Json | null
@@ -962,6 +1001,7 @@ export type Database = {
     }
     Functions: {
       approve_payout: { Args: { _payout_id: string }; Returns: undefined }
+      cleanup_debug_events: { Args: never; Returns: number }
       generate_referral_code: { Args: never; Returns: string }
       get_affiliate_balance: {
         Args: { _affiliate_id: string }

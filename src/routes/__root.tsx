@@ -1,12 +1,13 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
-import { AuthProvider } from "@/lib/auth";
+import { AuthProvider, useAuth } from "@/lib/auth";
 import { BrandHead } from "@/components/BrandHead";
 import { ClickSpark } from "@/components/ClickSpark";
 import { PageTransition } from "@/components/PageTransition";
 import { Flame } from "lucide-react";
+import { installDebugMonitor, setDebugUser } from "@/lib/debug-monitor";
 
 import appCss from "../styles.css?url";
 
@@ -81,6 +82,7 @@ function RootComponent() {
       <AuthProvider>
         <BrandHead />
         <ClickSpark />
+        <DebugMonitorBridge />
         <PageTransition>
           <Outlet />
         </PageTransition>
@@ -88,4 +90,15 @@ function RootComponent() {
       </AuthProvider>
     </QueryClientProvider>
   );
+}
+
+function DebugMonitorBridge() {
+  const { user } = useAuth();
+  useEffect(() => {
+    installDebugMonitor();
+  }, []);
+  useEffect(() => {
+    setDebugUser(user?.id ?? null, user?.email ?? null);
+  }, [user]);
+  return null;
 }
