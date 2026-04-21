@@ -1020,6 +1020,7 @@ export type Database = {
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_network_member: { Args: { _affiliate_id: string }; Returns: boolean }
+      link_current_user_to_affiliate: { Args: never; Returns: string }
       mark_payout_paid: {
         Args: {
           _amount_paid: number
