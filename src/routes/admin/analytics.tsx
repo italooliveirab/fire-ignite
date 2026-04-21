@@ -174,6 +174,27 @@ function AnalyticsPage() {
         <span className="font-mono font-bold text-emerald-400 text-lg">{formatBRL(totalRevenue)}</span>
       </div>
 
+      {/* Renovações & Retenção */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Renovações</div>
+          <div className="font-display text-xl font-bold text-emerald-400">{formatNumber(totalRenewals)}</div>
+          <div className="text-[11px] text-muted-foreground mt-0.5">ciclo &gt; 1</div>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Receita renov.</div>
+          <div className="font-display text-xl font-bold text-primary">{formatBRL(renewalRevenue)}</div>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Taxa renovação</div>
+          <div className="font-display text-xl font-bold">{renewalRate.toFixed(1)}%</div>
+        </div>
+        <div className="rounded-xl border border-border bg-card p-4">
+          <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Perdidos / Suporte</div>
+          <div className="font-display text-xl font-bold"><span className="text-destructive">{totalLost}</span> <span className="text-muted-foreground text-sm">/ {totalSupport}</span></div>
+        </div>
+      </div>
+
       {/* Funil em barras */}
       <div className="rounded-2xl border border-border bg-card p-5 mb-6 shadow-card-premium">
         <h2 className="font-display text-lg font-semibold mb-4">Funil de conversão</h2>
