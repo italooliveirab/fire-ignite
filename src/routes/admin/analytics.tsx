@@ -43,6 +43,18 @@ function AnalyticsPage() {
     },
   });
 
+  const { data: networkComms = [] } = useQuery({
+    queryKey: ["analytics-net-comms", dateFrom, dateTo],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("network_commissions")
+        .select("id, payment_cycle, payment_amount, created_at")
+        .gte("created_at", fromIso).lte("created_at", toIso)
+        .limit(10000);
+      return data ?? [];
+    },
+  });
+
   const { data: affiliates = [] } = useQuery({
     queryKey: ["analytics-affiliates"],
     queryFn: async () => (await supabase.from("affiliates").select("id, full_name, slug")).data ?? [],
@@ -68,6 +80,11 @@ function AnalyticsPage() {
   const totalPaid = leads.filter((l) => l.status === "paid").length;
   const totalRevenue = leads.filter((l) => l.status === "paid").reduce((s, l) => s + Number(l.payment_amount ?? 0), 0);
   const convRate = totalClicks > 0 ? (totalPaid / totalClicks) * 100 : 0;
+  const totalRenewals = networkComms.filter((c) => (c.payment_cycle ?? 1) > 1).length;
+  const renewalRevenue = networkComms.filter((c) => (c.payment_cycle ?? 1) > 1).reduce((s, c) => s + Number(c.payment_amount ?? 0), 0);
+  const renewalRate = totalPaid > 0 ? (totalRenewals / totalPaid) * 100 : 0;
+  const totalLost = leads.filter((l) => l.status === "lost" || l.status === "not_paid").length;
+  const totalSupport = leads.filter((l) => l.status === "support_received").length;
 
   // Série diária
   const dailySeries = useMemo(() => {

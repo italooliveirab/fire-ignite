@@ -121,6 +121,7 @@ export const Route = createFileRoute("/api/track-event")({
           if (event === "trial_requested") update.trial_generated_at = now;
           if (event === "payment_generated") update.payment_generated_at = now;
           if (event === "paid") update.paid_at = now;
+          if (event === "renewed") update.paid_at = now;
 
           const { data: updated, error: updErr } = await supabaseAdmin.from("leads").update(update as never).eq("id", lead.id).select().single();
           if (updErr) throw updErr;
