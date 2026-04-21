@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/lib/auth";
 import { BrandHead } from "@/components/BrandHead";
 import { ClickSpark } from "@/components/ClickSpark";
+import { PageTransition } from "@/components/PageTransition";
 import { Flame } from "lucide-react";
 
 import appCss from "../styles.css?url";
@@ -80,7 +81,9 @@ function RootComponent() {
       <AuthProvider>
         <BrandHead />
         <ClickSpark />
-        <Outlet />
+        <PageTransition>
+          <Outlet />
+        </PageTransition>
         <Toaster theme="dark" position="top-right" richColors />
       </AuthProvider>
     </QueryClientProvider>

@@ -31,6 +31,7 @@ export function ClickSpark() {
 
       const spark = document.createElement("span");
       spark.className = "fire-ripple";
+      spark.setAttribute("data-variant", detectVariant(trigger));
       spark.style.left = `${x}px`;
       spark.style.top = `${y}px`;
       trigger.appendChild(spark);
@@ -49,4 +50,23 @@ export function ClickSpark() {
   }, []);
 
   return null;
+}
+
+function detectVariant(el: HTMLElement): "fire" | "gold" | "info" | "success" | "danger" {
+  // Explicit override
+  const explicit = el.getAttribute("data-spark");
+  if (explicit === "gold" || explicit === "info" || explicit === "success" || explicit === "danger" || explicit === "fire") {
+    return explicit;
+  }
+  const cls = el.className && typeof el.className === "string" ? el.className : "";
+  // Success
+  if (/(bg-success|text-success|border-success|bg-emerald|bg-green)/.test(cls)) return "success";
+  // Danger / destructive
+  if (/(bg-destructive|destructive|bg-red)/.test(cls)) return "danger";
+  // Info / neon (azul)
+  if (/(bg-info|text-info|border-info|bg-neon|text-neon|bg-blue|bg-sky|bg-cyan)/.test(cls)) return "info";
+  // Primary / fire / gradient → dourado
+  if (/(gradient-fire|bg-primary|text-primary-foreground|bg-gold|text-gold)/.test(cls)) return "gold";
+  // Default: fire (laranja padrão)
+  return "fire";
 }
