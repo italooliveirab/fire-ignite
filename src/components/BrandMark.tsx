@@ -25,18 +25,18 @@ export function BrandMark({
   return (
     <div className={cn("flex items-center gap-2.5", className)}>
       {logoUrl ? (
-        <div className={cn(s.box, "border border-border bg-card flex items-center justify-center overflow-hidden shrink-0")}>
+        <div className={cn(s.box, "rounded-lg border border-border/70 bg-card flex items-center justify-center overflow-hidden shrink-0")}>
           <img src={logoUrl} alt={`${companyName} logo`} className="h-full w-full object-contain p-0.5" />
         </div>
       ) : (
-        <div className={cn(s.box, "bg-primary flex items-center justify-center shrink-0")}>
+        <div className={cn(s.box, "rounded-lg bg-gradient-fire flex items-center justify-center shrink-0 shadow-glow-soft")}>
           <Flame className={cn(s.icon, "text-primary-foreground")} strokeWidth={2.5} />
         </div>
       )}
       <div className="min-w-0">
-        <div className={cn("font-display leading-none text-foreground truncate uppercase tracking-tight", s.title)}>{companyName}</div>
+        <div className={cn("font-display font-semibold leading-none text-foreground truncate tracking-tight", s.title)}>{companyName}</div>
         {subtitle && (
-          <div className={cn("uppercase tracking-[0.25em] text-muted-foreground mt-1 font-mono", s.sub)}>{subtitle}</div>
+          <div className={cn("uppercase tracking-[0.18em] text-muted-foreground mt-1.5 font-medium", s.sub)}>{subtitle}</div>
         )}
       </div>
     </div>
