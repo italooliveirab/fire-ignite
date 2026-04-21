@@ -20,6 +20,8 @@ function StatusPage() {
   const [swActive, setSwActive] = useState<boolean>(false);
   const [serverSubError, setServerSubError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [resyncing, setResyncing] = useState(false);
+  const [resyncMsg, setResyncMsg] = useState<string | null>(null);
 
   // Detecções
   const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
@@ -56,6 +58,35 @@ function StatusPage() {
     }
     return () => { alive = false; };
   }, [user, refreshKey, push.subscribed]);
+
+  // Re-sincronizar: pega a subscription do navegador e força reenvio para o servidor.
+  const resync = async () => {
+    setResyncing(true); setResyncMsg(null);
+    try {
+      const reg = await navigator.serviceWorker.getRegistration("/sw.js");
+      const sub = await reg?.pushManager.getSubscription();
+      if (!sub) { setResyncMsg("Sem subscription no navegador. Toque em 'Ativar' primeiro."); return; }
+      const json = sub.toJSON() as { endpoint: string; keys: { p256dh: string; auth: string } };
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch("/api/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token ?? ""}` },
+        body: JSON.stringify({
+          endpoint: json.endpoint, p256dh: json.keys.p256dh, auth: json.keys.auth,
+          user_agent: navigator.userAgent.slice(0, 500),
+        }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (res.ok) { toast.success("Sincronizado com o servidor!"); setRefreshKey((k) => k + 1); }
+      else {
+        const msg = `${res.status}: ${j.detail || j.error || "erro"}`;
+        setResyncMsg(msg); toast.error("Falha ao sincronizar", { description: msg });
+      }
+    } catch (e) {
+      const msg = (e as Error).message;
+      setResyncMsg(msg); toast.error("Erro", { description: msg });
+    } finally { setResyncing(false); }
+  };
 
   const checks: Check[] = [
     {
@@ -200,6 +231,16 @@ function StatusPage() {
                 Desativar aqui
               </Button>
             </div>
+          )}
+
+          {push.subscribed && serverSubs === 0 && (
+            <Button onClick={resync} disabled={resyncing} variant="secondary" className="w-full">
+              <RefreshCw className={`h-4 w-4 mr-2 ${resyncing ? "animate-spin" : ""}`} />
+              {resyncing ? "Sincronizando..." : "Re-sincronizar com servidor"}
+            </Button>
+          )}
+          {resyncMsg && (
+            <p className="text-xs text-muted-foreground">{resyncMsg}</p>
           )}
 
           <Button variant="outline" className="w-full" onClick={() => { unlockAudio(); playCoinSound(); toast.success("💰 Som de venda"); }}>
