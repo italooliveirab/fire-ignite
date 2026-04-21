@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatBRL, formatDateTime } from "@/lib/format";
 import { exportCSV } from "@/lib/csv";
 import { toast } from "sonner";
-import { Search, Download, MousePointerClick, MessageCircle, Beaker, CreditCard, CheckCircle2, TrendingUp } from "lucide-react";
+import { Search, Download, MousePointerClick, MessageCircle, Beaker, CreditCard, CheckCircle2, TrendingUp, Copy } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -296,7 +296,26 @@ function LeadsPage() {
               ) : filtered.map((l) => (
                 <tr key={l.id} className="border-b border-border/50 hover:bg-background/40">
                   <td className="px-5 py-3.5 font-medium">{l.customer_name ?? "—"}</td>
-                  <td className="px-5 py-3.5 hidden md:table-cell text-muted-foreground">{l.whatsapp_number ?? "—"}</td>
+                  <td className="px-5 py-3.5 hidden md:table-cell text-muted-foreground">
+                    {l.whatsapp_number ? (
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono">{l.whatsapp_number}</span>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-6 w-6 shrink-0"
+                          title="Copiar WhatsApp"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigator.clipboard.writeText(l.whatsapp_number ?? "");
+                            toast.success("WhatsApp copiado!");
+                          }}
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ) : "—"}
+                  </td>
                   <td className="px-5 py-3.5 hidden lg:table-cell text-muted-foreground">{(l as { affiliates?: { full_name: string } }).affiliates?.full_name ?? "—"}</td>
                   <td className="px-5 py-3.5"><StatusBadge status={l.status} /></td>
                   <td className="px-5 py-3.5 hidden md:table-cell text-right font-mono">{l.payment_amount ? formatBRL(Number(l.payment_amount)) : "—"}</td>
