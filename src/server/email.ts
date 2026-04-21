@@ -19,26 +19,36 @@ export async function sendEmail(input: SendEmailInput): Promise<{ ok: boolean; e
   let okFlag = false;
   let errorMsg: string | undefined;
   try {
-    const from = process.env.SMTP_FROM ?? process.env.SMTP_USER!;
-    const config = getPrimarySmtpConfig();
-    const message = {
-      from,
-      to: recipient,
+    const lovableKey = process.env.LOVABLE_API_KEY;
+    const resendKey = process.env.RESEND_API_KEY;
+    if (!lovableKey) throw new Error("LOVABLE_API_KEY não configurado");
+    if (!resendKey) throw new Error("RESEND_API_KEY não configurado (conecte Resend)");
+
+    const fromAddress = process.env.SMTP_FROM ?? process.env.SMTP_USER ?? "notify@servicosfire.online";
+    const fromHeader = /<.+@.+>/.test(fromAddress) ? fromAddress : `FIRE <${fromAddress}>`;
+
+    const toList = Array.isArray(input.to) ? input.to : [input.to];
+    const payload: Record<string, unknown> = {
+      from: fromHeader,
+      to: toList,
       subject: input.subject,
       html: input.html,
       text: input.text ?? input.html.replace(/<[^>]+>/g, ""),
-      replyTo: input.replyTo,
     };
+    if (input.replyTo) payload.reply_to = input.replyTo;
 
-    try {
-      await getTransporter(config).sendMail(message);
-    } catch (primaryError) {
-      _transporterCache = null;
-      const fallbackConfig = getFallbackSmtpConfig(config);
-      const isAuthFailure = (primaryError as { responseCode?: number }).responseCode === 535;
-      if (!fallbackConfig || !isAuthFailure) throw primaryError;
-
-      await getTransporter(fallbackConfig).sendMail(message);
+    const res = await fetch(`${GATEWAY_URL}/emails`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${lovableKey}`,
+        "X-Connection-Api-Key": resendKey,
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(`Resend ${res.status}: ${JSON.stringify(data)}`);
     }
     okFlag = true;
   } catch (e) {
