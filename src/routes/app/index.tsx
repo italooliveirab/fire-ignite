@@ -167,11 +167,12 @@ function AffiliateDashboard() {
 }
 
 function SpotlightChart({ children }: { children: React.ReactNode }) {
-  const { ref, onMouseMove } = useSpotlight();
+  const { ref, onMouseMove, onMouseLeave } = useSpotlight();
   return (
     <div
       ref={ref}
       onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
       className="spotlight-card lg:col-span-2 rounded-2xl border border-border bg-card p-5 shadow-card-premium"
     >
       {children}
