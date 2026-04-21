@@ -164,6 +164,9 @@ function StatusPage() {
 
   // Re-sincronizar: pega a subscription do navegador e força reenvio para o servidor.
   const resync = async () => {
+
+    // placeholder no-op marker (real impl below)
+
     setResyncing(true); setResyncMsg(null);
     try {
       const reg = await navigator.serviceWorker.getRegistration("/sw.js");
