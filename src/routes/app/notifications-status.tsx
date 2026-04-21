@@ -22,6 +22,14 @@ function StatusPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [resyncing, setResyncing] = useState(false);
   const [resyncMsg, setResyncMsg] = useState<string | null>(null);
+  const [lastApiResponse, setLastApiResponse] = useState<{
+    status: number;
+    ok: boolean;
+    error?: string;
+    detail?: string;
+    raw?: string;
+    at: string;
+  } | null>(null);
 
   // Detecções
   const ua = typeof navigator !== "undefined" ? navigator.userAgent : "";
@@ -76,15 +84,27 @@ function StatusPage() {
           user_agent: navigator.userAgent.slice(0, 500),
         }),
       });
-      const j = await res.json().catch(() => ({}));
+      const raw = await res.text();
+      let j: { error?: string; detail?: string } = {};
+      try { j = JSON.parse(raw); } catch { /* corpo não-JSON */ }
+      setLastApiResponse({
+        status: res.status,
+        ok: res.ok,
+        error: j.error,
+        detail: j.detail,
+        raw: raw.slice(0, 1000),
+        at: new Date().toLocaleTimeString(),
+      });
       if (res.ok) { toast.success("Sincronizado com o servidor!"); setRefreshKey((k) => k + 1); }
       else {
-        const msg = `${res.status}: ${j.detail || j.error || "erro"}`;
+        const msg = `HTTP ${res.status} — ${j.error || "erro"}${j.detail ? `: ${j.detail}` : ""}`;
         setResyncMsg(msg); toast.error("Falha ao sincronizar", { description: msg });
       }
     } catch (e) {
       const msg = (e as Error).message;
-      setResyncMsg(msg); toast.error("Erro", { description: msg });
+      setResyncMsg(msg);
+      setLastApiResponse({ status: 0, ok: false, error: "network_error", detail: msg, at: new Date().toLocaleTimeString() });
+      toast.error("Erro", { description: msg });
     } finally { setResyncing(false); }
   };
 
