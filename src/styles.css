@@ -282,5 +282,66 @@ html { color-scheme: dark; }
 }
 .fire-pulse-ring { animation: pulse-ring 1.8s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
 
+/* ============================================
+   FIRE — Spotlight glow (cursor-tracking)
+   Use: <div class="spotlight-card">...</div>
+   ============================================ */
+.spotlight-card {
+  --mx: 50%;
+  --my: 50%;
+  --spot-color: 255, 90, 0;
+  position: relative;
+  isolation: isolate;
+}
+.spotlight-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 220ms ease;
+  background: radial-gradient(
+    420px circle at var(--mx) var(--my),
+    rgba(var(--spot-color), 0.18),
+    rgba(var(--spot-color), 0.06) 30%,
+    transparent 60%
+  );
+  z-index: 0;
+}
+.spotlight-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 220ms ease;
+  background: radial-gradient(
+    260px circle at var(--mx) var(--my),
+    rgba(255, 255, 255, 0.10),
+    transparent 60%
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  padding: 1px;
+  z-index: 1;
+}
+.spotlight-card:hover::before,
+.spotlight-card:hover::after { opacity: 1; }
+
+.spotlight-card[data-spot="neon"]    { --spot-color: 0, 191, 255; }
+.spotlight-card[data-spot="success"] { --spot-color: 40, 210, 120; }
+.spotlight-card[data-spot="gold"]    { --spot-color: 255, 180, 40; }
+.spotlight-card[data-spot="warning"] { --spot-color: 255, 150, 0; }
+.spotlight-card[data-spot="fire"]    { --spot-color: 255, 90, 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .spotlight-card::before, .spotlight-card::after { display: none; }
+}
+
 /* Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap');

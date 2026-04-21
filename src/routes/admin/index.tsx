@@ -6,6 +6,7 @@ import { StatCard } from "@/components/StatCard";
 import { supabase } from "@/integrations/supabase/client";
 import { formatBRL, formatNumber } from "@/lib/format";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
+import { useSpotlight } from "@/hooks/useSpotlight";
 
 export const Route = createFileRoute("/admin/")({ component: AdminDashboard });
 
@@ -123,8 +124,13 @@ function AdminDashboard() {
 }
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
+  const { ref, onMouseMove } = useSpotlight();
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 shadow-card-premium">
+    <div
+      ref={ref}
+      onMouseMove={onMouseMove}
+      className="spotlight-card rounded-2xl border border-border bg-card p-5 shadow-card-premium"
+    >
       <h3 className="font-display font-semibold mb-4">{title}</h3>
       {children}
     </div>

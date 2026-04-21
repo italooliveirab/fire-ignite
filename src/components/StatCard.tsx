@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSpotlight } from "@/hooks/useSpotlight";
 
 interface Props {
   label: string;
@@ -19,13 +20,18 @@ const accentMap = {
 };
 
 export function StatCard({ label, value, icon: Icon, trend, accent = "fire", className }: Props) {
+  const { ref, onMouseMove } = useSpotlight();
   return (
     <div className={cn(
-      "relative overflow-hidden rounded-2xl bg-card border border-border p-5 shadow-card-premium transition-all hover:border-primary/40 hover:-translate-y-0.5",
+      "spotlight-card relative overflow-hidden rounded-2xl bg-card border border-border p-5 shadow-card-premium transition-all hover:border-primary/40 hover:-translate-y-0.5",
       className,
-    )}>
+    )}
+    data-spot={accent}
+    ref={ref}
+    onMouseMove={onMouseMove}
+    >
       <div className={cn("absolute inset-0 bg-gradient-to-br opacity-60 pointer-events-none", accentMap[accent].split(" ").slice(0, 2).join(" "))} />
-      <div className="relative">
+      <div className="relative z-10">
         <div className="flex items-start justify-between mb-3">
           <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">{label}</span>
           {Icon && (
