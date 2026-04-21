@@ -132,9 +132,9 @@ function AffiliateDashboard() {
       {stats && (
         <>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
-            <StatCard label="Comissão pendente" value={formatBRL(stats.commPending)} icon={Clock} accent="warning" />
-            <StatCard label="Comissão paga" value={formatBRL(stats.commPaid)} icon={Banknote} accent="success" />
-            <StatCard label="Ganhos da rede" value={formatBRL(stats.networkEarnings)} icon={Network} accent="neon" />
+            <StatCard variant="premium" label="Comissão pendente" value={formatBRL(stats.commPending)} icon={Clock} accent="warning" />
+            <StatCard variant="premium" label="Comissão paga" value={formatBRL(stats.commPaid)} icon={Banknote} accent="success" />
+            <StatCard variant="premium" label="Ganhos da rede" value={formatBRL(stats.networkEarnings)} icon={Network} accent="neon" />
             <StatCard label="Total leads" value={formatNumber(stats.total)} icon={Target} accent="fire" />
             <StatCard label="Pagaram" value={formatNumber(stats.paid)} icon={CheckCircle} accent="success" />
           </div>
