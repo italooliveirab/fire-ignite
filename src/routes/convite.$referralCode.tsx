@@ -80,7 +80,7 @@ function InvitePage() {
                 Crie sua conta agora e entre direto para a rede de <strong className="text-foreground">{referrer.full_name}</strong>. Você ganha acesso ao produto <strong className="text-primary">FIRENET B</strong> e seu link de vendas é gerado automaticamente.
               </p>
               <Button
-                onClick={() => nav({ to: "/signup", search: { ref: referralCode } as never })}
+                onClick={() => { window.location.href = `/signup?ref=${encodeURIComponent(referralCode)}`; }}
                 className="w-full h-11 bg-gradient-fire text-white shadow-fire font-semibold"
               >
                 Criar minha conta <ArrowRight className="ml-2 h-4 w-4" />
