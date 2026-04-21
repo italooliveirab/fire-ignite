@@ -48,6 +48,7 @@ import { Route as AdminApiRouteImport } from './routes/admin/api'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin/analytics'
 import { Route as AdminAffiliatesRouteImport } from './routes/admin/affiliates'
 import { Route as PProductSlugAffiliateSlugRouteImport } from './routes/p.$productSlug.$affiliateSlug'
+import { Route as ApiLeadsWhatsappIdRouteImport } from './routes/api.leads.$whatsappId'
 import { Route as ApiAffiliatesSlugRouteImport } from './routes/api.affiliates.$slug'
 
 const SignupRoute = SignupRouteImport.update({
@@ -247,6 +248,11 @@ const PProductSlugAffiliateSlugRoute =
     path: '/p/$productSlug/$affiliateSlug',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiLeadsWhatsappIdRoute = ApiLeadsWhatsappIdRouteImport.update({
+  id: '/$whatsappId',
+  path: '/$whatsappId',
+  getParentRoute: () => ApiLeadsRoute,
+} as any)
 const ApiAffiliatesSlugRoute = ApiAffiliatesSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -277,7 +283,7 @@ export interface FileRoutesByFullPath {
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
-  '/api/leads': typeof ApiLeadsRoute
+  '/api/leads': typeof ApiLeadsRouteWithChildren
   '/api/products': typeof ApiProductsRoute
   '/api/track-event': typeof ApiTrackEventRoute
   '/app/commissions': typeof AppCommissionsRoute
@@ -293,6 +299,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/api/affiliates/$slug': typeof ApiAffiliatesSlugRoute
+  '/api/leads/$whatsappId': typeof ApiLeadsWhatsappIdRoute
   '/p/$productSlug/$affiliateSlug': typeof PProductSlugAffiliateSlugRoute
 }
 export interface FileRoutesByTo {
@@ -319,7 +326,7 @@ export interface FileRoutesByTo {
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
-  '/api/leads': typeof ApiLeadsRoute
+  '/api/leads': typeof ApiLeadsRouteWithChildren
   '/api/products': typeof ApiProductsRoute
   '/api/track-event': typeof ApiTrackEventRoute
   '/app/commissions': typeof AppCommissionsRoute
@@ -335,6 +342,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/api/affiliates/$slug': typeof ApiAffiliatesSlugRoute
+  '/api/leads/$whatsappId': typeof ApiLeadsWhatsappIdRoute
   '/p/$productSlug/$affiliateSlug': typeof PProductSlugAffiliateSlugRoute
 }
 export interface FileRoutesById {
@@ -362,7 +370,7 @@ export interface FileRoutesById {
   '/admin/requests': typeof AdminRequestsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/api/affiliates': typeof ApiAffiliatesRouteWithChildren
-  '/api/leads': typeof ApiLeadsRoute
+  '/api/leads': typeof ApiLeadsRouteWithChildren
   '/api/products': typeof ApiProductsRoute
   '/api/track-event': typeof ApiTrackEventRoute
   '/app/commissions': typeof AppCommissionsRoute
@@ -378,6 +386,7 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/api/affiliates/$slug': typeof ApiAffiliatesSlugRoute
+  '/api/leads/$whatsappId': typeof ApiLeadsWhatsappIdRoute
   '/p/$productSlug/$affiliateSlug': typeof PProductSlugAffiliateSlugRoute
 }
 export interface FileRouteTypes {
@@ -422,6 +431,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/app/'
     | '/api/affiliates/$slug'
+    | '/api/leads/$whatsappId'
     | '/p/$productSlug/$affiliateSlug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -464,6 +474,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/app'
     | '/api/affiliates/$slug'
+    | '/api/leads/$whatsappId'
     | '/p/$productSlug/$affiliateSlug'
   id:
     | '__root__'
@@ -506,6 +517,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/app/'
     | '/api/affiliates/$slug'
+    | '/api/leads/$whatsappId'
     | '/p/$productSlug/$affiliateSlug'
   fileRoutesById: FileRoutesById
 }
@@ -533,7 +545,7 @@ export interface RootRouteChildren {
   AdminRequestsRoute: typeof AdminRequestsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   ApiAffiliatesRoute: typeof ApiAffiliatesRouteWithChildren
-  ApiLeadsRoute: typeof ApiLeadsRoute
+  ApiLeadsRoute: typeof ApiLeadsRouteWithChildren
   ApiProductsRoute: typeof ApiProductsRoute
   ApiTrackEventRoute: typeof ApiTrackEventRoute
   AppCommissionsRoute: typeof AppCommissionsRoute
@@ -826,6 +838,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PProductSlugAffiliateSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/leads/$whatsappId': {
+      id: '/api/leads/$whatsappId'
+      path: '/$whatsappId'
+      fullPath: '/api/leads/$whatsappId'
+      preLoaderRoute: typeof ApiLeadsWhatsappIdRouteImport
+      parentRoute: typeof ApiLeadsRoute
+    }
     '/api/affiliates/$slug': {
       id: '/api/affiliates/$slug'
       path: '/$slug'
@@ -846,6 +865,18 @@ const ApiAffiliatesRouteChildren: ApiAffiliatesRouteChildren = {
 
 const ApiAffiliatesRouteWithChildren = ApiAffiliatesRoute._addFileChildren(
   ApiAffiliatesRouteChildren,
+)
+
+interface ApiLeadsRouteChildren {
+  ApiLeadsWhatsappIdRoute: typeof ApiLeadsWhatsappIdRoute
+}
+
+const ApiLeadsRouteChildren: ApiLeadsRouteChildren = {
+  ApiLeadsWhatsappIdRoute: ApiLeadsWhatsappIdRoute,
+}
+
+const ApiLeadsRouteWithChildren = ApiLeadsRoute._addFileChildren(
+  ApiLeadsRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
@@ -872,7 +903,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRequestsRoute: AdminRequestsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   ApiAffiliatesRoute: ApiAffiliatesRouteWithChildren,
-  ApiLeadsRoute: ApiLeadsRoute,
+  ApiLeadsRoute: ApiLeadsRouteWithChildren,
   ApiProductsRoute: ApiProductsRoute,
   ApiTrackEventRoute: ApiTrackEventRoute,
   AppCommissionsRoute: AppCommissionsRoute,
