@@ -17,11 +17,11 @@ const styles: Record<string, string> = {
 };
 
 const labels: Record<string, string> = {
-  initiated_conversation: "Iniciou conversa",
-  generated_trial: "Gerou teste",
-  generated_payment: "Gerou pagamento",
-  paid: "Pagou",
-  not_paid: "Não pagou",
+  initiated_conversation: "Novo lead",
+  generated_trial: "Em atendimento",
+  generated_payment: "Em atendimento",
+  paid: "Renovado",
+  not_paid: "Perdido",
   pending: "Pendente",
   released: "Liberada",
   active: "Ativo",
