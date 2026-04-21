@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/lib/auth";
 import { BrandHead } from "@/components/BrandHead";
+import { ClickSpark } from "@/components/ClickSpark";
 import { Flame } from "lucide-react";
 
 import appCss from "../styles.css?url";
@@ -78,6 +79,7 @@ function RootComponent() {
     <QueryClientProvider client={qc}>
       <AuthProvider>
         <BrandHead />
+        <ClickSpark />
         <Outlet />
         <Toaster theme="dark" position="top-right" richColors />
       </AuthProvider>
