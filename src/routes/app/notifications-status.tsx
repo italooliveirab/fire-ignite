@@ -31,6 +31,8 @@ function StatusPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [resyncing, setResyncing] = useState(false);
   const [resyncMsg, setResyncMsg] = useState<string | null>(null);
+  const [swBusy, setSwBusy] = useState(false);
+  const [swReregisterMsg, setSwReregisterMsg] = useState<string | null>(null);
   const [vapid, setVapid] = useState<{
     status: "loading" | "ok" | "fail";
     httpStatus?: number;
@@ -159,6 +161,49 @@ function StatusPage() {
       });
     return () => { alive = false; };
   }, [refreshKey]);
+
+  // Re-registrar Service Worker: desregistra o atual, registra de novo e aguarda ficar 'activated'.
+  const reregisterSW = async () => {
+    if (!("serviceWorker" in navigator)) {
+      toast.error("Navegador não suporta Service Worker");
+      return;
+    }
+    setSwBusy(true); setSwReregisterMsg("Desregistrando SW antigo...");
+    try {
+      const existing = await navigator.serviceWorker.getRegistrations();
+      for (const r of existing) {
+        try { await r.unregister(); } catch { /* noop */ }
+      }
+      setSwReregisterMsg("Registrando /sw.js...");
+      const reg = await navigator.serviceWorker.register("/sw.js", { updateViaCache: "none" });
+      // Polling até state === 'activated' (até 10s)
+      setSwReregisterMsg("Aguardando ativação...");
+      const start = Date.now();
+      let activated = false;
+      while (Date.now() - start < 10000) {
+        const sw = reg.active || reg.waiting || reg.installing;
+        if (sw?.state === "activated") { activated = true; break; }
+        await new Promise((res) => setTimeout(res, 300));
+        try { await reg.update(); } catch { /* noop */ }
+      }
+      try { await navigator.serviceWorker.ready; } catch { /* noop */ }
+      const final = reg.active || reg.waiting || reg.installing;
+      if (activated || final?.state === "activated") {
+        setSwReregisterMsg(`✅ Ativado em ${((Date.now() - start) / 1000).toFixed(1)}s · scope=${reg.scope}`);
+        toast.success("Service Worker ativo!");
+      } else {
+        setSwReregisterMsg(`⚠️ Estado final: ${final?.state ?? "desconhecido"} (timeout 10s). Recarregue a página.`);
+        toast.error("SW não atingiu 'activated' em 10s");
+      }
+      setRefreshKey((k) => k + 1);
+    } catch (e) {
+      const msg = (e as Error).message;
+      setSwReregisterMsg(`❌ Erro: ${msg}`);
+      toast.error("Falha ao registrar SW", { description: msg });
+    } finally {
+      setSwBusy(false);
+    }
+  };
 
   // Re-sincronizar: pega a subscription do navegador e força reenvio para o servidor.
   const resync = async () => {
@@ -399,6 +444,24 @@ function StatusPage() {
           {resyncMsg && (
             <p className="text-xs text-muted-foreground">{resyncMsg}</p>
           )}
+
+          {/* Re-registrar Service Worker */}
+          <div className="pt-2 border-t border-border/50 space-y-2">
+            <Button
+              onClick={reregisterSW}
+              disabled={swBusy || !push.supported}
+              variant="outline"
+              className="w-full"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${swBusy ? "animate-spin" : ""}`} />
+              {swBusy ? "Re-registrando SW..." : swActive ? "Re-registrar Service Worker" : "Ativar Service Worker"}
+            </Button>
+            {swReregisterMsg && (
+              <p className={`text-xs ${swReregisterMsg.startsWith("✅") ? "text-green-600 dark:text-green-400" : swReregisterMsg.startsWith("❌") || swReregisterMsg.startsWith("⚠️") ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground"}`}>
+                {swReregisterMsg}
+              </p>
+            )}
+          </div>
 
           {lastApiResponse && (
             <div className={`rounded-lg border p-3 text-xs space-y-1 ${lastApiResponse.ok ? "border-green-500/40 bg-green-500/5" : "border-red-500/40 bg-red-500/5"}`}>
