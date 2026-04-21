@@ -152,7 +152,9 @@ export function CampfireSound() {
       aria-label={enabled ? "Desligar som de fogueira" : "Ligar som de fogueira"}
       title={enabled ? "Som de fogueira: ligado" : "Som de fogueira: ligado em silêncio — clique para ativar"}
       className={cn(
-        "fixed bottom-5 right-5 z-50 h-11 w-11 rounded-full border backdrop-blur-xl",
+        "fixed z-50 h-11 w-11 rounded-full border backdrop-blur-xl",
+        // Safe-area friendly position (notch / home indicator on iOS)
+        "right-4 bottom-[max(1rem,env(safe-area-inset-bottom,0))] md:right-5 md:bottom-5",
         "flex items-center justify-center shadow-card-premium transition-all",
         enabled
           ? "bg-primary/15 border-primary/50 text-primary shadow-fire"
