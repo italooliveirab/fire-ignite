@@ -295,7 +295,14 @@ function LeadsPage() {
                 <tr><td colSpan={6} className="py-12 text-center text-muted-foreground">Nenhum lead.</td></tr>
               ) : filtered.map((l) => (
                 <tr key={l.id} className="border-b border-border/50 hover:bg-background/40">
-                  <td className="px-5 py-3.5 font-medium">{l.customer_name ?? "—"}</td>
+                  <td className="px-5 py-3.5 font-medium">
+                    <div>{l.customer_name ?? "—"}</div>
+                    {(l as { notes?: string | null }).notes && (
+                      <div className="text-[11px] text-muted-foreground italic mt-1 max-w-xs line-clamp-2" title={(l as { notes?: string | null }).notes ?? ""}>
+                        📝 {(l as { notes?: string | null }).notes}
+                      </div>
+                    )}
+                  </td>
                   <td className="px-5 py-3.5 hidden md:table-cell text-muted-foreground">
                     {l.whatsapp_number ? (
                       <div className="flex items-center gap-2">
