@@ -38,9 +38,10 @@ export const sendTestPushFn = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     const { sendPushToUsers } = await import("./push.server");
     return sendPushToUsers([context.userId], {
-      title: "🔥 FIRE — Teste",
-      body: "Notificações funcionando no seu dispositivo!",
-      tag: "test",
+      title: "💰 Venda aprovada!",
+      body: "Você acaba de receber R$ 97,00 de comissão. Parabéns! 🔥",
+      tag: "test-sale",
+      requireInteraction: true,
       url: "/app",
     });
   });
